@@ -12,7 +12,7 @@ namespace ElectroMod
     [Serializable]
     public class Elements : List<object> { }// Содержит все объекты модели
     [Serializable]
-    public class Element : IDrawable, IDragable
+    public class Element : IDrawable, IDragable, ISelectable
     {
         const float GRID_STEP = 20;
 
@@ -231,7 +231,7 @@ namespace ElectroMod
         public void Remove()
         {
             //remove me from model
-            Elements.Remove(this);
+            Elements.Remove(this); //ToDo: надо чтобы у всех ругих с ним связанных элементов тоже удалялись связи
 
             //remove me from all links
             //foreach (var node in Elements.OfType<Element>())
@@ -275,6 +275,39 @@ namespace ElectroMod
                 // Обновляем для всех элементов
                 element.OnDataChanged(element.CurrentStrength, element.Voltage, totalResistance);
             }
+        }
+
+        ISelectable ISelectable.Hit(Point point)
+        {
+            if(this.GetType() == typeof(Line))
+            {
+                var reallyStartPointLine = new PointF()
+                {
+                    X = Location.X + Path.PathPoints[0].X,
+                    Y = Location.Y + Path.PathPoints[0].Y
+                };
+                var reallyEndPointLine = new PointF()
+                {
+                    X = Location.X + Path.PathPoints[1].X,
+                    Y = Location.Y + Path.PathPoints[1].Y
+                };
+
+                var diffBetwenStartPointAndClickX = reallyStartPointLine.X - point.X;
+                var diffBetwenStartPointAndClickY = reallyStartPointLine.Y - point.Y;
+                double resultForStartPoint = Math.Sqrt(diffBetwenStartPointAndClickX * diffBetwenStartPointAndClickX +
+                                                        diffBetwenStartPointAndClickY * diffBetwenStartPointAndClickY);
+
+                var diffBetwenEndPointAndClickX = reallyEndPointLine.X - point.X;
+                var diffBetwenEndPointAndClickY = reallyEndPointLine.Y - point.Y;
+                double resultForEndPoint = Math.Sqrt(diffBetwenEndPointAndClickX * diffBetwenEndPointAndClickX +
+                                                      diffBetwenEndPointAndClickY * diffBetwenEndPointAndClickY);
+
+                if(resultForStartPoint < 50 || resultForEndPoint < 50) return this;
+            }
+            if (Path.GetBounds().Contains(point.StartPoint(Location)))
+                return this;
+
+            return null;
         }
     }
 }
