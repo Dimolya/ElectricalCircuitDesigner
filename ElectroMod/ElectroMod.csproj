@@ -54,6 +54,12 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Element.cs" />
+    <Compile Include="Forms\InputParametersElement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InputParametersElement.Designer.cs">
+      <DependentUpon>InputParametersElement.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\MainCalculatForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,6 +90,9 @@
     <Compile Include="Elements\Line.cs" />
     <EmbeddedResource Include="DrawPanel.resx">
       <DependentUpon>DrawPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InputParametersElement.resx">
+      <DependentUpon>InputParametersElement.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainCalculatForm.resx">
       <DependentUpon>MainCalculatForm.cs</DependentUpon>

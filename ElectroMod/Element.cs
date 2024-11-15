@@ -27,7 +27,7 @@ namespace ElectroMod
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public Point Location { get; set; }
-        public object Tag { get; set; } //для надписи на элементе
+        public string Label { get; set; }
         public Elements Elements { get; set; }
         public GraphicsPath Path
         {
@@ -36,11 +36,12 @@ namespace ElectroMod
         }
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
-        public List<Link> Links { get; set; } = new List<Link>();
+        //public List<Link> Links { get; set; } = new List<Link>();
 
         public double CurrentStrength { get; set; }
         public double Voltage { get; set; }
         public double Resistance { get; set; }
+        public int Angle { get; private set; }
 
         public Element(double cStr, double volt, double resist)
         {
@@ -65,10 +66,6 @@ namespace ElectroMod
 
         public virtual void Paint(Graphics g)
         {
-            //отрисовка связей
-            //foreach (Link link in Links)
-            //    link.Paint(g);
-
             //отрисовка соед. проводов
             foreach (ConnectingWare ware in Wares)
                 ware.Paint(g);
@@ -84,12 +81,35 @@ namespace ElectroMod
             //g.FillPath(FillColor.Brush(), Path);
             g.DrawPath(BorderColor.Pen(2), Path);
 
+            if (!string.IsNullOrEmpty(Label))
+            {
+                using (var font = new Font("Arial", 10))
+                using (var brush = new SolidBrush(Color.Black))
+                {
+                    // Координаты для текста (находятся под элементом)
+                    PointF textLocation = new PointF(Location.X, Location.Y - 20);
+
+                    // Если элемент повёрнут, измените расположение текста
+                    if (Angle != 0)
+                    {
+                        using (var matrix = new Matrix())
+                        {
+                            matrix.RotateAt(Angle, Location);
+                            g.Transform = matrix;
+                        }
+                    }
+
+                    g.DrawString(Label, font, brush, textLocation);
+                }
+                g.ResetTransform();
+            }
+
             //отрисовка Tag
             RectangleF rect = Path.GetBounds();//прямоугольник ограничивающий поле надписи
             rect.Inflate(25, 25);
-            if (Tag != null)
-                g.DrawString(Tag.ToString(), Addition.Font, Brushes.Black, rect, new StringFormat
-                { Alignment = StringAlignment.Center,  LineAlignment = StringAlignment.Near});//выравнивание строки
+            if (Label != null)
+                g.DrawString(Label, Addition.Font, Brushes.Black, rect, new StringFormat
+                { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Near });//выравнивание строки
             g.Restore(state);//нужное позиционирование всех эелементов
         }
 
@@ -129,20 +149,6 @@ namespace ElectroMod
             {
                 connectedElement.DragAllConnectedElements(offset, visited);
             }
-        }
-
-        public List<Element> GetConnectedElements()
-        {
-            // Собираем все связанные элементы
-            List<Element> connectedElements = new List<Element>();
-
-            foreach (var link in Links)
-            {
-                connectedElements.Add(link.Ware1.ParentElement);
-                connectedElements.Add(link.Ware2.ParentElement);
-            }
-
-            return connectedElements.Distinct().ToList();
         }
 
         //конец перетаскивания и выравнивание по сетке
@@ -195,10 +201,11 @@ namespace ElectroMod
                     matrix.RotateAt(90, center); // Поворачиваем на 90 градусов вокруг центра
                     Path.Transform(matrix);      // Применяем матрицу к пути (форме) элемента
                 }
-            }
-            foreach (var ware in Wares)
-            {
-                ware.RotateAroundParent(90, center);
+                foreach (var ware in Wares)
+                {
+                    ware.RotateAroundParent(90, center);
+                }
+                Angle += 90; //ToDo: поттом сделать если равно 180 то равно 0
             }
         }
 

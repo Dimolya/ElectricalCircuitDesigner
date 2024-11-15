@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Threading;
 using static ElectroMod.PowerSupplyCharacterization;
 using static ElectroMod.ResistanceChar;
+using ElectroMod.Forms;
 
 namespace ElectroMod
 {
@@ -65,14 +66,24 @@ namespace ElectroMod
         private void btTransformator_Click(object sender, EventArgs e)
         {
             try
-            {
-                ResistanceChar resistanceChar = new ResistanceChar();
-                resistanceChar.Show();
-                resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
+            {   
+                using(var inputParametersElement = new InputParametersElement())
+                {
+                    if(inputParametersElement.ShowDialog() == DialogResult.OK)
+                    {
+                        elements.Add(new Transormator(elements)
+                        {
+                            Label = inputParametersElement.ElementName,
+                            Location = new Point(250, 200)
+                        });
+                        drawPanel1.Invalidate();
+                    }
+                }               
+                //ResistanceChar resistanceChar = new ResistanceChar();
+                //resistanceChar.Show();
+                //resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
 
 
-                elements.Add(new Transormator(elements) { Location = new Point(250, 200)});
-                drawPanel1.Invalidate();
             }
             catch
             {
@@ -110,7 +121,7 @@ namespace ElectroMod
                 ResistanceChar resistanceChar = new ResistanceChar();
                 resistanceChar.Show();
                 resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
-                elements.Add(new Recloser(elements) { Location = new Point(250, 200), Tag="kfhdsjhbfjdhsbjhsdbvjhdsbhjvbdhjvbhjdsbvhjsdv"});
+                elements.Add(new Recloser(elements) { Location = new Point(250, 200)});
                 drawPanel1.Invalidate();
             }
             catch { Exception(); }
@@ -124,7 +135,7 @@ namespace ElectroMod
                 resistanceChar.Show();
                 resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
 
-                elements.Add(new Line(elements) { Location = new Point(250, 200), Tag = "оdfvdfgdfgfdgdfgdgля жож"});
+                elements.Add(new Line(elements) { Location = new Point(250, 200)});
                 drawPanel1.Invalidate();
             }
             catch { Exception(); }

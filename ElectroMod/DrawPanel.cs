@@ -3,17 +3,19 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System;
+using static System.Windows.Forms.AxHost;
 
 namespace ElectroMod
 {
     class DrawPanel : UserControl
     {
         IEnumerable<object> model;
-        Point offsetPoint;//начальные точки
-        private Point mouseDown;//значение координат, где нажали кнопку мышки
         IDragable dragable;
         ISelectable selected;
 
+        Point offsetPoint;//начальные точки
+        private Point mouseDown;//значение координат, где нажали кнопку мышки
+        private float scale = 1.0f;
         //задаем отображение
         public DrawPanel()
         {
@@ -28,6 +30,7 @@ namespace ElectroMod
         {
             this.model = model;
         }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             //если в коллекции нет объектов
@@ -37,6 +40,8 @@ namespace ElectroMod
             //позволяет сместить положение элемента по оси X, и по оси Y
             e.Graphics.TranslateTransform(offsetPoint.X, offsetPoint.Y);
 
+            e.Graphics.ScaleTransform(scale, scale);
+
             //отрисовываем объекты, относящиеся к типу IDrawable
             foreach (var obj in model.OfType<IDrawable>())
                 obj.Paint(e.Graphics);
@@ -45,7 +50,7 @@ namespace ElectroMod
         //В данном случае - перевод в систему координат, связанную с контролом.
         private Point GetStartPoint(Point p)
         {
-            return p.StartPoint(offsetPoint);
+            return new Point((int)((p.X - offsetPoint.X) / scale), (int)((p.Y - offsetPoint.Y) / scale));
         }
 
         /// <summary>
@@ -80,11 +85,12 @@ namespace ElectroMod
                     hittable.Rotate(90);
             }
         }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                Point movable = new Point(e.Location.X - mouseDown.X, e.Location.Y - mouseDown.Y);
+                Point movable = new Point((int)((e.Location.X - mouseDown.X) / scale), (int)((e.Location.Y - mouseDown.Y) / scale));
                 mouseDown = e.Location;
                 if (dragable != null)
                     dragable.Drag(movable);//двигаем объект
@@ -95,12 +101,36 @@ namespace ElectroMod
                 Invalidate();
             }            
         }
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            if(e.Delta > 0)
+            {
+                ZoomIn();
+            }
+            else
+            {
+                ZoomOut();
+            }
+        }
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
             if (dragable != null)
                 dragable.EndDrag();
             dragable = null;
+            Invalidate();
+        }
+
+        public void ZoomIn()
+        {
+            scale *= 1.1f;
+            Invalidate();
+        }
+
+        public void ZoomOut()
+        {
+            scale /= 1.1f;
             Invalidate();
         }
     }

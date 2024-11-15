@@ -102,9 +102,9 @@ namespace ElectroMod
             {
                 // Примагнитить текущий `ConnectingWare` к целевому
                 RelativeLocation = targetWare.Location.StartPoint(ParentElement.Location);
-                var newLink = new Link { Ware1 = this, Ware2 = targetWare };
-                ParentElement.Links.Add(newLink);
-                targetWare.ParentElement.Links.Add(newLink);
+                //var newLink = new Link { Ware1 = this, Ware2 = targetWare };
+                //ParentElement.Links.Add(newLink);
+                //targetWare.ParentElement.Links.Add(newLink);
 
                 // Соединяем элементы в цепочку
                 LinkElements(ParentElement, targetWare.ParentElement);
