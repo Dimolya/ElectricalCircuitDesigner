@@ -9,14 +9,16 @@ namespace ElectroMod
 {
     class DrawPanel : UserControl
     {
+        public event EventHandler<float> ScaleChanged;
+
         IEnumerable<object> model;
         IDragable dragable;
         ISelectable selected;
 
-        Point offsetPoint;//начальные точки
-        private Point mouseDown;//значение координат, где нажали кнопку мышки
-        private float scale = 1.0f;
-        //задаем отображение
+        Point offsetPoint; //начальные точки
+        Point mouseDown; 
+        float scale = 1.0f;
+        
         public DrawPanel()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
@@ -101,18 +103,6 @@ namespace ElectroMod
                 Invalidate();
             }            
         }
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            base.OnMouseWheel(e);
-            if(e.Delta > 0)
-            {
-                ZoomIn();
-            }
-            else
-            {
-                ZoomOut();
-            }
-        }
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
@@ -120,6 +110,20 @@ namespace ElectroMod
                 dragable.EndDrag();
             dragable = null;
             Invalidate();
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            if (e.Delta > 0)
+            {
+                ZoomIn();
+            }
+            else
+            {
+                ZoomOut();
+            }
+            ScaleChanged?.Invoke(this, scale);
         }
 
         public void ZoomIn()
@@ -132,6 +136,16 @@ namespace ElectroMod
         {
             scale /= 1.1f;
             Invalidate();
+        }
+            
+        public void SetDefaultScale(float defaultScale)
+        {
+            if (Math.Abs(scale - defaultScale) > 0.001f)
+            {
+                scale = defaultScale;
+                ScaleChanged?.Invoke(this, scale);
+                Invalidate();
+            }
         }
     }
 }

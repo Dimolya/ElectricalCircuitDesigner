@@ -15,7 +15,7 @@ namespace ElectroMod
             Path = new GraphicsPath();
 
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, -5)});
-            Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, 130)});
+            //Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, 130)});
 
             Path.AddLine(25, 0, 25, 25);
             Path.AddEllipse(0, 25, 50, 50);

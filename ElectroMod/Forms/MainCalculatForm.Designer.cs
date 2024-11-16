@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.btPowerSupply = new System.Windows.Forms.Button();
-            this.btResistor = new System.Windows.Forms.Button();
-            this.btDiode = new System.Windows.Forms.Button();
-            this.btThyristor = new System.Windows.Forms.Button();
+            this.btBus = new System.Windows.Forms.Button();
+            this.btTransformator = new System.Windows.Forms.Button();
+            this.btRecloser = new System.Windows.Forms.Button();
+            this.btLine = new System.Windows.Forms.Button();
             this.menu = new System.Windows.Forms.MenuStrip();
             this.файлToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,49 +51,50 @@
             this.lbV = new System.Windows.Forms.Label();
             this.lbA = new System.Windows.Forms.Label();
             this.drawPanel1 = new ElectroMod.DrawPanel();
+            this.btZoom = new System.Windows.Forms.Button();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // btPowerSupply
+            // btBus
             // 
-            this.btPowerSupply.Location = new System.Drawing.Point(12, 56);
-            this.btPowerSupply.Name = "btPowerSupply";
-            this.btPowerSupply.Size = new System.Drawing.Size(174, 32);
-            this.btPowerSupply.TabIndex = 1;
-            this.btPowerSupply.Text = "Шина ПС";
-            this.btPowerSupply.UseVisualStyleBackColor = true;
-            this.btPowerSupply.Click += new System.EventHandler(this.btPowerSupply_Click);
+            this.btBus.Location = new System.Drawing.Point(12, 56);
+            this.btBus.Name = "btBus";
+            this.btBus.Size = new System.Drawing.Size(174, 32);
+            this.btBus.TabIndex = 1;
+            this.btBus.Text = "Шина ПС";
+            this.btBus.UseVisualStyleBackColor = true;
+            this.btBus.Click += new System.EventHandler(this.btBus_Click);
             // 
-            // btResistor
+            // btTransformator
             // 
-            this.btResistor.Location = new System.Drawing.Point(12, 94);
-            this.btResistor.Name = "btResistor";
-            this.btResistor.Size = new System.Drawing.Size(174, 32);
-            this.btResistor.TabIndex = 2;
-            this.btResistor.Text = "Трансформатор";
-            this.btResistor.UseVisualStyleBackColor = true;
-            this.btResistor.Click += new System.EventHandler(this.btTransformator_Click);
+            this.btTransformator.Location = new System.Drawing.Point(12, 94);
+            this.btTransformator.Name = "btTransformator";
+            this.btTransformator.Size = new System.Drawing.Size(174, 32);
+            this.btTransformator.TabIndex = 2;
+            this.btTransformator.Text = "Трансформатор";
+            this.btTransformator.UseVisualStyleBackColor = true;
+            this.btTransformator.Click += new System.EventHandler(this.btTransformator_Click);
             // 
-            // btDiode
+            // btRecloser
             // 
-            this.btDiode.Location = new System.Drawing.Point(12, 132);
-            this.btDiode.Name = "btDiode";
-            this.btDiode.Size = new System.Drawing.Size(174, 32);
-            this.btDiode.TabIndex = 3;
-            this.btDiode.Text = "Реклоузер";
-            this.btDiode.UseVisualStyleBackColor = true;
-            this.btDiode.Click += new System.EventHandler(this.btRecloser_Click);
+            this.btRecloser.Location = new System.Drawing.Point(12, 132);
+            this.btRecloser.Name = "btRecloser";
+            this.btRecloser.Size = new System.Drawing.Size(174, 32);
+            this.btRecloser.TabIndex = 3;
+            this.btRecloser.Text = "Реклоузер";
+            this.btRecloser.UseVisualStyleBackColor = true;
+            this.btRecloser.Click += new System.EventHandler(this.btRecloser_Click);
             // 
-            // btThyristor
+            // btLine
             // 
-            this.btThyristor.Location = new System.Drawing.Point(12, 170);
-            this.btThyristor.Name = "btThyristor";
-            this.btThyristor.Size = new System.Drawing.Size(174, 32);
-            this.btThyristor.TabIndex = 4;
-            this.btThyristor.Text = "Линия";
-            this.btThyristor.UseVisualStyleBackColor = true;
-            this.btThyristor.Click += new System.EventHandler(this.btLine_Click);
+            this.btLine.Location = new System.Drawing.Point(12, 170);
+            this.btLine.Name = "btLine";
+            this.btLine.Size = new System.Drawing.Size(174, 32);
+            this.btLine.TabIndex = 4;
+            this.btLine.Text = "Линия";
+            this.btLine.UseVisualStyleBackColor = true;
+            this.btLine.Click += new System.EventHandler(this.btLine_Click);
             // 
             // menu
             // 
@@ -257,11 +258,22 @@
             this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
             this.drawPanel1.TabIndex = 0;
             // 
-            // Form1
+            // btZoom
+            // 
+            this.btZoom.Location = new System.Drawing.Point(1352, 547);
+            this.btZoom.Name = "btZoom";
+            this.btZoom.Size = new System.Drawing.Size(55, 23);
+            this.btZoom.TabIndex = 32;
+            this.btZoom.Text = "100%";
+            this.btZoom.UseVisualStyleBackColor = true;
+            this.btZoom.Click += new System.EventHandler(this.btZoom_Click);
+            // 
+            // MainCalculatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1419, 553);
+            this.ClientSize = new System.Drawing.Size(1419, 578);
+            this.Controls.Add(this.btZoom);
             this.Controls.Add(this.lbA);
             this.Controls.Add(this.lbV);
             this.Controls.Add(this.lbR);
@@ -273,16 +285,16 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btClear);
-            this.Controls.Add(this.btThyristor);
-            this.Controls.Add(this.btDiode);
-            this.Controls.Add(this.btResistor);
-            this.Controls.Add(this.btPowerSupply);
+            this.Controls.Add(this.btLine);
+            this.Controls.Add(this.btRecloser);
+            this.Controls.Add(this.btTransformator);
+            this.Controls.Add(this.btBus);
             this.Controls.Add(this.drawPanel1);
             this.Controls.Add(this.menu);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MainMenuStrip = this.menu;
             this.MaximizeBox = false;
-            this.Name = "Form1";
+            this.Name = "MainCalculatForm";
             this.Text = "Моделирование электрических цепей";
             this.menu.ResumeLayout(false);
             this.menu.PerformLayout();
@@ -295,10 +307,10 @@
         #endregion
 
         private DrawPanel drawPanel1;
-        private System.Windows.Forms.Button btPowerSupply;
-        private System.Windows.Forms.Button btResistor;
-        private System.Windows.Forms.Button btDiode;
-        private System.Windows.Forms.Button btThyristor;
+        private System.Windows.Forms.Button btBus;
+        private System.Windows.Forms.Button btTransformator;
+        private System.Windows.Forms.Button btRecloser;
+        private System.Windows.Forms.Button btLine;
         private System.Windows.Forms.MenuStrip menu;
         private System.Windows.Forms.ToolStripMenuItem файлToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem OpenFile;
@@ -316,6 +328,7 @@
         private System.Windows.Forms.Label lbR;
         private System.Windows.Forms.Label lbV;
         private System.Windows.Forms.Label lbA;
+        private System.Windows.Forms.Button btZoom;
     }
 }
 

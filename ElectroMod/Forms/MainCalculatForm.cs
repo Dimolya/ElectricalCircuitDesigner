@@ -7,12 +7,16 @@ using System.Threading;
 using static ElectroMod.PowerSupplyCharacterization;
 using static ElectroMod.ResistanceChar;
 using ElectroMod.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace ElectroMod
 {
     [Serializable]
     public partial class MainCalculatForm : Form
     {
+        private float defaultScale = 1.0f;
+        private float currentScale = 1.0f;
+
         Elements elements = new Elements();
         Element element = new Element();
         private int RCounter;
@@ -22,7 +26,14 @@ namespace ElectroMod
             InitializeComponent();
             drawPanel1.Build(elements);
             element.DataChanged += DataChange;
+            drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
+            UpdateZoomInfo(1.0f);
         }
+        private void DrawPanel1_ScaleChanged(object sender, float scale)
+        {
+            UpdateZoomInfo(scale);
+        }
+
         public void DataChange(double cStr, double volt, double resist)
         {
 
@@ -36,19 +47,19 @@ namespace ElectroMod
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btPowerSupply_Click(object sender, EventArgs e)
+        private void btBus_Click(object sender, EventArgs e)
         {
             PowerSupplyCharacterization pwChar = new PowerSupplyCharacterization();
             pwChar.Show();
             pwChar.PowerSupplyCharacterizationChanged += Add_CharacterizationPSupply;
 
-            btPowerSupply.Enabled = false;
-            elements.Add(new PowerSupply(elements) { Location = new Point(250, 200) });
+            btBus.Enabled = false;
+            elements.Add(new Bus(elements) { Location = new Point(250, 200) });
             drawPanel1.Invalidate();
         }
         private  void Add_CharacterizationPSupply(object sender, ElementsEvenAtgs e)
         {
-            PowerSupply pw = new PowerSupply();
+            Bus pw = new Bus();
             {
                 pw.CurrentStrenghtPS = e.CurrentStrenghtPS;
                 pw.VoltagePS = e.VoltagePS;
@@ -79,11 +90,6 @@ namespace ElectroMod
                         drawPanel1.Invalidate();
                     }
                 }               
-                //ResistanceChar resistanceChar = new ResistanceChar();
-                //resistanceChar.Show();
-                //resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
-
-
             }
             catch
             {
@@ -175,7 +181,7 @@ namespace ElectroMod
                 drawPanel1.Invalidate();
             }
             else return;
-            btPowerSupply.Enabled = true;
+            btBus.Enabled = true;
             lbA.Text = Convert.ToString(0);
             lbR.Text=Convert.ToString(0);
             lbV.Text = Convert.ToString(0);
@@ -203,6 +209,15 @@ namespace ElectroMod
         {
             if (lbR.Text.Length > 6)
                 lbR.Text = lbR.Text.Substring(0, 6);
+        }
+        private void UpdateZoomInfo(float scale)
+        {
+            btZoom.Text = $"{(scale * 100):0}%";
+        }
+
+        private void btZoom_Click(object sender, EventArgs e)
+        {
+            drawPanel1.SetDefaultScale(defaultScale);
         }
     }
 }

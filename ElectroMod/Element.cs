@@ -6,6 +6,8 @@ using System.Drawing.Drawing2D;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.ComponentModel;
+using System.CodeDom;
+using System.Windows.Forms.VisualStyles;
 
 namespace ElectroMod
 {
@@ -163,7 +165,7 @@ namespace ElectroMod
                 {
                     foreach (var otherElementWare in otherElement.Wares)
                     {
-                        if (thisWare.IsNear(otherElementWare, magnetRange))
+                        if (thisWare.IsNear(otherElementWare, magnetRange) && isCanConnected(otherElement))
                         {
                             var diffBetweenLocation = new Point(thisWare.Location.X - otherElementWare.Location.X,
                                                                 thisWare.Location.Y - otherElementWare.Location.Y);
@@ -173,12 +175,26 @@ namespace ElectroMod
                                 break;
                             ConnectedElements.Add(otherElement);
                             otherElement.ConnectedElements.Add(this);
+
                         }
                     }
                 }
             }
         }
-
+        protected bool isCanConnected(Element otherElement)
+        {
+            switch (GetType())
+            {
+                case Type type when type == typeof(Bus)
+                                 || type == typeof(Transormator)
+                                 || type == typeof(Recloser):
+                    return otherElement.GetType() == typeof(Line);
+                case Type type when type == typeof(Line):
+                    return true;
+            }
+            if (this.GetType() != otherElement.GetType()) return false;
+            return false;
+        }
         //public List<Element> GetConnectedElements()
         //{
         //    return Links.Select(link => link.Element1 == this ? link.Element2 : link.Element1)
@@ -267,7 +283,7 @@ namespace ElectroMod
 
         public void UpdateCurrentAndVoltage()
         {
-            foreach (var element in Elements.OfType<PowerSupply>())
+            foreach (var element in Elements.OfType<Bus>())
             {
                 double totalResistance = element.CalculateTotalResistance();
                 element.Voltage = element.CurrentStrength * totalResistance;
@@ -279,7 +295,7 @@ namespace ElectroMod
 
         ISelectable ISelectable.Hit(Point point)
         {
-            if(this.GetType() == typeof(Line))
+            if (this.GetType() == typeof(Line))
             {
                 var reallyStartPointLine = new PointF()
                 {
@@ -302,7 +318,7 @@ namespace ElectroMod
                 double resultForEndPoint = Math.Sqrt(diffBetwenEndPointAndClickX * diffBetwenEndPointAndClickX +
                                                       diffBetwenEndPointAndClickY * diffBetwenEndPointAndClickY);
 
-                if(resultForStartPoint < 50 || resultForEndPoint < 50) return this;
+                if (resultForStartPoint < 50 || resultForEndPoint < 50) return this;
             }
             if (Path.GetBounds().Contains(point.StartPoint(Location)))
                 return this;
