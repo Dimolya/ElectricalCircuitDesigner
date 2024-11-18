@@ -10,7 +10,6 @@ namespace ElectroMod
     [Serializable]
     class Line : Element
     {
-        public override Color BorderColor => Color.DarkBlue;
 
         public Line(Elements element) : base(element)
         {
@@ -21,6 +20,7 @@ namespace ElectroMod
             Path.AddLine(0, 0, 125, 0);
             Path.CloseFigure();
         }
+        public override Color BorderColor => Color.DarkBlue;
 
         public override bool Hit(Point pointClick)
         {    

@@ -16,20 +16,19 @@ namespace ElectroMod
     [Serializable]
     public class Element : IDrawable, IDragable, ISelectable
     {
-        const float GRID_STEP = 20;
+        public delegate void DataChangedHandler(double cStr, double volt, double resist);
+        public event DataChangedHandler DataChanged;
 
         private bool IsSelected = false;
         private SerializableGraphicsPath path;
 
-        public delegate void DataChangedHandler(double cStr, double volt, double resist);
-        public event DataChangedHandler DataChanged;
 
         public virtual bool AcceptWare => true;
         public virtual Color BorderColor => Color.White;
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
+        public string Name { get; set; }
         public Point Location { get; set; }
-        public string Label { get; set; }
         public Elements Elements { get; set; }
         public GraphicsPath Path
         {
@@ -45,13 +44,19 @@ namespace ElectroMod
         public double Resistance { get; set; }
         public int Angle { get; private set; }
 
+        public Element() { }
+        public Element(Elements elements)
+        {
+            Elements = elements;
+            Location = new Point(250, 200);
+        }
         public Element(double cStr, double volt, double resist)
         {
             CurrentStrength = cStr;
             Voltage = volt;
             Resistance = resist;
         }
-        public Element() { }
+
         public void OnDataChanged(double cStr, double volt, double resist)
         {
             cStr = volt / resist;
@@ -61,10 +66,6 @@ namespace ElectroMod
             DataChanged(cStr, volt, resist);
         }
 
-        public Element(Elements elements)
-        {
-            Elements = elements;
-        }
 
         public virtual void Paint(Graphics g)
         {
@@ -83,7 +84,7 @@ namespace ElectroMod
             //g.FillPath(FillColor.Brush(), Path);
             g.DrawPath(BorderColor.Pen(2), Path);
 
-            if (!string.IsNullOrEmpty(Label))
+            if (!string.IsNullOrEmpty(Name))
             {
                 using (var font = new Font("Arial", 10))
                 using (var brush = new SolidBrush(Color.Black))
@@ -101,7 +102,7 @@ namespace ElectroMod
                         }
                     }
 
-                    g.DrawString(Label, font, brush, textLocation);
+                    g.DrawString(Name, font, brush, textLocation);
                 }
                 g.ResetTransform();
             }
@@ -109,8 +110,8 @@ namespace ElectroMod
             //отрисовка Tag
             RectangleF rect = Path.GetBounds();//прямоугольник ограничивающий поле надписи
             rect.Inflate(25, 25);
-            if (Label != null)
-                g.DrawString(Label, Addition.Font, Brushes.Black, rect, new StringFormat
+            if (Name != null)
+                g.DrawString(Name, Addition.Font, Brushes.Black, rect, new StringFormat
                 { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Near });//выравнивание строки
             g.Restore(state);//нужное позиционирование всех эелементов
         }

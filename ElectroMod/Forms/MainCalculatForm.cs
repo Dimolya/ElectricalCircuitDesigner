@@ -8,6 +8,7 @@ using static ElectroMod.PowerSupplyCharacterization;
 using static ElectroMod.ResistanceChar;
 using ElectroMod.Forms;
 using static System.Windows.Forms.AxHost;
+using ElectroMod.Forms.InputForms;
 
 namespace ElectroMod
 {
@@ -36,7 +37,6 @@ namespace ElectroMod
 
         public void DataChange(double cStr, double volt, double resist)
         {
-
             lbA.Text = Convert.ToString(cStr);
             lbV.Text = Convert.ToString(volt);
             lbR.Text = Convert.ToString(resist);
@@ -54,20 +54,8 @@ namespace ElectroMod
             pwChar.PowerSupplyCharacterizationChanged += Add_CharacterizationPSupply;
 
             btBus.Enabled = false;
-            elements.Add(new Bus(elements) { Location = new Point(250, 200) });
+            elements.Add(new Bus(elements));
             drawPanel1.Invalidate();
-        }
-        private  void Add_CharacterizationPSupply(object sender, ElementsEvenAtgs e)
-        {
-            Bus pw = new Bus();
-            {
-                pw.CurrentStrenghtPS = e.CurrentStrenghtPS;
-                pw.VoltagePS = e.VoltagePS;
-                pw.ResistancePS = e.ResistancePS;
-            };
-            lbA.Text = Convert.ToString(pw.CurrentStrenghtPS);
-            lbV.Text = Convert.ToString(pw.VoltagePS);
-            lbR.Text = Convert.ToString(pw.ResistancePS);
         }
         /// <summary>
         /// Резистор
@@ -78,15 +66,15 @@ namespace ElectroMod
         {
             try
             {   
-                using(var inputParametersElement = new InputParametersElement())
+                using(var inputParametersTransformator = new InputParametersTransformator())
                 {
-                    if(inputParametersElement.ShowDialog() == DialogResult.OK)
+                    if(inputParametersTransformator.ShowDialog() == DialogResult.OK)
                     {
-                        elements.Add(new Transormator(elements)
-                        {
-                            Label = inputParametersElement.ElementName,
-                            Location = new Point(250, 200)
-                        });
+                        elements.Add(new Transormator(elements,
+                            inputParametersTransformator.ElementName,
+                            inputParametersTransformator.TypeKTP,
+                            inputParametersTransformator.ShemeConnectingWinding));
+
                         drawPanel1.Invalidate();
                     }
                 }               
@@ -95,6 +83,37 @@ namespace ElectroMod
             {
                 Exception();
             }
+        }
+        private void btRecloser_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using(var inputParametersRecloser = new InputParametersRecloser())
+                {
+                    if(inputParametersRecloser.ShowDialog() == DialogResult.OK)
+                    {
+                        elements.Add(new Recloser(elements,
+                                                  inputParametersRecloser.ElementName,
+                                                  inputParametersRecloser.TypeRecloser,
+                                                  inputParametersRecloser.TypeTT));
+                        drawPanel1.Invalidate(); 
+                    }
+                }
+            }
+            catch { Exception(); }
+        }
+
+        private void Add_CharacterizationPSupply(object sender, ElementsEvenAtgs e)
+        {
+            Bus pw = new Bus();
+            {
+                pw.CurrentStrenghtPS = e.CurrentStrenghtPS;
+                pw.VoltagePS = e.VoltagePS;
+                pw.ResistancePS = e.ResistancePS;
+            };
+            lbA.Text = Convert.ToString(pw.CurrentStrenghtPS);
+            lbV.Text = Convert.ToString(pw.VoltagePS);
+            lbR.Text = Convert.ToString(pw.ResistancePS);
         }
         private void Add_CharacterizationAll(object sender, ElementsEvenAtgsAll e)
         {
@@ -120,18 +139,6 @@ namespace ElectroMod
                 return;
             }
         }
-        private void btRecloser_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                ResistanceChar resistanceChar = new ResistanceChar();
-                resistanceChar.Show();
-                resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
-                elements.Add(new Recloser(elements) { Location = new Point(250, 200)});
-                drawPanel1.Invalidate();
-            }
-            catch { Exception(); }
-        }
 
         private void btLine_Click(object sender, EventArgs e)
         {
@@ -141,7 +148,7 @@ namespace ElectroMod
                 resistanceChar.Show();
                 resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
 
-                elements.Add(new Line(elements) { Location = new Point(250, 200)});
+                elements.Add(new Line(elements));
                 drawPanel1.Invalidate();
             }
             catch { Exception(); }

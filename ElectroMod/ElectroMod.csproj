@@ -54,11 +54,17 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Element.cs" />
-    <Compile Include="Forms\InputParametersElement.cs">
+    <Compile Include="Forms\InputForms\InputParametersRecloser.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\InputParametersElement.Designer.cs">
-      <DependentUpon>InputParametersElement.cs</DependentUpon>
+    <Compile Include="Forms\InputForms\InputParametersRecloser.Designer.cs">
+      <DependentUpon>InputParametersRecloser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\InputForms\InputParametersTransformator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InputForms\InputParametersTransformator.Designer.cs">
+      <DependentUpon>InputParametersTransformator.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MainCalculatForm.cs">
       <SubType>Form</SubType>
@@ -91,8 +97,11 @@
     <EmbeddedResource Include="DrawPanel.resx">
       <DependentUpon>DrawPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\InputParametersElement.resx">
-      <DependentUpon>InputParametersElement.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\InputForms\InputParametersRecloser.resx">
+      <DependentUpon>InputParametersRecloser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InputForms\InputParametersTransformator.resx">
+      <DependentUpon>InputParametersTransformator.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainCalculatForm.resx">
       <DependentUpon>MainCalculatForm.cs</DependentUpon>
