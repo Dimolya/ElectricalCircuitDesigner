@@ -20,7 +20,6 @@ namespace ElectroMod
 
         Elements elements = new Elements();
         Element element = new Element();
-        private int RCounter;
 
         public MainCalculatForm()
         {
@@ -30,6 +29,7 @@ namespace ElectroMod
             drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
             UpdateZoomInfo(1.0f);
         }
+
         private void DrawPanel1_ScaleChanged(object sender, float scale)
         {
             UpdateZoomInfo(scale);
@@ -42,33 +42,34 @@ namespace ElectroMod
             lbR.Text = Convert.ToString(resist);
         }
 
-        /// <summary>
-        /// Источник питания
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btBus_Click(object sender, EventArgs e)
         {
-            PowerSupplyCharacterization pwChar = new PowerSupplyCharacterization();
-            pwChar.Show();
-            pwChar.PowerSupplyCharacterizationChanged += Add_CharacterizationPSupply;
+            try
+            {
+                using (var inputParametersBus = new InputParametersBus())
+                {
+                    if (inputParametersBus.ShowDialog() == DialogResult.OK)
+                    {
+                        elements.Add(new Bus(elements,
+                            inputParametersBus.ElementName,
+                            inputParametersBus.Voltage,
+                            inputParametersBus.DataType));
+                        btBus.Enabled = false;
+                        drawPanel1.Invalidate();
+                    }
+                }
 
-            btBus.Enabled = false;
-            elements.Add(new Bus(elements));
-            drawPanel1.Invalidate();
+            }
+            catch { Exception(); }
         }
-        /// <summary>
-        /// Резистор
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
         private void btTransformator_Click(object sender, EventArgs e)
         {
             try
-            {   
-                using(var inputParametersTransformator = new InputParametersTransformator())
+            {
+                using (var inputParametersTransformator = new InputParametersTransformator())
                 {
-                    if(inputParametersTransformator.ShowDialog() == DialogResult.OK)
+                    if (inputParametersTransformator.ShowDialog() == DialogResult.OK)
                     {
                         elements.Add(new Transormator(elements,
                             inputParametersTransformator.ElementName,
@@ -77,7 +78,7 @@ namespace ElectroMod
 
                         drawPanel1.Invalidate();
                     }
-                }               
+                }
             }
             catch
             {
@@ -88,15 +89,34 @@ namespace ElectroMod
         {
             try
             {
-                using(var inputParametersRecloser = new InputParametersRecloser())
+                using (var inputParametersRecloser = new InputParametersRecloser())
                 {
-                    if(inputParametersRecloser.ShowDialog() == DialogResult.OK)
+                    if (inputParametersRecloser.ShowDialog() == DialogResult.OK)
                     {
                         elements.Add(new Recloser(elements,
                                                   inputParametersRecloser.ElementName,
                                                   inputParametersRecloser.TypeRecloser,
                                                   inputParametersRecloser.TypeTT));
-                        drawPanel1.Invalidate(); 
+                        drawPanel1.Invalidate();
+                    }
+                }
+            }
+            catch { Exception(); }
+        }
+
+        private void btLine_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var inputParametersLine = new InputParametersLine())
+                {
+                    if (inputParametersLine.ShowDialog() == DialogResult.OK)
+                    {
+                        elements.Add(new Line(elements,
+                                              inputParametersLine.ElementName,
+                                              inputParametersLine.ElementLength,
+                                              inputParametersLine.Mark));
+                        drawPanel1.Invalidate();
                     }
                 }
             }
@@ -127,7 +147,7 @@ namespace ElectroMod
             }
             else
             {
-                element.OnDataChanged(Convert.ToDouble(lbA.Text), Convert.ToDouble(lbV.Text), Convert.ToDouble(lbR.Text) );
+                element.OnDataChanged(Convert.ToDouble(lbA.Text), Convert.ToDouble(lbV.Text), Convert.ToDouble(lbR.Text));
             }
         }
 
@@ -140,20 +160,8 @@ namespace ElectroMod
             }
         }
 
-        private void btLine_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                ResistanceChar resistanceChar = new ResistanceChar();
-                resistanceChar.Show();
-                resistanceChar.ResistanceCharacterizationChanged += Add_CharacterizationAll;
 
-                elements.Add(new Line(elements));
-                drawPanel1.Invalidate();
-            }
-            catch { Exception(); }
-        }
-        
+
         private void OpenFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog { Filter = "Schema|*.schema" };
@@ -183,14 +191,13 @@ namespace ElectroMod
 
             if (result == DialogResult.OK)
             {
-                RCounter = 0;
                 elements.Clear();
                 drawPanel1.Invalidate();
             }
             else return;
             btBus.Enabled = true;
             lbA.Text = Convert.ToString(0);
-            lbR.Text=Convert.ToString(0);
+            lbR.Text = Convert.ToString(0);
             lbV.Text = Convert.ToString(0);
         }
 

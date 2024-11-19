@@ -54,6 +54,18 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Element.cs" />
+    <Compile Include="Forms\InputForms\InputParametersBus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InputForms\InputParametersBus.Designer.cs">
+      <DependentUpon>InputParametersBus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\InputForms\InputParametersLine.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InputForms\InputParametersLine.Designer.cs">
+      <DependentUpon>InputParametersLine.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\InputForms\InputParametersRecloser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,6 +108,12 @@
     <Compile Include="Elements\Line.cs" />
     <EmbeddedResource Include="DrawPanel.resx">
       <DependentUpon>DrawPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InputForms\InputParametersBus.resx">
+      <DependentUpon>InputParametersBus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InputForms\InputParametersLine.resx">
+      <DependentUpon>InputParametersLine.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\InputForms\InputParametersRecloser.resx">
       <DependentUpon>InputParametersRecloser.cs</DependentUpon>

@@ -122,7 +122,7 @@
             this.Controls.Add(this.tbElementName);
             this.Controls.Add(this.lbTextName);
             this.Name = "InputParametersRecloser";
-            this.Text = "InputParametersRecloser";
+            this.Text = "Вводные параметры";
             this.ResumeLayout(false);
             this.PerformLayout();
 

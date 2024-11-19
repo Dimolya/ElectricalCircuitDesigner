@@ -11,10 +11,10 @@ namespace ElectroMod
         private string _typeRecloser;
         private string _typeTT;
 
-        public Recloser(Elements element, 
+        public Recloser(Elements elements, 
                         string elementName,
                         string typeRecloser,
-                        string typeTT) : base(element)
+                        string typeTT) : base(elements)
         {
             _elementName = elementName;
             _typeRecloser = typeRecloser;

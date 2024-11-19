@@ -282,17 +282,17 @@ namespace ElectroMod
             return totalResistance;
         }
 
-        public void UpdateCurrentAndVoltage()
-        {
-            foreach (var element in Elements.OfType<Bus>())
-            {
-                double totalResistance = element.CalculateTotalResistance();
-                element.Voltage = element.CurrentStrength * totalResistance;
+        //public void UpdateCurrentAndVoltage()
+        //{
+        //    foreach (var element in Elements.OfType<Bus>())
+        //    {
+        //        double totalResistance = element.CalculateTotalResistance();
+        //        element.Voltage = element.CurrentStrength * totalResistance;
 
-                // Обновляем для всех элементов
-                element.OnDataChanged(element.CurrentStrength, element.Voltage, totalResistance);
-            }
-        }
+        //        // Обновляем для всех элементов
+        //        element.OnDataChanged(element.CurrentStrength, element.Voltage, totalResistance);
+        //    }
+        //}
 
         ISelectable ISelectable.Hit(Point point)
         {

@@ -4,23 +4,47 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 
-
 namespace ElectroMod
 {
     [Serializable]
     class Line : Element
     {
-
-        public Line(Elements element) : base(element)
+        private string _elementName;
+        private string _elementLength;
+        private string _mark;
+        public Line(Elements elements,
+                    string elementName,
+                    string elementLength,
+                    string mark) : base(elements)
         {
-            Path = new GraphicsPath();
+            _elementName = elementName;
+            _elementLength = elementLength;
+            _mark = mark;
+
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(-5, 0) });
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(130, 0) });
 
+            Path = new GraphicsPath();
             Path.AddLine(0, 0, 125, 0);
             Path.CloseFigure();
         }
+
         public override Color BorderColor => Color.DarkBlue;
+        public string ElementName
+        {
+            get { return _elementName; }
+            set { _elementName = value; }
+        }
+        public string ElementLength
+        {
+            get { return _elementLength; }
+            set { _elementLength = value; }
+        }
+        public string Mark
+        {
+            get { return _mark; }
+            set { _mark = value; }
+        }
 
         public override bool Hit(Point pointClick)
         {    
