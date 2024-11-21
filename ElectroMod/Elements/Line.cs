@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -46,10 +47,22 @@ namespace ElectroMod
             set { _mark = value; }
         }
 
+        public override Dictionary<string, string> GetElementData()
+        {
+            return new Dictionary<string, string>()
+            {
+                { "Наименовние", ElementName },
+                { "Длина", ElementLength },
+                { "Марка провода", Mark }
+            };
+        }
+
         public override bool Hit(Point pointClick)
         {    
             return IsNear(pointClick);
         }
+
+
 
         private bool IsNear(Point pointClick)
         {

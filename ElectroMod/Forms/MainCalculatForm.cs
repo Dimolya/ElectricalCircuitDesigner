@@ -9,12 +9,14 @@ using static ElectroMod.ResistanceChar;
 using ElectroMod.Forms;
 using static System.Windows.Forms.AxHost;
 using ElectroMod.Forms.InputForms;
+using System.Collections.Generic;
 
 namespace ElectroMod
 {
     [Serializable]
     public partial class MainCalculatForm : Form
     {
+        private Panel propertyPanel;    
         private float defaultScale = 1.0f;
         private float currentScale = 1.0f;
 
@@ -24,9 +26,22 @@ namespace ElectroMod
         public MainCalculatForm()
         {
             InitializeComponent();
+
+            propertyPanel = new Panel
+            {
+                Name = "propertyPanel",
+                Size = new Size(500, 200),
+                Dock = DockStyle.None,
+                AutoScroll = false,
+                BorderStyle = BorderStyle.None,
+                Location = new Point(150, 450)
+            };
+            this.Controls.Add(propertyPanel);
+
             drawPanel1.Build(elements);
             element.DataChanged += DataChange;
             drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
+            drawPanel1.ElementSelected += UpdateElementDetails;
             UpdateZoomInfo(1.0f);
         }
 
@@ -233,5 +248,42 @@ namespace ElectroMod
         {
             drawPanel1.SetDefaultScale(defaultScale);
         }
+
+        private void UpdateElementDetails(ISelectable selectedElement)
+        {
+            if (selectedElement is Element element)
+            {
+                propertyPanel.Controls.Clear(); 
+
+                var data = element.GetElementData();
+
+                int yOffset = 10;
+                foreach (var pair in data)
+                {
+                    Label label = new Label
+                    {
+                        Text = pair.Key + ":",
+                        Location = new Point(1, yOffset),
+                        AutoSize = true
+                    };
+                    TextBox textBox = new TextBox
+                    {
+                        Text = pair.Value,
+                        Location = new Point(110, yOffset),
+                        Width = 200
+                    };
+
+                    propertyPanel.Controls.Add(label);
+                    propertyPanel.Controls.Add(textBox);
+
+                    yOffset += 30;
+                }
+            }
+            else
+            {
+                propertyPanel.Controls.Clear();
+            }
+        }
+
     }
 }

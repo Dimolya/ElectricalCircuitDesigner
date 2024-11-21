@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
@@ -54,6 +55,16 @@ namespace ElectroMod
         protected bool CanConnected()
         {
             return false;
+        }
+
+        public override Dictionary<string, string> GetElementData()
+        {
+            return new Dictionary<string, string>()
+            {
+                { "Наименовние", ElementName },
+                { "Вольтаж", Voltage },
+                { "Тип", DataType }
+            };
         }
     }
 }

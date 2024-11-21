@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Net.NetworkInformation;
@@ -9,16 +10,16 @@ namespace ElectroMod
     class Transormator : Element
     {
         private string _elementName;
-        private string _typeKPT;
+        private string _typeKTP;
         private string _shemeConnectingWinding;
 
         public Transormator(Elements element, 
                             string elementName, 
-                            string typeKPT, 
+                            string typeKTP, 
                             string shemeConnectingWinding) : base(element)
         {
             _elementName = elementName;
-            _typeKPT = typeKPT;
+            _typeKTP = typeKTP;
             _shemeConnectingWinding = shemeConnectingWinding;
 
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, -5) });
@@ -38,15 +39,25 @@ namespace ElectroMod
             get { return _elementName; }
             set { _elementName = value; }
         }
-        public string TypeKPT
+        public string TypeKTP
         {
-            get { return _typeKPT; }
-            set { _typeKPT = value; }
+            get { return _typeKTP; }
+            set { _typeKTP = value; }
         }
         public string ShemeConnectingWinding
         {
             get { return _shemeConnectingWinding; }
             set { _shemeConnectingWinding = value; }
+        }
+
+        public override Dictionary<string, string> GetElementData()
+        {
+            return new Dictionary<string, string>()
+            {
+                { "Наименовние", ElementName },
+                { "Тип КТП", TypeKTP },
+                { "Схема", ShemeConnectingWinding }
+            };
         }
     }
 }

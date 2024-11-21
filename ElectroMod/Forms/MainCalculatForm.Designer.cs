@@ -104,7 +104,7 @@
             this.файлToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1419, 30);
+            this.menu.Size = new System.Drawing.Size(1419, 28);
             this.menu.TabIndex = 6;
             this.menu.Text = "menuStrip1";
             // 
@@ -114,7 +114,7 @@
             this.OpenFile,
             this.SaveFile});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
-            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 26);
+            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
             // OpenFile
@@ -272,7 +272,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1419, 578);
+            this.ClientSize = new System.Drawing.Size(1419, 853);
             this.Controls.Add(this.btZoom);
             this.Controls.Add(this.lbA);
             this.Controls.Add(this.lbV);

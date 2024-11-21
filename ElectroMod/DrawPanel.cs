@@ -10,6 +10,7 @@ namespace ElectroMod
     class DrawPanel : UserControl
     {
         public event EventHandler<float> ScaleChanged;
+        public event Action<ISelectable> ElementSelected;
 
         IEnumerable<object> model;
         IDragable dragable;
@@ -78,7 +79,7 @@ namespace ElectroMod
                 selected?.Unselect();
                 selected = model.OfType<ISelectable>().Select(n => n.Hit(p)).FirstOrDefault(s => s != null);
                 selected?.Select();
-
+                ElementSelected?.Invoke(selected);
                 Invalidate();
             }
             else if (e.Button == MouseButtons.Right)

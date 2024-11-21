@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
@@ -45,6 +46,16 @@ namespace ElectroMod
         {
             get { return _typeTT; }
             set { _typeTT = value; }
+        }
+
+        public override Dictionary<string, string> GetElementData()
+        {
+            return new Dictionary<string, string>()
+            {
+                { "Наименовние", ElementName },
+                { "Тип", TypeRecloser },
+                { "Тип ТТ", TypeTT }
+            };
         }
     }
 }

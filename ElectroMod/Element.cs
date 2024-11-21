@@ -22,7 +22,6 @@ namespace ElectroMod
         private bool IsSelected = false;
         private SerializableGraphicsPath path;
 
-
         public virtual bool AcceptWare => true;
         public virtual Color BorderColor => Color.White;
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
@@ -37,6 +36,7 @@ namespace ElectroMod
         }
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
+        
         //public List<Link> Links { get; set; } = new List<Link>();
 
         public double CurrentStrength { get; set; }
@@ -176,7 +176,6 @@ namespace ElectroMod
                                 break;
                             ConnectedElements.Add(otherElement);
                             otherElement.ConnectedElements.Add(this);
-
                         }
                     }
                 }
@@ -324,6 +323,11 @@ namespace ElectroMod
             if (Path.GetBounds().Contains(point.StartPoint(Location)))
                 return this;
 
+            return null;
+        }
+
+        public virtual Dictionary<string, string> GetElementData()
+        {
             return null;
         }
     }
