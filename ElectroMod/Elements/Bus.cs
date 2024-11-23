@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace ElectroMod
 {
@@ -21,7 +22,8 @@ namespace ElectroMod
         public Bus(Elements elements,
                    string elementName,
                    string voltage,
-                   string dataType) : base(elements)
+                   string dataType) 
+            : base(elements)
         {
             _elementName = elementName;
             _voltage = voltage;
@@ -57,13 +59,13 @@ namespace ElectroMod
             return false;
         }
 
-        public override Dictionary<string, string> GetElementData()
+        public override List<(string, string, string)> GetElementData()
         {
-            return new Dictionary<string, string>()
+            return new List<(string, string, string)>()
             {
-                { "Наименовние", ElementName },
-                { "Вольтаж", Voltage },
-                { "Тип", DataType }
+                ("Наименовние", ElementName, "TextBox"),
+                ("Вольтаж", Voltage, "TextBox"),
+                ("Тип", DataType, "ComboBox")
             };
         }
     }

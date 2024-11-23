@@ -311,12 +311,12 @@ namespace ElectroMod
                 var diffBetwenStartPointAndClickX = reallyStartPointLine.X - point.X;
                 var diffBetwenStartPointAndClickY = reallyStartPointLine.Y - point.Y;
                 double resultForStartPoint = Math.Sqrt(diffBetwenStartPointAndClickX * diffBetwenStartPointAndClickX +
-                                                        diffBetwenStartPointAndClickY * diffBetwenStartPointAndClickY);
+                                                       diffBetwenStartPointAndClickY * diffBetwenStartPointAndClickY);
 
                 var diffBetwenEndPointAndClickX = reallyEndPointLine.X - point.X;
                 var diffBetwenEndPointAndClickY = reallyEndPointLine.Y - point.Y;
                 double resultForEndPoint = Math.Sqrt(diffBetwenEndPointAndClickX * diffBetwenEndPointAndClickX +
-                                                      diffBetwenEndPointAndClickY * diffBetwenEndPointAndClickY);
+                                                     diffBetwenEndPointAndClickY * diffBetwenEndPointAndClickY);
 
                 if (resultForStartPoint < 50 || resultForEndPoint < 50) return this;
             }
@@ -326,8 +326,8 @@ namespace ElectroMod
             return null;
         }
 
-        public virtual Dictionary<string, string> GetElementData()
-        {
+        public virtual List<(string, string, string)> GetElementData()
+        { 
             return null;
         }
     }

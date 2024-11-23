@@ -48,13 +48,13 @@ namespace ElectroMod
             set { _typeTT = value; }
         }
 
-        public override Dictionary<string, string> GetElementData()
+        public override List<(string, string, string)> GetElementData()
         {
-            return new Dictionary<string, string>()
+            return new List<(string, string, string)>()
             {
-                { "Наименовние", ElementName },
-                { "Тип", TypeRecloser },
-                { "Тип ТТ", TypeTT }
+                ("Наименовние", ElementName, "TextBox"),
+                ("Тип", TypeRecloser, "ComboBox"),
+                ("Тип ТТ", TypeTT, "ComboBox")
             };
         }
     }

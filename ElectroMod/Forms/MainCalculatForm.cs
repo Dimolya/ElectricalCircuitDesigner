@@ -16,7 +16,7 @@ namespace ElectroMod
     [Serializable]
     public partial class MainCalculatForm : Form
     {
-        private Panel propertyPanel;    
+        private Panel propertyPanel;
         private float defaultScale = 1.0f;
         private float currentScale = 1.0f;
 
@@ -253,7 +253,7 @@ namespace ElectroMod
         {
             if (selectedElement is Element element)
             {
-                propertyPanel.Controls.Clear(); 
+                propertyPanel.Controls.Clear();
 
                 var data = element.GetElementData();
 
@@ -262,19 +262,31 @@ namespace ElectroMod
                 {
                     Label label = new Label
                     {
-                        Text = pair.Key + ":",
+                        Text = pair.Item1 + ":",
                         Location = new Point(1, yOffset),
                         AutoSize = true
                     };
-                    TextBox textBox = new TextBox
+                    if (pair.Item3 == "TextBox")
                     {
-                        Text = pair.Value,
-                        Location = new Point(110, yOffset),
-                        Width = 200
-                    };
-
+                        TextBox textBox = new TextBox
+                        {
+                            Text = pair.Item2,
+                            Location = new Point(110, yOffset),
+                            Width = 200
+                        };
+                        propertyPanel.Controls.Add(textBox);
+                    }
+                    else
+                    {
+                        ComboBox comboBox = new ComboBox
+                        {
+                            Text = pair.Item2,
+                            Location = new Point(110, yOffset),
+                            Width = 200
+                        };
+                        propertyPanel.Controls.Add(comboBox);
+                    }
                     propertyPanel.Controls.Add(label);
-                    propertyPanel.Controls.Add(textBox);
 
                     yOffset += 30;
                 }

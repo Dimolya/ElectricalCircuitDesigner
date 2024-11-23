@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Net.NetworkInformation;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace ElectroMod
 {
@@ -50,13 +51,13 @@ namespace ElectroMod
             set { _shemeConnectingWinding = value; }
         }
 
-        public override Dictionary<string, string> GetElementData()
+        public override List<(string, string, string)> GetElementData()
         {
-            return new Dictionary<string, string>()
+            return new List<(string, string, string)>()
             {
-                { "Наименовние", ElementName },
-                { "Тип КТП", TypeKTP },
-                { "Схема", ShemeConnectingWinding }
+                ("Наименовние", "TextBox", ElementName ),
+                ("Тип КТП", "TextBox", TypeKTP),
+                ("Схема", "TextBox", ShemeConnectingWinding)
             };
         }
     }

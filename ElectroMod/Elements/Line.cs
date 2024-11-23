@@ -47,13 +47,13 @@ namespace ElectroMod
             set { _mark = value; }
         }
 
-        public override Dictionary<string, string> GetElementData()
+        public override List<(string, string, string)> GetElementData()
         {
-            return new Dictionary<string, string>()
+            return new List<(string, string, string)>()
             {
-                { "Наименовние", ElementName },
-                { "Длина", ElementLength },
-                { "Марка провода", Mark }
+                ( "Наименовние", ElementName, "TextBox"),
+                ("Длина", ElementLength, "TextBox"),
+                ("Марка провода", Mark, "ComboBox")
             };
         }
 
