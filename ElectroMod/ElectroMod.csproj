@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +52,11 @@
   <ItemGroup>
     <Compile Include="Addition.cs" />
     <Compile Include="ConnectingWare.cs" />
+    <Compile Include="DataBase\Dtos\LineDataTypeDto.cs" />
+    <Compile Include="DataBase\Dtos\RecloserDataTypeDto.cs" />
+    <Compile Include="DataBase\Dtos\TransformatorDataTypeDto.cs" />
+    <Compile Include="DataBase\Dtos\BusDataTypeDto.cs" />
+    <Compile Include="DataBase\JsonProvider.cs" />
     <Compile Include="Elements\Recloser.cs" />
     <Compile Include="DrawPanel.cs">
       <SubType>UserControl</SubType>
@@ -84,18 +92,6 @@
     <Compile Include="Forms\MainCalculatForm.Designer.cs">
       <DependentUpon>MainCalculatForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Form2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Form2.Designer.cs">
-      <DependentUpon>Form2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Form3.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Form3.Designer.cs">
-      <DependentUpon>Form3.cs</DependentUpon>
-    </Compile>
     <Compile Include="Interfaces\IDragable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\ISelectable.cs" />
@@ -124,12 +120,6 @@
     <EmbeddedResource Include="Forms\MainCalculatForm.resx">
       <DependentUpon>MainCalculatForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Form2.resx">
-      <DependentUpon>Form2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Form3.resx">
-      <DependentUpon>Form3.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -140,6 +130,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="DataBase\BusDataTypesDB.json" />
+    <None Include="DataBase\LineDataTypesDB.json" />
+    <None Include="DataBase\RecloserDataTypeDB.json" />
+    <None Include="DataBase\TransformatorDataTypeDB.json" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

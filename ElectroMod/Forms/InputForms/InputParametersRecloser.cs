@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ElectroMod.DataBase;
+using ElectroMod.DataBase.Dtos;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,18 +14,29 @@ namespace ElectroMod.Forms.InputForms
 {
     public partial class InputParametersRecloser : Form
     {
+        private List<RecloserDataTypeDto> _dto;
         private string _elementName;
         private string _typeRecloser;
         private string _typeTT;
-        private List<string> _typesRecloser = new List<string>() { "Таврила электрик", "БМР3" };
-        private List<string> _typesTT = new List<string>() { "5/10", "5/15","5/50" };
 
         public InputParametersRecloser()
         {
             InitializeComponent();
-            cbTypeRecloser.DataSource = _typesRecloser;
-            cbTypeTT.DataSource = _typesTT;
+            LoadDataToComboBox();
         }
+
+        private void LoadDataToComboBox()
+        {
+            _dto = JsonProvider.LoadData<RecloserDataTypeDto>("..\\..\\DataBase\\RecloserDataTypeDB.json");
+            cbTypeRecloser.DataSource = _dto[0].TypeRecloser;
+            cbTypeRecloser.DisplayMember = "Name";
+            cbTypeRecloser.ValueMember = "Id";
+
+            cbTypeTT.DataSource = _dto[0].TypeTT;
+            cbTypeTT.DisplayMember = "Name";
+            cbTypeTT.ValueMember = "Id";
+        }
+
         public string ElementName
         {
             get { return _elementName; }

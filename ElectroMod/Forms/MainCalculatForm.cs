@@ -4,8 +4,6 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using System.Threading;
-using static ElectroMod.PowerSupplyCharacterization;
-using static ElectroMod.ResistanceChar;
 using ElectroMod.Forms;
 using static System.Windows.Forms.AxHost;
 using ElectroMod.Forms.InputForms;
@@ -137,35 +135,7 @@ namespace ElectroMod
             }
             catch { Exception(); }
         }
-
-        private void Add_CharacterizationPSupply(object sender, ElementsEvenAtgs e)
-        {
-            Bus pw = new Bus();
-            {
-                pw.CurrentStrenghtPS = e.CurrentStrenghtPS;
-                pw.VoltagePS = e.VoltagePS;
-                pw.ResistancePS = e.ResistancePS;
-            };
-            lbA.Text = Convert.ToString(pw.CurrentStrenghtPS);
-            lbV.Text = Convert.ToString(pw.VoltagePS);
-            lbR.Text = Convert.ToString(pw.ResistancePS);
-        }
-        private void Add_CharacterizationAll(object sender, ElementsEvenAtgsAll e)
-        {
-            Element r = new Element();
-            {
-                r.Resistance = e.Resistance;
-            };
-            if (Convert.ToDouble(lbR.Text) + r.Resistance != 0)
-            {
-                element.OnDataChanged(Convert.ToDouble(lbA.Text), Convert.ToDouble(lbV.Text), Convert.ToDouble(lbR.Text) + r.Resistance);
-            }
-            else
-            {
-                element.OnDataChanged(Convert.ToDouble(lbA.Text), Convert.ToDouble(lbV.Text), Convert.ToDouble(lbR.Text));
-            }
-        }
-
+        
         public void Exception()
         {
             DialogResult result = MessageBox.Show("Вы не добавили источник питания!", "Предупреждение", MessageBoxButtons.OK);
@@ -174,8 +144,6 @@ namespace ElectroMod
                 return;
             }
         }
-
-
 
         private void OpenFile_Click(object sender, EventArgs e)
         {

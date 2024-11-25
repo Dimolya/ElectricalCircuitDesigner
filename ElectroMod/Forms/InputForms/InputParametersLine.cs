@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ElectroMod.DataBase;
+using ElectroMod.DataBase.Dtos;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,16 +16,25 @@ namespace ElectroMod.Forms.InputForms
 {
     public partial class InputParametersLine : Form
     {
+        private List<LineDataTypeDto> _dto;
         private string _elementName;
         private string _elementLength;
         private string _mark;
-        private List<string> _marks = new List<string>() { "АС35", "АС50", "АС70" };
 
         public InputParametersLine()
         {
             InitializeComponent();
-            cbMarks.DataSource = _marks;
+            LoadDataToComboBox();
         }
+
+        private void LoadDataToComboBox()
+        {
+            _dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json");
+            cbMarks.DataSource = _dto;
+            cbMarks.DisplayMember = "Name";
+            cbMarks.ValueMember = "ID";
+        }
+
         public string ElementName
         {
             get { return _elementName; }
@@ -39,6 +50,7 @@ namespace ElectroMod.Forms.InputForms
             get { return _mark; }
             set { _mark = value; }
         }
+
         private void btnApply_Click(object sender, EventArgs e)
         {
             ElementName = tbElementName.Text;

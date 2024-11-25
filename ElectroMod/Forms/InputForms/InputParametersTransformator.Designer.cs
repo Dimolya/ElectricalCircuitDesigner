@@ -32,7 +32,7 @@
             this.tbElementName = new System.Windows.Forms.TextBox();
             this.btnApply = new System.Windows.Forms.Button();
             this.cbTypeKTP = new System.Windows.Forms.ComboBox();
-            this.cbShemeConnectWinding = new System.Windows.Forms.ComboBox();
+            this.cbShemesConnectWinding = new System.Windows.Forms.ComboBox();
             this.lbTypeKTP = new System.Windows.Forms.Label();
             this.lbShemeConnectWinding = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -74,11 +74,11 @@
             // 
             // cbShemeConnectWinding
             // 
-            this.cbShemeConnectWinding.FormattingEnabled = true;
-            this.cbShemeConnectWinding.Location = new System.Drawing.Point(210, 69);
-            this.cbShemeConnectWinding.Name = "cbShemeConnectWinding";
-            this.cbShemeConnectWinding.Size = new System.Drawing.Size(273, 24);
-            this.cbShemeConnectWinding.TabIndex = 4;
+            this.cbShemesConnectWinding.FormattingEnabled = true;
+            this.cbShemesConnectWinding.Location = new System.Drawing.Point(210, 69);
+            this.cbShemesConnectWinding.Name = "cbShemeConnectWinding";
+            this.cbShemesConnectWinding.Size = new System.Drawing.Size(273, 24);
+            this.cbShemesConnectWinding.TabIndex = 4;
             // 
             // lbTypeKTP
             // 
@@ -116,7 +116,7 @@
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.lbShemeConnectWinding);
             this.Controls.Add(this.lbTypeKTP);
-            this.Controls.Add(this.cbShemeConnectWinding);
+            this.Controls.Add(this.cbShemesConnectWinding);
             this.Controls.Add(this.cbTypeKTP);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.tbElementName);
@@ -134,7 +134,7 @@
         private System.Windows.Forms.TextBox tbElementName;
         private System.Windows.Forms.Button btnApply;
         private System.Windows.Forms.ComboBox cbTypeKTP;
-        private System.Windows.Forms.ComboBox cbShemeConnectWinding;
+        private System.Windows.Forms.ComboBox cbShemesConnectWinding;
         private System.Windows.Forms.Label lbTypeKTP;
         private System.Windows.Forms.Label lbShemeConnectWinding;
         private System.Windows.Forms.Button btnCancel;

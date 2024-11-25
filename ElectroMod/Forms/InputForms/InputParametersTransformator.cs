@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ElectroMod.DataBase.Dtos;
+using ElectroMod.DataBase;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,17 +14,27 @@ namespace ElectroMod.Forms
 {
     public partial class InputParametersTransformator : Form
     {
+        private List<TransformatorDataTypeDto> _dto;
         private string _elementName;
         private string _typeKTP;
         private string _shemeConnectingWinding;
-        private List<string> _typesKTP = new List<string>() { "Тип 1", "Тип 2" };
-        private List<string> _shemesConnectingWinding = new List<string>() { "Звезда", "Треугольник" };
 
         public InputParametersTransformator()
         {
             InitializeComponent();
-            cbTypeKTP.DataSource = _typesKTP;
-            cbShemeConnectWinding.DataSource = _shemesConnectingWinding;
+            LoadDataToComboBox();
+        }
+
+        private void LoadDataToComboBox()
+        {
+            _dto = JsonProvider.LoadData<TransformatorDataTypeDto>("..\\..\\DataBase\\TransformatorDataTypeDB.json");
+            cbTypeKTP.DataSource = _dto[0].TypeKTP;
+            cbTypeKTP.DisplayMember = "Name";
+            cbTypeKTP.ValueMember = "Id";
+
+            cbShemesConnectWinding.DataSource = _dto[0].ShemesConnectingWinding;
+            cbShemesConnectWinding.DisplayMember = "Name";
+            cbShemesConnectWinding.ValueMember = "Id";
         }
 
         public string ElementName 
@@ -45,7 +57,7 @@ namespace ElectroMod.Forms
         {
             ElementName = tbElementName.Text;
             TypeKTP = cbTypeKTP.SelectedItem.ToString();
-            ShemeConnectingWinding = cbShemeConnectWinding.SelectedItem.ToString();
+            ShemeConnectingWinding = cbShemesConnectWinding.SelectedItem.ToString();
             DialogResult = DialogResult.OK;
         }
 

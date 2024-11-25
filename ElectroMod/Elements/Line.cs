@@ -62,8 +62,6 @@ namespace ElectroMod
             return IsNear(pointClick);
         }
 
-
-
         private bool IsNear(Point pointClick)
         {
             var reallyStartPointLine = new PointF() 

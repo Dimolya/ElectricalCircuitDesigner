@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ElectroMod.DataBase;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,14 +13,20 @@ namespace ElectroMod.Forms.InputForms
 {
     public partial class InputParametersBus : Form
     {
+        private List<BusDataTypeDto> _dto;
+
         private string _elementName;
         private string _voltage;
         private string _dataType;
-        private List<string> _dataTypes = new List<string>() { "Ток", "Сопротивление" };
         public InputParametersBus()
         {
             InitializeComponent();
-            cbDataTypes.DataSource = _dataTypes;
+            LoadDataToComboBox();
+        }
+
+        private void LoadDataToComboBox()
+        {
+            _dto = JsonProvider.LoadData<BusDataTypeDto>("..\\..\\DataBase\\BusDataTypesDB.json");
         }
 
         public string ElementName
@@ -42,13 +49,32 @@ namespace ElectroMod.Forms.InputForms
         {
             ElementName = tbElementName.Text;
             Voltage = tbVoltage.Text;
-            DataType = cbDataTypes.SelectedItem.ToString();
             DialogResult = DialogResult.OK;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+        }
+
+        private void rbCurrent_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = (RadioButton)sender;
+            if (rb.Checked)
+            {
+                panelForCurrent.Visible = true;
+                panelForResistance.Visible = false;
+            }
+        }
+
+        private void rbResistance_CheckedChanged(object sender, EventArgs e)
+        {
+            RadioButton rb = (RadioButton)sender;
+            if (rb.Checked)
+            {
+                panelForResistance.Visible = true;
+                panelForCurrent.Visible = false;
+            }
         }
     }
 }
