@@ -28,13 +28,13 @@ namespace ElectroMod.Forms
         private void LoadDataToComboBox()
         {
             _dto = JsonProvider.LoadData<TransformatorDataTypeDto>("..\\..\\DataBase\\TransformatorDataTypeDB.json");
-            cbTypeKTP.DataSource = _dto[0].TypeKTP;
-            cbTypeKTP.DisplayMember = "Name";
-            cbTypeKTP.ValueMember = "Id";
+            cbTypesKTP.DataSource = _dto[0].TypesKTP;
+            cbTypesKTP.DisplayMember = "Type";
+            cbTypesKTP.ValueMember = "Id";
 
-            cbShemesConnectWinding.DataSource = _dto[0].ShemesConnectingWinding;
-            cbShemesConnectWinding.DisplayMember = "Name";
-            cbShemesConnectWinding.ValueMember = "Id";
+            cbSchemesConnectWinding.DataSource = _dto[0].SchemesConnectingWinding;
+            cbSchemesConnectWinding.DisplayMember = "Scheme";
+            cbSchemesConnectWinding.ValueMember = "Id";
         }
 
         public string ElementName 
@@ -56,8 +56,8 @@ namespace ElectroMod.Forms
         private void btnApply_Click(object sender, EventArgs e)
         {
             ElementName = tbElementName.Text;
-            TypeKTP = cbTypeKTP.SelectedItem.ToString();
-            ShemeConnectingWinding = cbShemesConnectWinding.SelectedItem.ToString();
+            TypeKTP = cbTypesKTP.SelectedItem.ToString();
+            ShemeConnectingWinding = cbSchemesConnectWinding.SelectedItem.ToString();
             DialogResult = DialogResult.OK;
         }
 

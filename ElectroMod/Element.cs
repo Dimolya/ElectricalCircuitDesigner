@@ -20,6 +20,7 @@ namespace ElectroMod
         public event DataChangedHandler DataChanged;
 
         private bool IsSelected = false;
+        public bool IsFirstInit { get; set; } = true;
         private SerializableGraphicsPath path;
 
         public virtual bool AcceptWare => true;

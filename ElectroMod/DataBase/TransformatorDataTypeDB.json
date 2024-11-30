@@ -1,24 +1,24 @@
 [
   {
-    "TypeKTP": [
+    "TypesKTP": [
       {
-        "Id": 1,
-        "Name": "Тип 1"
+        "Type": "Тип 1",
+        "ResistanceOne": 0.345,
+        "ResistanceTwo": 1.234
       },
       {
-        "Id": 2,
-        "Name": "Тип 2"
+        "Type": "Тип 2",
+        "ResistanceOne": 0.908,
+        "ResistanceTwo": 1.12
       }
     ],
 
-    "ShemesConnectingWinding": [
+    "SchemesConnectingWinding": [
       {
-        "Id": 1,
-        "Name": "Звезда"
+        "Scheme": "Звезда"
       },
-      {
-        "Id": 2,
-        "Name": "Треугольник"
+      { 
+        "Scheme": "Треугольник"
       }
     ]
   }

@@ -32,7 +32,7 @@ namespace ElectroMod.Forms.InputForms
             cbTypeRecloser.DisplayMember = "Name";
             cbTypeRecloser.ValueMember = "Id";
 
-            cbTypeTT.DataSource = _dto[0].TypeTT;
+            cbTypeTT.DataSource = _dto[0].TypeRecloser[0].TypeTT;
             cbTypeTT.DisplayMember = "Name";
             cbTypeTT.ValueMember = "Id";
         }

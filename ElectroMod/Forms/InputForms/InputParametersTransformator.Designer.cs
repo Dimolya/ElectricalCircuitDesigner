@@ -31,8 +31,8 @@
             this.lbTextName = new System.Windows.Forms.Label();
             this.tbElementName = new System.Windows.Forms.TextBox();
             this.btnApply = new System.Windows.Forms.Button();
-            this.cbTypeKTP = new System.Windows.Forms.ComboBox();
-            this.cbShemesConnectWinding = new System.Windows.Forms.ComboBox();
+            this.cbTypesKTP = new System.Windows.Forms.ComboBox();
+            this.cbSchemesConnectWinding = new System.Windows.Forms.ComboBox();
             this.lbTypeKTP = new System.Windows.Forms.Label();
             this.lbShemeConnectWinding = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -66,19 +66,19 @@
             // 
             // cbTypeKTP
             // 
-            this.cbTypeKTP.FormattingEnabled = true;
-            this.cbTypeKTP.Location = new System.Drawing.Point(210, 39);
-            this.cbTypeKTP.Name = "cbTypeKTP";
-            this.cbTypeKTP.Size = new System.Drawing.Size(273, 24);
-            this.cbTypeKTP.TabIndex = 3;
+            this.cbTypesKTP.FormattingEnabled = true;
+            this.cbTypesKTP.Location = new System.Drawing.Point(210, 39);
+            this.cbTypesKTP.Name = "cbTypeKTP";
+            this.cbTypesKTP.Size = new System.Drawing.Size(273, 24);
+            this.cbTypesKTP.TabIndex = 3;
             // 
             // cbShemeConnectWinding
             // 
-            this.cbShemesConnectWinding.FormattingEnabled = true;
-            this.cbShemesConnectWinding.Location = new System.Drawing.Point(210, 69);
-            this.cbShemesConnectWinding.Name = "cbShemeConnectWinding";
-            this.cbShemesConnectWinding.Size = new System.Drawing.Size(273, 24);
-            this.cbShemesConnectWinding.TabIndex = 4;
+            this.cbSchemesConnectWinding.FormattingEnabled = true;
+            this.cbSchemesConnectWinding.Location = new System.Drawing.Point(210, 69);
+            this.cbSchemesConnectWinding.Name = "cbShemeConnectWinding";
+            this.cbSchemesConnectWinding.Size = new System.Drawing.Size(273, 24);
+            this.cbSchemesConnectWinding.TabIndex = 4;
             // 
             // lbTypeKTP
             // 
@@ -116,8 +116,8 @@
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.lbShemeConnectWinding);
             this.Controls.Add(this.lbTypeKTP);
-            this.Controls.Add(this.cbShemesConnectWinding);
-            this.Controls.Add(this.cbTypeKTP);
+            this.Controls.Add(this.cbSchemesConnectWinding);
+            this.Controls.Add(this.cbTypesKTP);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.tbElementName);
             this.Controls.Add(this.lbTextName);
@@ -133,8 +133,8 @@
         private System.Windows.Forms.Label lbTextName;
         private System.Windows.Forms.TextBox tbElementName;
         private System.Windows.Forms.Button btnApply;
-        private System.Windows.Forms.ComboBox cbTypeKTP;
-        private System.Windows.Forms.ComboBox cbShemesConnectWinding;
+        private System.Windows.Forms.ComboBox cbTypesKTP;
+        private System.Windows.Forms.ComboBox cbSchemesConnectWinding;
         private System.Windows.Forms.Label lbTypeKTP;
         private System.Windows.Forms.Label lbShemeConnectWinding;
         private System.Windows.Forms.Button btnCancel;

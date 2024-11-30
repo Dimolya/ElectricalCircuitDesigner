@@ -8,13 +8,20 @@ namespace ElectroMod.DataBase.Dtos
 {
     public class TransformatorDataTypeDto
     {
-        public List<InternalPropTransformator> TypeKTP { get; set; }
-        public List<InternalPropTransformator> ShemesConnectingWinding { get; set; }
+        public List<TypeProp> TypesKTP { get; set; }
+        public List<ShemesProp> SchemesConnectingWinding { get; set; }
     }
 
-    public class InternalPropTransformator
+    public class TypeProp
     {
-        public int ID { get; set; }
-        public string Name { get; set; }
+        public string Type { get; set; }
+        public double ResistanceOne { get; set; }
+        public double ResistanceTwo { get; set; }
     }
+
+    public class ShemesProp
+    {
+        public string Scheme { get; set; }
+    }
+
 }

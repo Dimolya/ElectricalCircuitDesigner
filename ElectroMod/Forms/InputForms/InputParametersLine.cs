@@ -19,7 +19,7 @@ namespace ElectroMod.Forms.InputForms
         private List<LineDataTypeDto> _dto;
         private string _elementName;
         private string _elementLength;
-        private string _mark;
+        private LineDataTypeDto _mark;
 
         public InputParametersLine()
         {
@@ -31,8 +31,8 @@ namespace ElectroMod.Forms.InputForms
         {
             _dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json");
             cbMarks.DataSource = _dto;
-            cbMarks.DisplayMember = "Name";
-            cbMarks.ValueMember = "ID";
+            cbMarks.DisplayMember = "Mark";
+            cbMarks.ValueMember = "Id";
         }
 
         public string ElementName
@@ -45,7 +45,7 @@ namespace ElectroMod.Forms.InputForms
             get { return _elementLength; }
             set { _elementLength = value; }
         }
-        public string Mark
+        public LineDataTypeDto Mark
         {
             get { return _mark; }
             set { _mark = value; }
@@ -55,7 +55,7 @@ namespace ElectroMod.Forms.InputForms
         {
             ElementName = tbElementName.Text;
             ElementLength = tbElementName.Text;
-            Mark = cbMarks.SelectedItem.ToString();
+            Mark = cbMarks.SelectedItem as LineDataTypeDto;
             DialogResult = DialogResult.OK;
         }
 

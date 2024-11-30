@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ElectroMod.DataBase.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -8,20 +9,10 @@ using System.Windows.Forms;
 namespace ElectroMod
 {
     [Serializable]
-    class Line : Element
+    public class Line : Element
     {
-        private string _elementName;
-        private string _elementLength;
-        private string _mark;
-        public Line(Elements elements,
-                    string elementName,
-                    string elementLength,
-                    string mark) : base(elements)
+        public Line(Elements elements) : base(elements)
         {
-            _elementName = elementName;
-            _elementLength = elementLength;
-            _mark = mark;
-
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(-5, 0) });
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(130, 0) });
 
@@ -31,31 +22,11 @@ namespace ElectroMod
         }
 
         public override Color BorderColor => Color.DarkBlue;
-        public string ElementName
-        {
-            get { return _elementName; }
-            set { _elementName = value; }
-        }
-        public string ElementLength
-        {
-            get { return _elementLength; }
-            set { _elementLength = value; }
-        }
-        public string Mark
-        {
-            get { return _mark; }
-            set { _mark = value; }
-        }
-
-        public override List<(string, string, string)> GetElementData()
-        {
-            return new List<(string, string, string)>()
-            {
-                ( "Наименовние", ElementName, "TextBox"),
-                ("Длина", ElementLength, "TextBox"),
-                ("Марка провода", Mark, "ComboBox")
-            };
-        }
+        public string Name{ get; set; }
+        public double Length { get; set; }
+        public string Mark { get; set; }
+        public double ActiveResistance { get; set; }
+        public double ReactiveResistance { get; set; }
 
         public override bool Hit(Point pointClick)
         {    

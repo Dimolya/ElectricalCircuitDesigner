@@ -9,26 +9,9 @@ namespace ElectroMod
     [Serializable]
     public class Bus: Element
     {
-        private string _elementName;
-        private string _voltage;
-        private string _dataType;
-
-        public double CurrentStrenghtPS { get; set; }
-        public double VoltagePS { get; set; }
-        public double ResistancePS { get; set; }
-
         public Bus() {}
-
-        public Bus(Elements elements,
-                   string elementName,
-                   string voltage,
-                   string dataType) 
-            : base(elements)
+        public Bus(Elements elements) : base(elements)
         {
-            _elementName = elementName;
-            _voltage = voltage;
-            _dataType = dataType;
-
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(37, -5) });
 
             Path = new GraphicsPath();
@@ -38,35 +21,16 @@ namespace ElectroMod
         }
 
         public override Color BorderColor => Color.DarkBlue;
-        public string ElementName
-        {
-            get { return _elementName; }
-            set { _elementName = value; }
-        }
-        public string Voltage
-        {
-            get { return _voltage; }
-            set { _voltage = value; }
-        }
-        public string DataType
-        {
-            get { return _dataType; }
-            set { _dataType = value; }
-        }
-
-        protected bool CanConnected()
-        {
-            return false;
-        }
-
-        public override List<(string, string, string)> GetElementData()
-        {
-            return new List<(string, string, string)>()
-            {
-                ("Наименовние", ElementName, "TextBox"),
-                ("Вольтаж", Voltage, "TextBox"),
-                ("Тип", DataType, "ComboBox")
-            };
-        }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public double Voltage { get; set; }
+        public bool isCurrent { get; set; } 
+        public bool isResistanse { get; set; }
+        public double ActiveResistMax { get; set; }
+        public double ReactiveResistMax { get; set; }
+        public double ActiveResistMin { get; set; }
+        public double ReactiveResistMin { get; set; }
+        public double CurrentMax { get; set; }
+        public double CurrentMin { get; set; }
     }
 }
