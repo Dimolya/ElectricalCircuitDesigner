@@ -8,13 +8,8 @@ namespace ElectroMod.DataBase.Dtos
 {
     public class RecloserDataTypeDto
     {
-        public List<InternalPropRecloser> TypeRecloser { get; set; }
-    }
-    public class InternalPropRecloser    
-    {
-        public int Id { get; set; }
         public string Name { get; set; }
-        public List<string> TypeTT { get; set; }
+        public string TypeRecloser { get; set; }
+        public double TypeTT { get; set; }
     }
-
 }

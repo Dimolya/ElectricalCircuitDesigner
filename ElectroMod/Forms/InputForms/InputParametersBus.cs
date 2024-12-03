@@ -13,7 +13,7 @@ namespace ElectroMod.Forms.InputForms
 {
     public partial class InputParametersBus : Form
     {
-        private List<BusDataTypeDto> _dto;
+        //private List<BusDataTypeDto> _dto;
 
         private string _elementName;
         private string _voltage;
@@ -26,7 +26,7 @@ namespace ElectroMod.Forms.InputForms
 
         private void LoadDataToComboBox()
         {
-            _dto = JsonProvider.LoadData<BusDataTypeDto>("..\\..\\DataBase\\BusDataTypesDB.json");
+            //_dto = JsonProvider.LoadData<BusDataTypeDto>("..\\..\\DataBase\\BusDataTypesDB.json");
         }
 
         public string ElementName

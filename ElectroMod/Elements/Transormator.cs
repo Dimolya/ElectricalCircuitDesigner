@@ -25,8 +25,7 @@ namespace ElectroMod
         public override Color BorderColor => Color.DarkBlue;
         public string Name { get; set; }
         public string TypeKTP { get; set; }
-        public string ShemeConnectingWinding { get; set; }
-        public double ResistanceOne { get; set; }
-        public double ResistanceTwo { get; set; }
+        public string Scheme { get; set; }
+        public double Resistance { get; set; }
     }
 }

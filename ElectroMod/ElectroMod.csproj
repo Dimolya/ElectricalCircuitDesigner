@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Office.Interop.Word.15.0.4797.1004\lib\net20\Microsoft.Office.Interop.Word.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -52,10 +56,12 @@
   <ItemGroup>
     <Compile Include="Addition.cs" />
     <Compile Include="ConnectingWare.cs" />
-    <Compile Include="DataBase\Dtos\LineDataTypeDto.cs" />
-    <Compile Include="DataBase\Dtos\RecloserDataTypeDto.cs" />
-    <Compile Include="DataBase\Dtos\TransformatorDataTypeDto.cs" />
-    <Compile Include="DataBase\Dtos\BusDataTypeDto.cs" />
+    <Compile Include="Dtos\LineDataTypeDto.cs" />
+    <Compile Include="Dtos\RecloserDataTypeDto.cs" />
+    <Compile Include="Dtos\StaticDtos\DataLineDto.cs" />
+    <Compile Include="Dtos\StaticDtos\DataRecloserDto.cs" />
+    <Compile Include="Dtos\StaticDtos\DataTransformatorDto.cs" />
+    <Compile Include="Dtos\TransformatorContainerDto.cs" />
     <Compile Include="DataBase\JsonProvider.cs" />
     <Compile Include="Elements\Recloser.cs" />
     <Compile Include="DrawPanel.cs">
@@ -130,10 +136,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="DataBase\BusDataTypesDB.json" />
     <None Include="DataBase\LineDataTypesDB.json" />
-    <None Include="DataBase\RecloserDataTypeDB.json" />
-    <None Include="DataBase\TransformatorDataTypeDB.json" />
+    <None Include="DataBase\StaticData\DataLine.json" />
+    <None Include="DataBase\StaticData\DataRecloser.json" />
+    <None Include="DataBase\TransformatorContainer.json" />
+    <None Include="DataBase\StaticData\DataTransformator.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -8,7 +8,6 @@ namespace ElectroMod.DataBase.Dtos
 {
     public class LineDataTypeDto
     {
-        public int Id { get; set; }
         public string Mark { get; set; }
         public double ActiveResistance { get; set; }
         public double ReactiveResistance { get; set; }

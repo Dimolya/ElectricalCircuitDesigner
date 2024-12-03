@@ -12,6 +12,10 @@ using Newtonsoft.Json;
 using ElectroMod.DataBase.Dtos;
 using ElectroMod.DataBase;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Microsoft.Office.Interop.Word;
+using System.Windows.Forms.VisualStyles;
+using ElectroMod.DataBase.Dtos.StaticDtos;
+using ElectroMod.Dtos.StaticDtos;
 
 namespace ElectroMod
 {
@@ -176,12 +180,24 @@ namespace ElectroMod
 
                 tbBusName.Text = bus.Name;
                 tbBusVoltage.Text = bus.Voltage.ToString();
-                tbBusCurrentMax.Text = bus.CurrentMax.ToString();
-                tbBusCurrentMin.Text = bus.CurrentMin.ToString();
-                tbBusActiveResistMax.Text = bus.ActiveResistMax.ToString();
-                tbBusReactiveResistMax.Text = bus.ReactiveResistMax.ToString();
-                tbBusActiveResistMin.Text = bus.ActiveResistMin.ToString();
-                tbBusReactiveResistMin.Text = bus.ReactiveResistMin.ToString();
+                if (rbBusCurrent.Checked)
+                {
+                    bus.isCurrent = true;
+                    bus.isResistanse = false;
+                    tbBusCurrentMax.Text = bus.CurrentMax.ToString();
+                    tbBusCurrentMin.Text = bus.CurrentMin.ToString();
+                }
+                else if (rbBusResistance.Checked)
+                {
+                    bus.isResistanse = true;
+                    bus.isCurrent = false;
+                    tbBusActiveResistMax.Text = bus.ActiveResistMax.ToString();
+                    tbBusReactiveResistMax.Text = bus.ReactiveResistMax.ToString();
+                    tbBusActiveResistMin.Text = bus.ActiveResistMin.ToString();
+                    tbBusReactiveResistMin.Text = bus.ReactiveResistMin.ToString();
+                }
+                rbBusCurrent.CheckedChanged += RbBusCurrent_CheckedChanged;
+                rbBusResistance.CheckedChanged += RbBusCurrent_CheckedChanged;
             }
             else if (selectedElement is Line line)
             {
@@ -193,10 +209,8 @@ namespace ElectroMod
 
                 tbLineName.Text = line.Name;
                 tbLineLength.Text = line.Length.ToString();
-                var dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json");
-                cbLineMarks.DataSource = dto[0].Mark;
-                cbLineMarks.DisplayMember = "Name";
-                cbLineMarks.ValueMember = "Id";
+                var dto = JsonProvider.LoadData<DataLineDto>("..\\..\\DataBase\\StaticData\\DataLine.json");
+                cbLineMarks.DataSource = dto[0].Marks;
             }
             else if (selectedElement is Recloser recloser)
             {
@@ -207,11 +221,12 @@ namespace ElectroMod
                 panelPropertyTransformator.Visible = false;
 
                 tbRecloserName.Text = recloser.Name;
-                var dto = JsonProvider.LoadData<RecloserDataTypeDto>("..\\..\\DataBase\\RecloserDataTypeDB.json");
+                var dto = JsonProvider.LoadData<DataRecloserDto>("..\\..\\DataBase\\StaticData\\DataRecloser.json");
                 cbRecloserType.DataSource = dto[0].TypeRecloser;
-                cbRecloserType.DisplayMember = "Name";
-                cbRecloserType.ValueMember = "Id";
-                cbRecloserTypeTT.DataSource = (cbRecloserType.SelectedItem as InternalPropRecloser).TypeTT;
+                if (cbRecloserType.Text == "Таврила электрик")
+                    cbRecloserTypeTT.DataSource = dto[0].TypeTTTavrila;
+                if (cbRecloserType.Text == "БМР3")
+                    cbRecloserTypeTT.DataSource = dto[0].TypeTTBMP3;
                 cbRecloserType.SelectedIndexChanged += cbRecloserType_SelectedIndexChanged;
             }
             else if (selectedElement is Transormator transormator)
@@ -223,10 +238,10 @@ namespace ElectroMod
                 panelPropertyBus.Visible = false;
 
                 tbTransformatorName.Text = transormator.Name;
-                var dto = JsonProvider.LoadData<TransformatorDataTypeDto>("..\\..\\DataBase\\TransformatorDataTypeDB.json");
-                cbTransformatorTypesKTP.DataSource = dto[0].TypesKTP;
-                cbTransformatorTypesKTP.DisplayMember = "Type";
-                cbTransformatorSchemes.DataSource = dto[0].SchemesConnectingWinding;
+                var dto = JsonProvider.LoadData<DataTransformatorDto>("..\\..\\DataBase\\StaticData\\DataTransformator.json");
+                cbTransformatorTypesKTP.DataSource = dto[0].TypeKTP;
+                cbTransformatorTypesKTP.DisplayMember = "TypeKTP";
+                cbTransformatorSchemes.DataSource = dto[0].Scheme;
                 cbTransformatorSchemes.DisplayMember = "Scheme";
             }
             else
@@ -238,13 +253,36 @@ namespace ElectroMod
             }
         }
 
+        private void RbBusCurrent_CheckedChanged(object sender, EventArgs e)
+        {
+            var bus = slctElement as Bus;
+            if (bus == null)
+                return;
+            if (rbBusCurrent.Checked)
+            {
+                bus.isCurrent = true;
+                bus.isResistanse = false;
+                tbBusCurrentMax.Text = bus.CurrentMax.ToString();
+                tbBusCurrentMin.Text = bus.CurrentMin.ToString();
+            }
+            else if (rbBusResistance.Checked)
+            {
+                bus.isResistanse = true;
+                bus.isCurrent = false;
+                tbBusActiveResistMax.Text = bus.ActiveResistMax.ToString();
+                tbBusReactiveResistMax.Text = bus.ReactiveResistMax.ToString();
+                tbBusActiveResistMin.Text = bus.ActiveResistMin.ToString();
+                tbBusReactiveResistMin.Text = bus.ReactiveResistMin.ToString();
+            }
+        }
+
         private void cbRecloserType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var selectedRecloser = cbRecloserType.SelectedItem as InternalPropRecloser;
-            if (selectedRecloser != null)
-            {
-                cbRecloserTypeTT.DataSource = selectedRecloser.TypeTT;
-            }
+            var dto = JsonProvider.LoadData<DataRecloserDto>("..\\..\\DataBase\\StaticData\\DataRecloser.json");
+            if (cbRecloserType.Text == "Таврила электрик")
+                cbRecloserTypeTT.DataSource = dto[0].TypeTTTavrila;
+            if (cbRecloserType.Text == "БМР3")
+                cbRecloserTypeTT.DataSource = dto[0].TypeTTBMP3;
         }
 
         private void rbBusCurrent_CheckedChanged(object sender, EventArgs e)
@@ -276,41 +314,69 @@ namespace ElectroMod
             {
                 bus.Name = tbBusName.Text;
                 bus.Voltage = double.Parse(tbBusVoltage.Text);
-                bus.CurrentMin = double.Parse(tbBusCurrentMin.Text);
-                bus.CurrentMax = double.Parse(tbBusCurrentMax.Text);
-                bus.ActiveResistMax = double.Parse(tbBusActiveResistMax.Text);
-                bus.ReactiveResistMax = double.Parse(tbBusReactiveResistMax.Text);
-                bus.ActiveResistMin = double.Parse(tbBusActiveResistMin.Text);
-                bus.ReactiveResistMin = double.Parse(tbBusReactiveResistMin.Text);
+                if (bus.isCurrent)
+                {
+                    bus.CurrentMin = double.Parse(tbBusCurrentMin.Text);
+                    bus.CurrentMax = double.Parse(tbBusCurrentMax.Text);
+                }
+                else if (bus.isResistanse)
+                {
+                    bus.ActiveResistMax = double.Parse(tbBusActiveResistMax.Text);
+                    bus.ReactiveResistMax = double.Parse(tbBusReactiveResistMax.Text);
+                    bus.ActiveResistMin = double.Parse(tbBusActiveResistMin.Text);
+                    bus.ReactiveResistMin = double.Parse(tbBusReactiveResistMin.Text);
+                }
             }
             else if (slctElement is Line line)
             {
                 line.Name = tbLineName.Text;
                 line.Length = double.Parse(tbLineLength.Text);
-                line.Mark = cbLineMarks.SelectedText;
-                line.ActiveResistance = (cbLineMarks.SelectedItem as LineDataTypeDto).ActiveResistance;
-                line.ReactiveResistance = (cbLineMarks.SelectedItem as LineDataTypeDto).ReactiveResistance;
+                var dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json");
+                for (int i = 0; i < dto.Count; i++)
+                {
+                    if (cbLineMarks.Text == dto[i].Mark)
+                    {
+                        line.ActiveResistance = dto[i].ActiveResistance;
+                        line.ReactiveResistance = dto[i].ReactiveResistance;
+                        break;
+                    }
+                }
             }
-            else if(slctElement is Recloser recloser)
+            else if (slctElement is Recloser recloser)
             {
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
-
-                var input = cbRecloserTypeTT.Text;
-                var parts = input.Split('/');
-                var numerator = double.Parse(parts[0].Trim()); 
-                var denominator = double.Parse(parts[1].Trim());
-                var result = numerator / denominator;
-                recloser.TypeTT = result;
+                try
+                {
+                    var input = cbRecloserTypeTT.Text;
+                    var parts = input.Split('/');
+                    var numerator = double.Parse(parts[0].Trim());
+                    var denominator = double.Parse(parts[1].Trim());
+                    var result = numerator / denominator;
+                    recloser.TypeTT = result;
+                }
+                catch
+                {
+                    MessageBox.Show("Не удалось сконвертировать ТипТТ");
+                }
 
             }
-            else if(slctElement is Transormator transormator)
+            else if (slctElement is Transormator transormator)
             {
                 transormator.Name = tbTransformatorName.Text;
-                transormator.TypeKTP = cbTransformatorTypesKTP.SelectedText;
-                transormator.ShemeConnectingWinding = cbTransformatorSchemes.SelectedText;
-                transormator.ResistanceOne = (cbTransformatorTypesKTP.SelectedItem as TypeProp).ResistanceOne;
-                transormator.ResistanceTwo = (cbTransformatorTypesKTP.SelectedItem as TypeProp).ResistanceTwo;
+                transormator.TypeKTP = cbTransformatorTypesKTP.Text;
+                transormator.Scheme = cbTransformatorSchemes.Text;
+                var dto = JsonProvider.LoadData<TransformatorContainerDto>("..\\..\\DataBase\\TransformatorContainer.json");
+
+                for (int i = 0; i < dto.Count; i++)
+                {
+                    if (transormator.TypeKTP == dto[i].TypeKTP
+                     && transormator.Scheme == dto[i].Scheme)
+                    {
+                        transormator.Resistance = dto[i].Resistance;
+                        break;
+                    }
+                }
             }
         }
     }

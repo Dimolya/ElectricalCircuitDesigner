@@ -14,7 +14,7 @@ namespace ElectroMod.Forms
 {
     public partial class InputParametersTransformator : Form
     {
-        private List<TransformatorDataTypeDto> _dto;
+       // private List<TransformatorDataTypeDto> _dto;
         private string _elementName;
         private string _typeKTP;
         private string _shemeConnectingWinding;
@@ -27,12 +27,12 @@ namespace ElectroMod.Forms
 
         private void LoadDataToComboBox()
         {
-            _dto = JsonProvider.LoadData<TransformatorDataTypeDto>("..\\..\\DataBase\\TransformatorDataTypeDB.json");
-            cbTypesKTP.DataSource = _dto[0].TypesKTP;
+            //_dto = JsonProvider.LoadData<TransformatorDataTypeDto>("..\\..\\DataBase\\TransformatorDataTypeDB.json");
+            //cbTypesKTP.DataSource = _dto[0].TypesKTP;
             cbTypesKTP.DisplayMember = "Type";
             cbTypesKTP.ValueMember = "Id";
 
-            cbSchemesConnectWinding.DataSource = _dto[0].SchemesConnectingWinding;
+            //cbSchemesConnectWinding.DataSource = _dto[0].SchemesConnectingWinding;
             cbSchemesConnectWinding.DisplayMember = "Scheme";
             cbSchemesConnectWinding.ValueMember = "Id";
         }
