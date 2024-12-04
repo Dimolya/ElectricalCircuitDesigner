@@ -20,6 +20,9 @@ namespace ElectroMod
         Point mouseDown; 
         float scale = 1.0f;
         
+        List<CalculationPoint> _calculationPoints = new List<CalculationPoint>();
+        int _pointCount = 1;
+
         public DrawPanel()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
@@ -45,6 +48,10 @@ namespace ElectroMod
 
             e.Graphics.ScaleTransform(scale, scale);
 
+            foreach (var point in _calculationPoints)
+            {
+                point.Paint(e.Graphics);
+            }
             //отрисовываем объекты, относящиеся к типу IDrawable
             foreach (var obj in model.OfType<IDrawable>())
                 obj.Paint(e.Graphics);
@@ -85,7 +92,17 @@ namespace ElectroMod
             else if (e.Button == MouseButtons.Right)
             {
                 if (hittable != null)
+                {
                     hittable.Rotate(90);
+                    var calculationPoint = new CalculationPoint
+                    {
+                        Location = p,
+                        OrderNumber = _pointCount++
+                    };
+
+                    // Добавляем точку в коллекцию и на панель
+                    _calculationPoints.Add(calculationPoint);
+                }
             }
         }
 

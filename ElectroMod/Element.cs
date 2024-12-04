@@ -36,6 +36,7 @@ namespace ElectroMod
             set { path = value; }
         }
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
+        public List<CalculationPoint> CalculationPoints { get; set; } = new List<CalculationPoint>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
         
         //public List<Link> Links { get; set; } = new List<Link>();
@@ -182,6 +183,7 @@ namespace ElectroMod
                 }
             }
         }
+
         protected bool isCanConnected(Element otherElement)
         {
             switch (GetType())
@@ -232,27 +234,9 @@ namespace ElectroMod
             return Wares.OrderBy(ware => ware.Location.StartPoint(p).LengthSqr()).FirstOrDefault();
         }
 
-        //ISelectable ISelectable.Hit(Point p)
-        //{
-        //    //если кликнули линк, то выделяем линк
-        //    var clickedLink = Links.Select(link => link.Hit(p)).FirstOrDefault(s => s != null);
-        //    if (clickedLink != null)
-        //        return clickedLink;
-
-        //    if (Path.GetBounds().Contains(p.StartPoint(Location)))
-        //        return this;
-
-        //    return null;
-        //}
-
         public void Remove()
         {
-            //remove me from model
             Elements.Remove(this); //ToDo: надо чтобы у всех ругих с ним связанных элементов тоже удалялись связи
-
-            //remove me from all links
-            //foreach (var node in Elements.OfType<Element>())
-            //    node.Links.RemoveAll(link => link.Ware1.ParentElement == this || link.Ware2.ParentElement == this);
         }
 
         public void Select()
@@ -264,35 +248,6 @@ namespace ElectroMod
         {
             IsSelected = false;
         }
-
-        public double CalculateTotalResistance(HashSet<Element> visited = null)
-        {
-            if (visited == null) visited = new HashSet<Element>();
-            if (visited.Contains(this)) return 0; // Избегаем повторного посещения
-
-            visited.Add(this);
-            double totalResistance = Resistance;
-
-            //foreach (var link in Links)
-            //{
-            //    var connectedWare = link.Ware1.ParentElement == this ? link.Ware2 : link.Ware1;
-            //    totalResistance += connectedWare.ParentElement.CalculateTotalResistance(visited);
-            //}
-
-            return totalResistance;
-        }
-
-        //public void UpdateCurrentAndVoltage()
-        //{
-        //    foreach (var element in Elements.OfType<Bus>())
-        //    {
-        //        double totalResistance = element.CalculateTotalResistance();
-        //        element.Voltage = element.CurrentStrength * totalResistance;
-
-        //        // Обновляем для всех элементов
-        //        element.OnDataChanged(element.CurrentStrength, element.Voltage, totalResistance);
-        //    }
-        //}
 
         ISelectable ISelectable.Hit(Point point)
         {

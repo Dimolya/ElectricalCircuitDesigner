@@ -359,7 +359,6 @@ namespace ElectroMod
                 {
                     MessageBox.Show("Не удалось сконвертировать ТипТТ");
                 }
-
             }
             else if (slctElement is Transormator transormator)
             {

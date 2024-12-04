@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Addition.cs" />
+    <Compile Include="CalculationPoint.cs" />
     <Compile Include="ConnectingWare.cs" />
     <Compile Include="Dtos\LineDataTypeDto.cs" />
     <Compile Include="Dtos\RecloserDataTypeDto.cs" />
