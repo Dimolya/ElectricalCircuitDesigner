@@ -21,6 +21,7 @@ namespace ElectroMod
 
         private bool IsSelected = false;
         public bool IsFirstInit { get; set; } = true;
+        public bool IsVisited { get; set; } 
         private SerializableGraphicsPath path;
 
         public virtual bool AcceptWare => true;
@@ -38,7 +39,8 @@ namespace ElectroMod
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
         public List<CalculationPoint> CalculationPoints { get; set; } = new List<CalculationPoint>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
-        
+        Dictionary<object, List<object>> circuitConnections = new Dictionary<object, List<object>>();
+
         //public List<Link> Links { get; set; } = new List<Link>();
 
         public double CurrentStrength { get; set; }
@@ -178,6 +180,11 @@ namespace ElectroMod
                                 break;
                             ConnectedElements.Add(otherElement);
                             otherElement.ConnectedElements.Add(this);
+
+                            thisWare.ConnectedWares.Add(otherElementWare);
+                            otherElementWare.ConnectedWares.Add(thisWare);
+                            //circuitConnections.Add(this, new List<object> { otherElement });
+                            //circuitConnections.Add(otherElement, new List<object> { this });
                         }
                     }
                 }

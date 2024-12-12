@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 
 namespace ElectroMod
 {
@@ -20,7 +21,12 @@ namespace ElectroMod
         public Point RelativeLocation { get; set; }
         public Color BorderColor { get; set; } = Color.Navy;
         public Color FillColor { get; set; } = Color.DeepSkyBlue;
+        public bool IsPointCalculation { get; set; }
+        public CalculationPoint PointCalculation;
 
+
+        public List<ConnectingWare> ConnectedWares { get; set; } = new List<ConnectingWare>();
+        public bool IsVisited { get; set; }
 
         private Point drag;
 

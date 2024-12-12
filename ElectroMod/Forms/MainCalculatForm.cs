@@ -141,6 +141,19 @@ namespace ElectroMod
             drawPanel1.Invalidate();
         }
 
+        private void btnCalculate_Click(object sender, EventArgs e)
+        {
+            using (var preCalculateForm = new PreCalculationForm())
+            {
+                if(preCalculateForm.ShowDialog() == DialogResult.OK)
+                {
+                    var calcul = new CenterCalculation(elements);
+                    calcul.GenerateListObjectsForCalculation();
+
+                }
+            }
+        }
+
         private void lbA_TextChanged(object sender, EventArgs e)
         {
             if (lbA.Text.Length > 6)
@@ -336,8 +349,8 @@ namespace ElectroMod
                 {
                     if (cbLineMarks.Text == dto[i].Mark)
                     {
-                        line.ActiveResistance = dto[i].ActiveResistance;
-                        line.ReactiveResistance = dto[i].ReactiveResistance;
+                        line.ActiveResistance = dto[i].ActiveResistance * line.Length;
+                        line.ReactiveResistance = dto[i].ReactiveResistance * line.Length;
                         break;
                     }
                 }

@@ -104,6 +104,7 @@
             this.label20 = new System.Windows.Forms.Label();
             this.drawPanel1 = new ElectroMod.DrawPanel();
             this.btnSaveProp = new System.Windows.Forms.Button();
+            this.btnCalculate = new System.Windows.Forms.Button();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -820,12 +821,23 @@
             this.btnSaveProp.UseVisualStyleBackColor = true;
             this.btnSaveProp.Click += new System.EventHandler(this.btnSaveProp_Click);
             // 
+            // btnCalculate
+            // 
+            this.btnCalculate.Location = new System.Drawing.Point(1223, 593);
+            this.btnCalculate.Name = "btnCalculate";
+            this.btnCalculate.Size = new System.Drawing.Size(171, 48);
+            this.btnCalculate.TabIndex = 56;
+            this.btnCalculate.Text = "Расчет";
+            this.btnCalculate.UseVisualStyleBackColor = true;
+            this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
+            // 
             // MainCalculatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1406, 844);
+            this.Controls.Add(this.btnCalculate);
             this.Controls.Add(this.btnSaveProp);
             this.Controls.Add(this.panelPropertyTransformator);
             this.Controls.Add(this.panelPropertyRecloser);
@@ -953,6 +965,7 @@
         private System.Windows.Forms.TextBox tbTransformatorName;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Button btnSaveProp;
+        private System.Windows.Forms.Button btnCalculate;
     }
 }
 
