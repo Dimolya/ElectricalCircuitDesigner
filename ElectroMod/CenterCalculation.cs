@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
@@ -12,16 +14,28 @@ namespace ElectroMod
     public class CenterCalculation
     {
         private static Elements _elements;
+        private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
+        private List<(double, double)> _resistanceForBusResistance = new List<(double, double)>();
 
         public CenterCalculation(Elements elements)
         {
             _elements = elements;
+            GenerateListObjectsForCalculation();
         }
 
-        public List<List<Element>> CalculationObject { get; set; } = new List<List<Element>>();
-        private List<Element> _CurrentsWaysElements = new List<Element>();
+        public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
 
-        public void GenerateListObjectsForCalculation()
+        public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
+
+        public void CalculationFormuls()
+        {
+            foreach (var elementsList in CalculationElementList)
+            {
+                Calculate(elementsList);
+            }
+        }
+
+        private void GenerateListObjectsForCalculation()
         {
             foreach (var element in _elements.OfType<Element>())
             {
@@ -30,10 +44,6 @@ namespace ElectroMod
                     var visited = new HashSet<Element>();
                     var currentPath = new List<Element>();
                     Recurce(bus, visited, currentPath);
-
-                    //_CurrentsWaysElements.Reverse();
-                    //CalculationObject.Add(_CurrentsWaysElements);
-                    //_CurrentsWaysElements.Clear();
                 }
             }
         }
@@ -49,7 +59,7 @@ namespace ElectroMod
             // Если текущий элемент - конечный, сохраняем путь
             if (current is Transormator)
             {
-                CalculationObject.Add(new List<Element>(currentPath));
+                CalculationElementList.Add(new List<Element>(currentPath));
             }
             else
             {
@@ -76,41 +86,81 @@ namespace ElectroMod
             visited.Remove(current);
             currentPath.RemoveAt(currentPath.Count - 1);
         }
-        //element.IsVisited = true;
-        //_CurrentsWaysElements.Add(element);
-        //for (int i = 0; i < element.ConnectedElements.Count; i++)
-        //{
-        //    if (element is Bus)
-        //    {
-        //        CalculationObject.Add(new List<object>(_CurrentsWaysElements));
-        //        return;
-        //    }
 
-        //    if (element.ConnectedElements[i].IsVisited)
-        //        continue;
+        private void Calculate(List<Element> elements)
+        {
+            double ISCMax = 0;
+            double ISCMin = 0;
+            double voltage = 0;
+            double Rmax = 0;
+            double Xmax = 0;
+            double Rmin = 0;
+            double Xmin = 0;
 
+            double Zmax = 0;
+            double Zmin = 0;
+            bool isCurrent = false;
+            bool isResistance = false;
 
-        //    //element.Wares
-        //    //    .SelectMany(ware => ware.ConnectedWares)
-        //    //    .Where(connectingWare => !connectingWare.IsVisited).ToList()
-        //    //    .ForEach(connectingWare => connectingWare.IsVisited = true);
+            (double, double) sumResistance;
 
-        //    foreach (var ware in element.Wares)
-        //    {
-        //        foreach (var connectedWare in ware.ConnectedWares)
-        //        {
-        //            //if (connectedWare.ParentElement is Transormator)
-        //            //    return;
+            foreach (var element in elements)
+            {
+                if (element is Bus bus)
+                {
+                    voltage = bus.Voltage;
+                    if (bus.isCurrent)
+                    {
+                        isCurrent = bus.isCurrent;
+                        ISCMax = bus.CurrentMax;
+                        ISCMin = bus.CurrentMin;
+                        Zmax = voltage / (Math.Sqrt(3) * ISCMax);
+                        Zmin = voltage / (Math.Sqrt(3) * ISCMin);
+                        if (!Currents.Contains((ISCMax, ISCMin)))
+                            Currents.Add((ISCMax, ISCMin));
+                    }
+                    else
+                    {
+                        isResistance = bus.isResistanse;
+                        Rmax = bus.ActiveResistMax;
+                        Rmin = bus.ActiveResistMin;
+                        Xmax = bus.ReactiveResistMax;
+                        Xmin = bus.ReactiveResistMin;
+                    }
+                    continue;
+                }
+                else if (element is Line line)
+                {
+                    _resistanceSchemes.Add((line.ActiveResistance, line.ReactiveResistance));
+                }
+                else if (element is Recloser recloser)
+                {
+                    Currents.Add((ISCMax, ISCMin));
+                    continue;
+                }
+                else if (element is Transormator transormator)
+                {
+                    _resistanceSchemes.Add((transormator.ActiveResistance, transormator.ReactiveResistance));
+                }
 
-        //            //if (connectedWare.IsVisited)
-        //            //    continue;
+                sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
+                                 _resistanceSchemes.Sum(x => x.Item2));
+                if (isCurrent)
+                {
+                    ISCMax = voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
+                    ISCMin = voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
+                }
+                else
+                {
+                    ISCMax = voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
+                    ISCMin = voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
+                }
 
-        //            //connectedWare.IsVisited = true;
-        //            //ware.IsVisited = true;
-        //        }
-        //    }
-
-        //    Recurce(element.ConnectedElements[i]);
-        //    break;
+                if (Currents.Contains((ISCMax, ISCMin)))
+                    continue;
+                Currents.Add((ISCMax, ISCMin));
+            }
+            _resistanceSchemes.Clear();
+        }
     }
 }

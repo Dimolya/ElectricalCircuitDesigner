@@ -16,23 +16,24 @@ using Microsoft.Office.Interop.Word;
 using System.Windows.Forms.VisualStyles;
 using ElectroMod.DataBase.Dtos.StaticDtos;
 using ElectroMod.Dtos.StaticDtos;
+using System.Globalization;
 
 namespace ElectroMod
 {
     [Serializable]
     public partial class MainCalculatForm : Form
     {
-        private float defaultScale = 1.0f;
-        private float currentScale = 1.0f;
+        private float _defaultScale = 1.0f;
+        private float _currentScale = 1.0f;
 
-        Elements elements = new Elements();
-        Element element = new Element();
-        private ISelectable slctElement;
+        private Elements _elements = new Elements();
+        private ISelectable _slctElement;
+        private double _voltage;
 
         public MainCalculatForm()
         {
             InitializeComponent();
-            drawPanel1.Build(elements);
+            drawPanel1.Build(_elements);
             drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
             drawPanel1.ElementSelected += UpdateElementDetails;
             UpdateZoomInfo(1.0f);
@@ -45,56 +46,28 @@ namespace ElectroMod
 
         private void btBus_Click(object sender, EventArgs e)
         {
-            try
-            {
-                elements.Add(new Bus(elements));
-                btBus.Enabled = false;
-                drawPanel1.Invalidate();
-            }
-            catch { Exception(); }
+            _elements.Add(new Bus(_elements));
+            btBus.Enabled = false;
+            drawPanel1.Invalidate();
         }
 
         private void btLine_Click(object sender, EventArgs e)
         {
-            try
-            {
-                elements.Add(new Line(elements));
-                drawPanel1.Invalidate();
-            }
-            catch { Exception(); }
+            _elements.Add(new Line(_elements));
+            drawPanel1.Invalidate();
         }
 
         private void btRecloser_Click(object sender, EventArgs e)
         {
-            try
-            {
-                elements.Add(new Recloser(elements));
-                drawPanel1.Invalidate();
-            }
-            catch { Exception(); }
+            _elements.Add(new Recloser(_elements));
+            drawPanel1.Invalidate();
         }
 
         private void btTransformator_Click(object sender, EventArgs e)
         {
-            try
-            {
-                elements.Add(new Transormator(elements));
-                drawPanel1.Invalidate();
-            }
-            catch
-            {
-                Exception();
-            }
-        }
-
-
-        public void Exception()
-        {
-            DialogResult result = MessageBox.Show("Вы не добавили источник питания!", "Предупреждение", MessageBoxButtons.OK);
-            if (result == DialogResult.OK)
-            {
-                return;
-            }
+            _elements.Add(new Transormator(_elements));
+            drawPanel1.Invalidate();
+            //DialogResult result = MessageBox.Show("Вы не добавили источник питания!", "Предупреждение", MessageBoxButtons.OK);
         }
 
         private void OpenFile_Click(object sender, EventArgs e)
@@ -103,8 +76,8 @@ namespace ElectroMod
             if (ofd.ShowDialog(this) == DialogResult.OK)
                 using (FileStream fs = File.OpenRead(ofd.FileName))
                 {
-                    elements = (Elements)new BinaryFormatter().Deserialize(fs);
-                    drawPanel1.Build(elements);
+                    _elements = (Elements)new BinaryFormatter().Deserialize(fs);
+                    drawPanel1.Build(_elements);
                 }
         }
 
@@ -113,26 +86,19 @@ namespace ElectroMod
             SaveFileDialog sfd = new SaveFileDialog { Filter = "Schema|*.schema" };
             if (sfd.ShowDialog(this) == DialogResult.OK)
                 using (FileStream fs = File.Create(sfd.FileName))
-                    new BinaryFormatter().Serialize(fs, elements);
+                    new BinaryFormatter().Serialize(fs, _elements);
         }
 
         private void btClear_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show(
-           "Очистить поле?",
-           "Сообщение",
-           MessageBoxButtons.OKCancel);
+            DialogResult result = MessageBox.Show("Очистить поле?", "Сообщение", MessageBoxButtons.OKCancel);
 
             if (result == DialogResult.OK)
             {
-                elements.Clear();
+                _elements.Clear();
                 drawPanel1.Invalidate();
+                btBus.Enabled = true;
             }
-            else return;
-            btBus.Enabled = true;
-            lbA.Text = Convert.ToString(0);
-            lbR.Text = Convert.ToString(0);
-            lbV.Text = Convert.ToString(0);
         }
 
         private void bt_DeleteOne_Click(object sender, EventArgs e)
@@ -145,32 +111,17 @@ namespace ElectroMod
         {
             using (var preCalculateForm = new PreCalculationForm())
             {
-                if(preCalculateForm.ShowDialog() == DialogResult.OK)
+                if (preCalculateForm.ShowDialog() == DialogResult.OK)
                 {
-                    var calcul = new CenterCalculation(elements);
-                    calcul.GenerateListObjectsForCalculation();
+                    var calcul = new CenterCalculation(_elements);
+                    calcul.CalculationFormuls();
 
+                    var docx = new Docx();
+                    docx.Generate(calcul.Currents);
                 }
             }
         }
 
-        private void lbA_TextChanged(object sender, EventArgs e)
-        {
-            if (lbA.Text.Length > 6)
-                lbA.Text = lbA.Text.Substring(0, 6);
-        }
-
-        private void lbV_TextChanged(object sender, EventArgs e)
-        {
-            if (lbV.Text.Length > 6)
-                lbV.Text = lbV.Text.Substring(0, 6);
-        }
-
-        private void lbR_TextChanged(object sender, EventArgs e)
-        {
-            if (lbR.Text.Length > 6)
-                lbR.Text = lbR.Text.Substring(0, 6);
-        }
         private void UpdateZoomInfo(float scale)
         {
             btZoom.Text = $"{(scale * 100):0}%";
@@ -178,14 +129,14 @@ namespace ElectroMod
 
         private void btZoom_Click(object sender, EventArgs e)
         {
-            drawPanel1.SetDefaultScale(defaultScale);
+            drawPanel1.SetDefaultScale(_defaultScale);
         }
 
         private void UpdateElementDetails(ISelectable selectedElement)
         {
             if (selectedElement is Bus bus)
             {
-                slctElement = bus;
+                _slctElement = bus;
                 panelPropertyBus.Visible = true;
                 panelPropertyLine.Visible = false;
                 panelPropertyRecloser.Visible = false;
@@ -214,7 +165,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Line line)
             {
-                slctElement = line;
+                _slctElement = line;
                 panelPropertyLine.Visible = true;
                 panelPropertyBus.Visible = false;
                 panelPropertyRecloser.Visible = false;
@@ -227,7 +178,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Recloser recloser)
             {
-                slctElement = recloser;
+                _slctElement = recloser;
                 panelPropertyRecloser.Visible = true;
                 panelPropertyLine.Visible = false;
                 panelPropertyBus.Visible = false;
@@ -244,7 +195,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Transormator transormator)
             {
-                slctElement = transormator;
+                _slctElement = transormator;
                 panelPropertyTransformator.Visible = true;
                 panelPropertyRecloser.Visible = false;
                 panelPropertyLine.Visible = false;
@@ -268,7 +219,7 @@ namespace ElectroMod
 
         private void RbBusCurrent_CheckedChanged(object sender, EventArgs e)
         {
-            var bus = slctElement as Bus;
+            var bus = _slctElement as Bus;
             if (bus == null)
                 return;
             if (rbBusCurrent.Checked)
@@ -320,17 +271,17 @@ namespace ElectroMod
 
         private void btnSaveProp_Click(object sender, EventArgs e)
         {
-            if (slctElement == null)
+            if (_slctElement == null)
                 return;
-
-            if (slctElement is Bus bus)
+            if (_slctElement is Bus bus)
             {
                 bus.Name = tbBusName.Text;
                 bus.Voltage = double.Parse(tbBusVoltage.Text);
+                _voltage = bus.Voltage;
                 if (bus.isCurrent)
                 {
-                    bus.CurrentMin = double.Parse(tbBusCurrentMin.Text);
                     bus.CurrentMax = double.Parse(tbBusCurrentMax.Text);
+                    bus.CurrentMin = double.Parse(tbBusCurrentMin.Text);
                 }
                 else if (bus.isResistanse)
                 {
@@ -340,11 +291,11 @@ namespace ElectroMod
                     bus.ReactiveResistMin = double.Parse(tbBusReactiveResistMin.Text);
                 }
             }
-            else if (slctElement is Line line)
+            else if (_slctElement is Line line)
             {
                 line.Name = tbLineName.Text;
                 line.Length = double.Parse(tbLineLength.Text);
-                var dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json");
+                var dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json"); //ToDo: нужно как то сдлеать универсальный поиск независимо от места
                 for (int i = 0; i < dto.Count; i++)
                 {
                     if (cbLineMarks.Text == dto[i].Mark)
@@ -355,7 +306,7 @@ namespace ElectroMod
                     }
                 }
             }
-            else if (slctElement is Recloser recloser)
+            else if (_slctElement is Recloser recloser)
             {
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
@@ -373,7 +324,7 @@ namespace ElectroMod
                     MessageBox.Show("Не удалось сконвертировать ТипТТ");
                 }
             }
-            else if (slctElement is Transormator transormator)
+            else if (_slctElement is Transormator transormator)
             {
                 transormator.Name = tbTransformatorName.Text;
                 transormator.TypeKTP = cbTransformatorTypesKTP.Text;
@@ -382,10 +333,11 @@ namespace ElectroMod
 
                 for (int i = 0; i < dto.Count; i++)
                 {
-                    if (transormator.TypeKTP == dto[i].TypeKTP
-                     && transormator.Scheme == dto[i].Scheme)
+                    if (transormator.TypeKTP == dto[i].TypeKTP)
                     {
-                        transormator.Resistance = dto[i].Resistance;
+                        transormator.FullResistance = 10 * dto[i].Uk * Math.Pow(_voltage, 2) / dto[i].S;
+                        transormator.ActiveResistance = dto[i].Pk * Math.Pow(_voltage, 2) / Math.Pow(dto[i].S, 2);
+                        transormator.ReactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
                         break;
                     }
                 }

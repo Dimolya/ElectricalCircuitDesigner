@@ -29,6 +29,7 @@ namespace ElectroMod
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public string Name { get; set; }
+        public double Voltage { get; set; }
         public Point Location { get; set; }
         public Elements Elements { get; set; }
         public GraphicsPath Path
@@ -37,15 +38,8 @@ namespace ElectroMod
             set { path = value; }
         }
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
-        public List<CalculationPoint> CalculationPoints { get; set; } = new List<CalculationPoint>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
-        Dictionary<object, List<object>> circuitConnections = new Dictionary<object, List<object>>();
 
-        //public List<Link> Links { get; set; } = new List<Link>();
-
-        public double CurrentStrength { get; set; }
-        public double Voltage { get; set; }
-        public double Resistance { get; set; }
         public int Angle { get; private set; }
 
         public Element() { }
@@ -54,22 +48,6 @@ namespace ElectroMod
             Elements = elements;
             Location = new Point(250, 200);
         }
-        public Element(double cStr, double volt, double resist)
-        {
-            CurrentStrength = cStr;
-            Voltage = volt;
-            Resistance = resist;
-        }
-
-        public void OnDataChanged(double cStr, double volt, double resist)
-        {
-            cStr = volt / resist;
-            CurrentStrength = cStr;
-            Voltage = volt;
-            Resistance = resist;
-            DataChanged(cStr, volt, resist);
-        }
-
 
         public virtual void Paint(Graphics g)
         {

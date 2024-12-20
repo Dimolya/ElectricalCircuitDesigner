@@ -22,8 +22,6 @@ namespace ElectroMod
         public Color BorderColor { get; set; } = Color.Navy;
         public Color FillColor { get; set; } = Color.DeepSkyBlue;
         public bool IsPointCalculation { get; set; }
-        public CalculationPoint PointCalculation;
-
 
         public List<ConnectingWare> ConnectedWares { get; set; } = new List<ConnectingWare>();
         public bool IsVisited { get; set; }

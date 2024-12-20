@@ -279,36 +279,6 @@
             this.bt_DeleteOne.UseVisualStyleBackColor = true;
             this.bt_DeleteOne.Click += new System.EventHandler(this.bt_DeleteOne_Click);
             // 
-            // lbR
-            // 
-            this.lbR.AutoSize = true;
-            this.lbR.Location = new System.Drawing.Point(130, 416);
-            this.lbR.Name = "lbR";
-            this.lbR.Size = new System.Drawing.Size(14, 16);
-            this.lbR.TabIndex = 29;
-            this.lbR.Text = "0";
-            this.lbR.TextChanged += new System.EventHandler(this.lbR_TextChanged);
-            // 
-            // lbV
-            // 
-            this.lbV.AutoSize = true;
-            this.lbV.Location = new System.Drawing.Point(130, 383);
-            this.lbV.Name = "lbV";
-            this.lbV.Size = new System.Drawing.Size(14, 16);
-            this.lbV.TabIndex = 30;
-            this.lbV.Text = "0";
-            this.lbV.TextChanged += new System.EventHandler(this.lbV_TextChanged);
-            // 
-            // lbA
-            // 
-            this.lbA.AutoSize = true;
-            this.lbA.Location = new System.Drawing.Point(130, 346);
-            this.lbA.Name = "lbA";
-            this.lbA.Size = new System.Drawing.Size(14, 16);
-            this.lbA.TabIndex = 31;
-            this.lbA.Text = "0";
-            this.lbA.TextChanged += new System.EventHandler(this.lbA_TextChanged);
-            // 
             // btZoom
             // 
             this.btZoom.Location = new System.Drawing.Point(1352, 547);

@@ -26,6 +26,9 @@ namespace ElectroMod
         public string Name { get; set; }
         public string TypeKTP { get; set; }
         public string Scheme { get; set; }
-        public double Resistance { get; set; }
+
+        public double FullResistance { get; set; }
+        public double ActiveResistance { get; set; }
+        public double ReactiveResistance { get; set; }
     }
 }

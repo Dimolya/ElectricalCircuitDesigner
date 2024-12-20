@@ -9,7 +9,8 @@ namespace ElectroMod.DataBase.Dtos
     public class TransformatorContainerDto
     {
         public string TypeKTP { get; set; }
-        public string Scheme { get; set; }
-        public double Resistance { get; set; }
+        public double Uk { get; set; }
+        public double Pk { get; set; }
+        public double S { get; set; }
     }
 }

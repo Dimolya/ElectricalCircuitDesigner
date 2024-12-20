@@ -26,5 +26,6 @@ namespace ElectroMod
         public string Name { get; set; }
         public string TypeRecloser { get; set; }
         public double TypeTT { get; set; }
+        public bool isCurrent { get; set; }
     }
 }
