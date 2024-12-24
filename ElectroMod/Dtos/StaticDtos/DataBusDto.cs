@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace ElectroMod.DataBase.Dtos.StaticDtos
 {
-    public class DataRecloserDto
+    public class DataBusDto
     {
-        public List<string> TypeRecloser { get; set; }
-        public List<string> TypeTT { get; set; }
+        public List<double> Voltage { get; set; }
     }
 }

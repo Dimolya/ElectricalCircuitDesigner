@@ -21,11 +21,16 @@ namespace ElectroMod
             Path.CloseFigure();
         }
 
-        public override Color BorderColor => Color.DarkBlue;
-
         public string Name { get; set; }
+        public string TypeTT { get; set; }
+        public int Ntt { get; set; }
+
         public string TypeRecloser { get; set; }
-        public double TypeTT { get; set; }
-        public bool isCurrent { get; set; }
+        public double Kb { get; set; }
+        public double Kcz { get; set; }
+        public double Kn { get; set; }
+        public bool isCalculated { get; set; }
+
+        public override Color BorderColor => Color.DarkBlue;
     }
 }

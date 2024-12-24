@@ -3,6 +3,7 @@ using System.Linq;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Collections.Generic;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace ElectroMod
 {
@@ -25,7 +26,7 @@ namespace ElectroMod
 
         public List<ConnectingWare> ConnectedWares { get; set; } = new List<ConnectingWare>();
         public bool IsVisited { get; set; }
-
+        public string Label { get; set; }
         private Point drag;
 
         public ConnectingWare (Element parentElement)
@@ -65,8 +66,15 @@ namespace ElectroMod
                 g.DrawEllipse(BorderColor.Pen(), drag.X - 5, drag.Y - 5, 10, 10);
                 g.FillEllipse(FillColor.Brush(), drag.X - 5, drag.Y - 5, 10, 10);
             }
-            g.Restore(state);
+            //отрисовка Tag
+            RectangleF rect = Path.GetBounds();//прямоугольник ограничивающий поле надписи
+            rect.Inflate(25, 25);
+            if (Label != null)
+                g.DrawString(Label.ToString(), Addition.Font, Brushes.Black, rect, new StringFormat
+                { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Near });//выравнивание строки
+            g.Restore(state);//нужное позиционирование всех эелементов
         }
+
         public bool Hit(Point point)
         {
             return Path.IsVisible(point.StartPoint(Location));

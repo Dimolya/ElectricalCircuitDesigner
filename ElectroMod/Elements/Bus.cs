@@ -30,7 +30,5 @@ namespace ElectroMod
         public double ReactiveResistMax { get; set; }
         public double ActiveResistMin { get; set; }
         public double ReactiveResistMin { get; set; }
-        public double CurrentMax { get; set; }
-        public double CurrentMin { get; set; }
     }
 }

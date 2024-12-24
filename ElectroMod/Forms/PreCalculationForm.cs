@@ -14,9 +14,10 @@ namespace ElectroMod.Forms
     {
         public string NumberTY { get; set; }
         public double PowerKBT { get; set; }
+        public double PowerSuchKBT { get; set; }
+
         public double PowerKBA { get; set; }
-        public double CapacityKBT { get; set; }
-        public double CapacityKBA { get; set; }
+        public double PowerSuchKBA { get; set; }
 
         public PreCalculationForm()
         {
@@ -27,14 +28,14 @@ namespace ElectroMod.Forms
         {
             double powerKBT;
             double powerKBA;
-            double capacityKBT;
-            double capacityKBA;
+            double powerSuchKBT;
+            double powerSuchKBA;
 
             NumberTY = tbNumberTY.Text;
-            if (double.TryParse(tbCapacityKBT.Text, out capacityKBT))
-                CapacityKBT = capacityKBT;
-            if (double.TryParse(tbCapacityKBA.Text, out capacityKBA))
-                CapacityKBA = capacityKBA;
+            if (double.TryParse(tbPowerSuchKBT.Text, out powerSuchKBT))
+                PowerSuchKBT = powerSuchKBT;
+            if (double.TryParse(tbPowerSuchKBA.Text, out powerSuchKBA))
+                PowerSuchKBA = powerSuchKBA;
             if (double.TryParse(tbPowerKBT.Text, out powerKBT))
                 PowerKBT = powerKBT;
             if (double.TryParse(tbPowerKBA.Text, out powerKBA))
@@ -46,31 +47,17 @@ namespace ElectroMod.Forms
         private void cbReconnect_SelectedIndexChanged(object sender, EventArgs e)
         {
             var cb = sender as ComboBox;
-            if(cb.Text == "Расчет по мощности")
+            if(cb.Text == "Расчет по мощности ТУ")
             {
-                panelOptionOneReconnect.Visible = true;
-                panelOptionTwoReconnect.Visible = false;
+                panelHasTY.Visible = true;
+                panelNotTY.Visible = false;
             }
             else
             {
-                panelOptionOneReconnect.Visible = false;
-                panelOptionTwoReconnect.Visible = true;
+                panelHasTY.Visible = false;
+                panelNotTY.Visible = true;
             }
         }
 
-        private void cbEarlyConnect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var cb = sender as ComboBox;
-            if (cb.Text == "Расчет по мощности кВт")
-            {
-                panelOptionOneEarlyConnect.Visible = true;
-                panelOptionTwoEarlyConnect.Visible = false;
-            }
-            else
-            {
-                panelOptionOneEarlyConnect.Visible = false;
-                panelOptionTwoEarlyConnect.Visible = true;
-            }
-        }
     }
 }

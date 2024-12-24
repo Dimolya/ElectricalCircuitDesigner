@@ -1,22 +1,67 @@
 ﻿[
   {
-    "Mark": "АС35",
-    "ActiveResistance": 0.95,
-    "ReactiveResistance": 1.78
+    "Mark": "Провод АС 50/8",
+    "ActiveResistance": 0.592,
+    "ReactiveResistance": 0.392
   },
   {
-    "Mark": "АС50",
-    "ActiveResistance": 0.90,
-    "ReactiveResistance": 1.98
+    "Mark": "Провод АС 70/11",
+    "ActiveResistance": 0.42,
+    "ReactiveResistance": 0.382
   },
   {
-    "Mark": "АС70",
-    "ActiveResistance": 0.85,
-    "ReactiveResistance": 2.18
+    "Mark": "Провод АС 95/16",
+    "ActiveResistance": 0.33,
+    "ReactiveResistance": 0.371
   },
   {
-    "Mark": "АС90",
-    "ActiveResistance": 0.80,
-    "ReactiveResistance": 2.38
+    "Mark": "Провод АС 120/9",
+    "ActiveResistance": 0.249,
+    "ReactiveResistance": 0.365
+  },
+  {
+    "Mark": "Провод СИП-3 1х35",
+    "ActiveResistance": 0.986,
+    "ReactiveResistance": 0.305
+  },
+  {
+    "Mark": "Провод СИП-3 1х50",
+    "ActiveResistance": 0.72,
+    "ReactiveResistance": 0.29
+  },
+  {
+    "Mark": "Провод СИП-3 1х70",
+    "ActiveResistance": 0.493,
+    "ReactiveResistance": 0.291
+  },
+  {
+    "Mark": "Провод СИП-3 1х95",
+    "ActiveResistance": 0.363,
+    "ReactiveResistance": 0.284
+  },
+  {
+    "Mark": "Провод СИП-3 1х120",
+    "ActiveResistance": 0.288,
+    "ReactiveResistance": 0.278
+  },
+  {
+    "Mark": "Кабель ПвКП2гнг(А)-HF 3x70/16",
+    "ActiveResistance": 0.443,
+    "ReactiveResistance": 0.196
+  },
+  {
+    "Mark": "Кабель АПвПу 3х50/16-10",
+    "ActiveResistance": 0.641,
+    "ReactiveResistance": 0.104
+  },
+  {
+    "Mark": "Кабель АПвПу 3х70/16-10",
+    "ActiveResistance": 0.443,
+    "ReactiveResistance": 0.098
+  },
+  {
+    "Mark": "Кабель АПвПу 3х95/25-10",
+    "ActiveResistance": 0.32,
+    "ReactiveResistance": 0.092
   }
 ]

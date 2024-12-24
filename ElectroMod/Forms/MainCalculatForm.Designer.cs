@@ -52,6 +52,7 @@
             this.lbA = new System.Windows.Forms.Label();
             this.btZoom = new System.Windows.Forms.Button();
             this.panelPropertyBus = new System.Windows.Forms.Panel();
+            this.cbBusVoltage = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.panelForResistance = new System.Windows.Forms.Panel();
             this.label12 = new System.Windows.Forms.Label();
@@ -76,7 +77,6 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.rbBusResistance = new System.Windows.Forms.RadioButton();
             this.rbBusCurrent = new System.Windows.Forms.RadioButton();
-            this.tbBusVoltage = new System.Windows.Forms.TextBox();
             this.lbVoltage = new System.Windows.Forms.Label();
             this.lbDataTypes = new System.Windows.Forms.Label();
             this.tbBusName = new System.Windows.Forms.TextBox();
@@ -102,9 +102,11 @@
             this.cbTransformatorTypesKTP = new System.Windows.Forms.ComboBox();
             this.tbTransformatorName = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
-            this.drawPanel1 = new ElectroMod.DrawPanel();
             this.btnSaveProp = new System.Windows.Forms.Button();
             this.btnCalculate = new System.Windows.Forms.Button();
+            this.cbIsCalculate = new System.Windows.Forms.CheckBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.drawPanel1 = new ElectroMod.DrawPanel();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -279,6 +281,27 @@
             this.bt_DeleteOne.UseVisualStyleBackColor = true;
             this.bt_DeleteOne.Click += new System.EventHandler(this.bt_DeleteOne_Click);
             // 
+            // lbR
+            // 
+            this.lbR.Location = new System.Drawing.Point(0, 0);
+            this.lbR.Name = "lbR";
+            this.lbR.Size = new System.Drawing.Size(100, 23);
+            this.lbR.TabIndex = 59;
+            // 
+            // lbV
+            // 
+            this.lbV.Location = new System.Drawing.Point(0, 0);
+            this.lbV.Name = "lbV";
+            this.lbV.Size = new System.Drawing.Size(100, 23);
+            this.lbV.TabIndex = 58;
+            // 
+            // lbA
+            // 
+            this.lbA.Location = new System.Drawing.Point(0, 0);
+            this.lbA.Name = "lbA";
+            this.lbA.Size = new System.Drawing.Size(100, 23);
+            this.lbA.TabIndex = 57;
+            // 
             // btZoom
             // 
             this.btZoom.Location = new System.Drawing.Point(1352, 547);
@@ -292,11 +315,11 @@
             // panelPropertyBus
             // 
             this.panelPropertyBus.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyBus.Controls.Add(this.cbBusVoltage);
             this.panelPropertyBus.Controls.Add(this.label9);
             this.panelPropertyBus.Controls.Add(this.panelForResistance);
             this.panelPropertyBus.Controls.Add(this.panelForCurrent);
             this.panelPropertyBus.Controls.Add(this.panel1);
-            this.panelPropertyBus.Controls.Add(this.tbBusVoltage);
             this.panelPropertyBus.Controls.Add(this.lbVoltage);
             this.panelPropertyBus.Controls.Add(this.lbDataTypes);
             this.panelPropertyBus.Controls.Add(this.tbBusName);
@@ -308,10 +331,18 @@
             this.panelPropertyBus.TabIndex = 33;
             this.panelPropertyBus.Visible = false;
             // 
+            // cbBusVoltage
+            // 
+            this.cbBusVoltage.FormattingEnabled = true;
+            this.cbBusVoltage.Location = new System.Drawing.Point(196, 30);
+            this.cbBusVoltage.Name = "cbBusVoltage";
+            this.cbBusVoltage.Size = new System.Drawing.Size(121, 24);
+            this.cbBusVoltage.TabIndex = 52;
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(293, 34);
+            this.label9.Location = new System.Drawing.Point(323, 34);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(23, 16);
             this.label9.TabIndex = 51;
@@ -534,13 +565,6 @@
             this.rbBusCurrent.UseVisualStyleBackColor = true;
             this.rbBusCurrent.CheckedChanged += new System.EventHandler(this.rbBusCurrent_CheckedChanged);
             // 
-            // tbBusVoltage
-            // 
-            this.tbBusVoltage.Location = new System.Drawing.Point(196, 30);
-            this.tbBusVoltage.Name = "tbBusVoltage";
-            this.tbBusVoltage.Size = new System.Drawing.Size(91, 22);
-            this.tbBusVoltage.TabIndex = 47;
-            // 
             // lbVoltage
             // 
             this.lbVoltage.AutoSize = true;
@@ -584,7 +608,7 @@
             this.panelPropertyLine.Controls.Add(this.cbLineMarks);
             this.panelPropertyLine.Controls.Add(this.tbLineName);
             this.panelPropertyLine.Controls.Add(this.label18);
-            this.panelPropertyLine.Location = new System.Drawing.Point(226, 547);
+            this.panelPropertyLine.Location = new System.Drawing.Point(228, 546);
             this.panelPropertyLine.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelPropertyLine.Name = "panelPropertyLine";
             this.panelPropertyLine.Size = new System.Drawing.Size(800, 235);
@@ -643,13 +667,15 @@
             // panelPropertyRecloser
             // 
             this.panelPropertyRecloser.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyRecloser.Controls.Add(this.label21);
+            this.panelPropertyRecloser.Controls.Add(this.cbIsCalculate);
             this.panelPropertyRecloser.Controls.Add(this.lbTypeTT);
             this.panelPropertyRecloser.Controls.Add(this.lbTypeRecloser);
             this.panelPropertyRecloser.Controls.Add(this.cbRecloserTypeTT);
             this.panelPropertyRecloser.Controls.Add(this.cbRecloserType);
             this.panelPropertyRecloser.Controls.Add(this.tbRecloserName);
             this.panelPropertyRecloser.Controls.Add(this.label19);
-            this.panelPropertyRecloser.Location = new System.Drawing.Point(226, 549);
+            this.panelPropertyRecloser.Location = new System.Drawing.Point(228, 545);
             this.panelPropertyRecloser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelPropertyRecloser.Name = "panelPropertyRecloser";
             this.panelPropertyRecloser.Size = new System.Drawing.Size(800, 233);
@@ -715,7 +741,7 @@
             this.panelPropertyTransformator.Controls.Add(this.cbTransformatorTypesKTP);
             this.panelPropertyTransformator.Controls.Add(this.tbTransformatorName);
             this.panelPropertyTransformator.Controls.Add(this.label20);
-            this.panelPropertyTransformator.Location = new System.Drawing.Point(223, 547);
+            this.panelPropertyTransformator.Location = new System.Drawing.Point(228, 545);
             this.panelPropertyTransformator.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelPropertyTransformator.Name = "panelPropertyTransformator";
             this.panelPropertyTransformator.Size = new System.Drawing.Size(800, 235);
@@ -772,15 +798,6 @@
             this.label20.TabIndex = 7;
             this.label20.Text = "Наименование";
             // 
-            // drawPanel1
-            // 
-            this.drawPanel1.BackColor = System.Drawing.SystemColors.Window;
-            this.drawPanel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.drawPanel1.Location = new System.Drawing.Point(226, 31);
-            this.drawPanel1.Name = "drawPanel1";
-            this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
-            this.drawPanel1.TabIndex = 0;
-            // 
             // btnSaveProp
             // 
             this.btnSaveProp.Location = new System.Drawing.Point(15, 556);
@@ -800,6 +817,33 @@
             this.btnCalculate.Text = "Расчет";
             this.btnCalculate.UseVisualStyleBackColor = true;
             this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
+            // 
+            // cbIsCalculate
+            // 
+            this.cbIsCalculate.AutoSize = true;
+            this.cbIsCalculate.Location = new System.Drawing.Point(196, 97);
+            this.cbIsCalculate.Name = "cbIsCalculate";
+            this.cbIsCalculate.Size = new System.Drawing.Size(18, 17);
+            this.cbIsCalculate.TabIndex = 19;
+            this.cbIsCalculate.UseVisualStyleBackColor = true;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(1, 97);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(97, 16);
+            this.label21.TabIndex = 20;
+            this.label21.Text = "Вычисляемый";
+            // 
+            // drawPanel1
+            // 
+            this.drawPanel1.BackColor = System.Drawing.SystemColors.Window;
+            this.drawPanel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.drawPanel1.Location = new System.Drawing.Point(226, 31);
+            this.drawPanel1.Name = "drawPanel1";
+            this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
+            this.drawPanel1.TabIndex = 0;
             // 
             // MainCalculatForm
             // 
@@ -908,7 +952,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RadioButton rbBusResistance;
         private System.Windows.Forms.RadioButton rbBusCurrent;
-        private System.Windows.Forms.TextBox tbBusVoltage;
         private System.Windows.Forms.Label lbVoltage;
         private System.Windows.Forms.Label lbDataTypes;
         private System.Windows.Forms.TextBox tbBusName;
@@ -936,6 +979,9 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Button btnSaveProp;
         private System.Windows.Forms.Button btnCalculate;
+        private System.Windows.Forms.ComboBox cbBusVoltage;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.CheckBox cbIsCalculate;
     }
 }
 

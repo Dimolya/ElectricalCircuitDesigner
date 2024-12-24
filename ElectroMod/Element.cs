@@ -29,7 +29,8 @@ namespace ElectroMod
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public string Name { get; set; }
-        public double Voltage { get; set; }
+        public double IcsMax { get; set; }
+        public double IcsMin { get; set; }
         public Point Location { get; set; }
         public Elements Elements { get; set; }
         public GraphicsPath Path
@@ -142,8 +143,8 @@ namespace ElectroMod
             int magnetRange = 25;
             foreach (var otherElement in Elements.OfType<Element>())
             {
-                if (otherElement == this) continue;
-
+                if (otherElement == this) 
+                    continue;
                 foreach (var thisWare in Wares)
                 {
                     foreach (var otherElementWare in otherElement.Wares)
@@ -161,8 +162,6 @@ namespace ElectroMod
 
                             thisWare.ConnectedWares.Add(otherElementWare);
                             otherElementWare.ConnectedWares.Add(thisWare);
-                            //circuitConnections.Add(this, new List<object> { otherElement });
-                            //circuitConnections.Add(otherElement, new List<object> { this });
                         }
                     }
                 }

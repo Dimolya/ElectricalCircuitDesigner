@@ -30,36 +30,30 @@
         {
             this.btnFormCalculate = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.cbReconnect = new System.Windows.Forms.ComboBox();
-            this.cbEarlyConnect = new System.Windows.Forms.ComboBox();
-            this.panelOptionOneReconnect = new System.Windows.Forms.Panel();
-            this.label5 = new System.Windows.Forms.Label();
-            this.tbPowerKBT = new System.Windows.Forms.TextBox();
-            this.tbNumberTY = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.panelOptionTwoReconnect = new System.Windows.Forms.Panel();
+            this.panelHasTY = new System.Windows.Forms.Panel();
+            this.panelNotTY = new System.Windows.Forms.Panel();
             this.label6 = new System.Windows.Forms.Label();
-            this.tbPowerKBA = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.panelOptionOneEarlyConnect = new System.Windows.Forms.Panel();
-            this.label8 = new System.Windows.Forms.Label();
-            this.panelOptionTwoEarlyConnect = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
-            this.tbCapacityKBA = new System.Windows.Forms.TextBox();
+            this.tbPowerKBA = new System.Windows.Forms.TextBox();
+            this.tbPowerSuchKBA = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.tbCapacityKBT = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.tbPowerKBT = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.panelOptionOneReconnect.SuspendLayout();
-            this.panelOptionTwoReconnect.SuspendLayout();
-            this.panelOptionOneEarlyConnect.SuspendLayout();
-            this.panelOptionTwoEarlyConnect.SuspendLayout();
+            this.tbPowerSuchKBT = new System.Windows.Forms.TextBox();
+            this.tbNumberTY = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.panelHasTY.SuspendLayout();
+            this.panelNotTY.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnFormCalculate
             // 
-            this.btnFormCalculate.Location = new System.Drawing.Point(511, 342);
+            this.btnFormCalculate.Location = new System.Drawing.Point(511, 262);
             this.btnFormCalculate.Name = "btnFormCalculate";
             this.btnFormCalculate.Size = new System.Drawing.Size(173, 43);
             this.btnFormCalculate.TabIndex = 0;
@@ -76,175 +70,88 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "Выберите тип вновь подключаемой нагрузки";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 191);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(306, 16);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Выберите тип ранее подключаемой нагрузки";
-            // 
             // cbReconnect
             // 
             this.cbReconnect.FormattingEnabled = true;
             this.cbReconnect.Items.AddRange(new object[] {
-            "Расчет по мощности",
-            "Расчет по проектируемым нагрузкам"});
+            "Расчет по мощности ТУ",
+            "Расчет по мощности кВа"});
             this.cbReconnect.Location = new System.Drawing.Point(328, 43);
             this.cbReconnect.Name = "cbReconnect";
             this.cbReconnect.Size = new System.Drawing.Size(291, 24);
             this.cbReconnect.TabIndex = 3;
-            this.cbReconnect.Text = "Расчет по мощности";
+            this.cbReconnect.Text = "Расчет по мощности ТУ";
             this.cbReconnect.SelectedIndexChanged += new System.EventHandler(this.cbReconnect_SelectedIndexChanged);
             // 
-            // cbEarlyConnect
+            // panelHasTY
             // 
-            this.cbEarlyConnect.FormattingEnabled = true;
-            this.cbEarlyConnect.Items.AddRange(new object[] {
-            "Расчет по мощности кВт",
-            "Расчет по мощности кВа"});
-            this.cbEarlyConnect.Location = new System.Drawing.Point(329, 188);
-            this.cbEarlyConnect.Name = "cbEarlyConnect";
-            this.cbEarlyConnect.Size = new System.Drawing.Size(208, 24);
-            this.cbEarlyConnect.TabIndex = 4;
-            this.cbEarlyConnect.Text = "Расчет по мощности кВт";
-            this.cbEarlyConnect.SelectedIndexChanged += new System.EventHandler(this.cbEarlyConnect_SelectedIndexChanged);
+            this.panelHasTY.Controls.Add(this.label4);
+            this.panelHasTY.Controls.Add(this.label5);
+            this.panelHasTY.Controls.Add(this.label8);
+            this.panelHasTY.Controls.Add(this.tbPowerKBT);
+            this.panelHasTY.Controls.Add(this.label9);
+            this.panelHasTY.Controls.Add(this.tbPowerSuchKBT);
+            this.panelHasTY.Controls.Add(this.tbNumberTY);
+            this.panelHasTY.Controls.Add(this.label3);
+            this.panelHasTY.Location = new System.Drawing.Point(12, 88);
+            this.panelHasTY.Name = "panelHasTY";
+            this.panelHasTY.Size = new System.Drawing.Size(607, 126);
+            this.panelHasTY.TabIndex = 5;
             // 
-            // panelOptionOneReconnect
+            // panelNotTY
             // 
-            this.panelOptionOneReconnect.Controls.Add(this.label5);
-            this.panelOptionOneReconnect.Controls.Add(this.tbPowerKBT);
-            this.panelOptionOneReconnect.Controls.Add(this.tbNumberTY);
-            this.panelOptionOneReconnect.Controls.Add(this.label4);
-            this.panelOptionOneReconnect.Controls.Add(this.label3);
-            this.panelOptionOneReconnect.Location = new System.Drawing.Point(12, 91);
-            this.panelOptionOneReconnect.Name = "panelOptionOneReconnect";
-            this.panelOptionOneReconnect.Size = new System.Drawing.Size(604, 59);
-            this.panelOptionOneReconnect.TabIndex = 5;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(522, 17);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(30, 16);
-            this.label5.TabIndex = 4;
-            this.label5.Text = "кВт";
-            // 
-            // tbPowerKBT
-            // 
-            this.tbPowerKBT.Location = new System.Drawing.Point(401, 14);
-            this.tbPowerKBT.Name = "tbPowerKBT";
-            this.tbPowerKBT.Size = new System.Drawing.Size(115, 22);
-            this.tbPowerKBT.TabIndex = 3;
-            // 
-            // tbNumberTY
-            // 
-            this.tbNumberTY.Location = new System.Drawing.Point(120, 14);
-            this.tbNumberTY.Name = "tbNumberTY";
-            this.tbNumberTY.Size = new System.Drawing.Size(115, 22);
-            this.tbNumberTY.TabIndex = 2;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(266, 17);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(129, 16);
-            this.label4.TabIndex = 1;
-            this.label4.Text = "Введите мощность";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 17);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(101, 16);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "Введите № ТУ";
-            // 
-            // panelOptionTwoReconnect
-            // 
-            this.panelOptionTwoReconnect.Controls.Add(this.label6);
-            this.panelOptionTwoReconnect.Controls.Add(this.tbPowerKBA);
-            this.panelOptionTwoReconnect.Controls.Add(this.label7);
-            this.panelOptionTwoReconnect.Location = new System.Drawing.Point(12, 91);
-            this.panelOptionTwoReconnect.Name = "panelOptionTwoReconnect";
-            this.panelOptionTwoReconnect.Size = new System.Drawing.Size(646, 59);
-            this.panelOptionTwoReconnect.TabIndex = 6;
-            this.panelOptionTwoReconnect.Visible = false;
+            this.panelNotTY.Controls.Add(this.label6);
+            this.panelNotTY.Controls.Add(this.label10);
+            this.panelNotTY.Controls.Add(this.tbPowerKBA);
+            this.panelNotTY.Controls.Add(this.tbPowerSuchKBA);
+            this.panelNotTY.Controls.Add(this.label7);
+            this.panelNotTY.Controls.Add(this.label11);
+            this.panelNotTY.Location = new System.Drawing.Point(12, 88);
+            this.panelNotTY.Name = "panelNotTY";
+            this.panelNotTY.Size = new System.Drawing.Size(607, 126);
+            this.panelNotTY.TabIndex = 9;
+            this.panelNotTY.Visible = false;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(266, 20);
+            this.label6.Location = new System.Drawing.Point(370, 50);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(31, 16);
             this.label6.TabIndex = 7;
             this.label6.Text = "кВа";
             // 
-            // tbPowerKBA
-            // 
-            this.tbPowerKBA.Location = new System.Drawing.Point(145, 17);
-            this.tbPowerKBA.Name = "tbPowerKBA";
-            this.tbPowerKBA.Size = new System.Drawing.Size(115, 22);
-            this.tbPowerKBA.TabIndex = 6;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(10, 20);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(129, 16);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "Введите мощность";
-            // 
-            // panelOptionOneEarlyConnect
-            // 
-            this.panelOptionOneEarlyConnect.Controls.Add(this.label8);
-            this.panelOptionOneEarlyConnect.Controls.Add(this.tbCapacityKBT);
-            this.panelOptionOneEarlyConnect.Controls.Add(this.label9);
-            this.panelOptionOneEarlyConnect.Location = new System.Drawing.Point(12, 223);
-            this.panelOptionOneEarlyConnect.Name = "panelOptionOneEarlyConnect";
-            this.panelOptionOneEarlyConnect.Size = new System.Drawing.Size(582, 59);
-            this.panelOptionOneEarlyConnect.TabIndex = 8;
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(365, 20);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(30, 16);
-            this.label8.TabIndex = 7;
-            this.label8.Text = "кВт";
-            // 
-            // panelOptionTwoEarlyConnect
-            // 
-            this.panelOptionTwoEarlyConnect.Controls.Add(this.label10);
-            this.panelOptionTwoEarlyConnect.Controls.Add(this.tbCapacityKBA);
-            this.panelOptionTwoEarlyConnect.Controls.Add(this.label11);
-            this.panelOptionTwoEarlyConnect.Location = new System.Drawing.Point(12, 223);
-            this.panelOptionTwoEarlyConnect.Name = "panelOptionTwoEarlyConnect";
-            this.panelOptionTwoEarlyConnect.Size = new System.Drawing.Size(582, 59);
-            this.panelOptionTwoEarlyConnect.TabIndex = 9;
-            this.panelOptionTwoEarlyConnect.Visible = false;
-            // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(365, 20);
+            this.label10.Location = new System.Drawing.Point(370, 20);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(31, 16);
             this.label10.TabIndex = 7;
             this.label10.Text = "кВа";
             // 
-            // tbCapacityKBA
+            // tbPowerKBA
             // 
-            this.tbCapacityKBA.Location = new System.Drawing.Point(240, 17);
-            this.tbCapacityKBA.Name = "tbCapacityKBA";
-            this.tbCapacityKBA.Size = new System.Drawing.Size(115, 22);
-            this.tbCapacityKBA.TabIndex = 6;
+            this.tbPowerKBA.Location = new System.Drawing.Point(245, 47);
+            this.tbPowerKBA.Name = "tbPowerKBA";
+            this.tbPowerKBA.Size = new System.Drawing.Size(115, 22);
+            this.tbPowerKBA.TabIndex = 6;
+            // 
+            // tbPowerSuchKBA
+            // 
+            this.tbPowerSuchKBA.Location = new System.Drawing.Point(245, 17);
+            this.tbPowerSuchKBA.Name = "tbPowerSuchKBA";
+            this.tbPowerSuchKBA.Size = new System.Drawing.Size(115, 22);
+            this.tbPowerSuchKBA.TabIndex = 6;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(13, 53);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(159, 16);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "Введите мощность КТП";
             // 
             // label11
             // 
@@ -255,46 +162,88 @@
             this.label11.TabIndex = 5;
             this.label11.Text = "Введите значение сущ. нагрузки";
             // 
-            // tbCapacityKBT
+            // label4
             // 
-            this.tbCapacityKBT.Location = new System.Drawing.Point(240, 17);
-            this.tbCapacityKBT.Name = "tbCapacityKBT";
-            this.tbCapacityKBT.Size = new System.Drawing.Size(115, 22);
-            this.tbCapacityKBT.TabIndex = 6;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(10, 85);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(129, 16);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "Введите мощность";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(374, 85);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(30, 16);
+            this.label5.TabIndex = 4;
+            this.label5.Text = "кВт";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(373, 53);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(30, 16);
+            this.label8.TabIndex = 7;
+            this.label8.Text = "кВт";
+            // 
+            // tbPowerKBT
+            // 
+            this.tbPowerKBT.Location = new System.Drawing.Point(248, 82);
+            this.tbPowerKBT.Name = "tbPowerKBT";
+            this.tbPowerKBT.Size = new System.Drawing.Size(115, 22);
+            this.tbPowerKBT.TabIndex = 3;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(10, 20);
+            this.label9.Location = new System.Drawing.Point(13, 53);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(224, 16);
             this.label9.TabIndex = 5;
             this.label9.Text = "Введите значение сущ. нагрузки";
             // 
+            // tbPowerSuchKBT
+            // 
+            this.tbPowerSuchKBT.Location = new System.Drawing.Point(248, 50);
+            this.tbPowerSuchKBT.Name = "tbPowerSuchKBT";
+            this.tbPowerSuchKBT.Size = new System.Drawing.Size(115, 22);
+            this.tbPowerSuchKBT.TabIndex = 6;
+            // 
+            // tbNumberTY
+            // 
+            this.tbNumberTY.Location = new System.Drawing.Point(145, 14);
+            this.tbNumberTY.Name = "tbNumberTY";
+            this.tbNumberTY.Size = new System.Drawing.Size(437, 22);
+            this.tbNumberTY.TabIndex = 2;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(13, 17);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(101, 16);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Введите № ТУ";
+            // 
             // PreCalculationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(696, 397);
-            this.Controls.Add(this.panelOptionTwoReconnect);
-            this.Controls.Add(this.panelOptionTwoEarlyConnect);
-            this.Controls.Add(this.panelOptionOneEarlyConnect);
-            this.Controls.Add(this.panelOptionOneReconnect);
-            this.Controls.Add(this.cbEarlyConnect);
+            this.ClientSize = new System.Drawing.Size(696, 317);
+            this.Controls.Add(this.panelNotTY);
+            this.Controls.Add(this.panelHasTY);
             this.Controls.Add(this.cbReconnect);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnFormCalculate);
             this.Name = "PreCalculationForm";
             this.Text = "PreCalculationForm";
-            this.panelOptionOneReconnect.ResumeLayout(false);
-            this.panelOptionOneReconnect.PerformLayout();
-            this.panelOptionTwoReconnect.ResumeLayout(false);
-            this.panelOptionTwoReconnect.PerformLayout();
-            this.panelOptionOneEarlyConnect.ResumeLayout(false);
-            this.panelOptionOneEarlyConnect.PerformLayout();
-            this.panelOptionTwoEarlyConnect.ResumeLayout(false);
-            this.panelOptionTwoEarlyConnect.PerformLayout();
+            this.panelHasTY.ResumeLayout(false);
+            this.panelHasTY.PerformLayout();
+            this.panelNotTY.ResumeLayout(false);
+            this.panelNotTY.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -304,11 +253,8 @@
 
         private System.Windows.Forms.Button btnFormCalculate;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cbReconnect;
-        private System.Windows.Forms.ComboBox cbEarlyConnect;
-        private System.Windows.Forms.Panel panelOptionOneReconnect;
-        private System.Windows.Forms.Panel panelOptionTwoReconnect;
+        private System.Windows.Forms.Panel panelHasTY;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox tbPowerKBA;
         private System.Windows.Forms.Label label7;
@@ -317,13 +263,12 @@
         private System.Windows.Forms.TextBox tbNumberTY;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Panel panelOptionOneEarlyConnect;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox tbCapacityKBT;
+        private System.Windows.Forms.TextBox tbPowerSuchKBT;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Panel panelOptionTwoEarlyConnect;
+        private System.Windows.Forms.Panel panelNotTY;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.TextBox tbCapacityKBA;
+        private System.Windows.Forms.TextBox tbPowerSuchKBA;
         private System.Windows.Forms.Label label11;
     }
 }
