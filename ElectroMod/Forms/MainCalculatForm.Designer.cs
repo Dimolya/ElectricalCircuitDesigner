@@ -40,16 +40,7 @@
             this.btClear = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.deleteElement = new System.Windows.Forms.ToolStripMenuItem();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.bt_DeleteOne = new System.Windows.Forms.Button();
-            this.lbR = new System.Windows.Forms.Label();
-            this.lbV = new System.Windows.Forms.Label();
-            this.lbA = new System.Windows.Forms.Label();
             this.btZoom = new System.Windows.Forms.Button();
             this.panelPropertyBus = new System.Windows.Forms.Panel();
             this.cbBusVoltage = new System.Windows.Forms.ComboBox();
@@ -89,6 +80,8 @@
             this.tbLineName = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.panelPropertyRecloser = new System.Windows.Forms.Panel();
+            this.label21 = new System.Windows.Forms.Label();
+            this.cbIsCalculate = new System.Windows.Forms.CheckBox();
             this.lbTypeTT = new System.Windows.Forms.Label();
             this.lbTypeRecloser = new System.Windows.Forms.Label();
             this.cbRecloserTypeTT = new System.Windows.Forms.ComboBox();
@@ -104,8 +97,6 @@
             this.label20 = new System.Windows.Forms.Label();
             this.btnSaveProp = new System.Windows.Forms.Button();
             this.btnCalculate = new System.Windows.Forms.Button();
-            this.cbIsCalculate = new System.Windows.Forms.CheckBox();
-            this.label21 = new System.Windows.Forms.Label();
             this.drawPanel1 = new ElectroMod.DrawPanel();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -166,7 +157,7 @@
             this.файлToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1406, 30);
+            this.menu.Size = new System.Drawing.Size(1406, 28);
             this.menu.TabIndex = 6;
             this.menu.Text = "menuStrip1";
             // 
@@ -176,26 +167,26 @@
             this.OpenFile,
             this.SaveFile});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
-            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 26);
+            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
             // OpenFile
             // 
             this.OpenFile.Name = "OpenFile";
-            this.OpenFile.Size = new System.Drawing.Size(166, 26);
+            this.OpenFile.Size = new System.Drawing.Size(224, 26);
             this.OpenFile.Text = "Открыть";
             this.OpenFile.Click += new System.EventHandler(this.OpenFile_Click);
             // 
             // SaveFile
             // 
             this.SaveFile.Name = "SaveFile";
-            this.SaveFile.Size = new System.Drawing.Size(166, 26);
+            this.SaveFile.Size = new System.Drawing.Size(224, 26);
             this.SaveFile.Text = "Сохранить";
             this.SaveFile.Click += new System.EventHandler(this.SaveFile_Click);
             // 
             // btClear
             // 
-            this.btClear.Location = new System.Drawing.Point(15, 502);
+            this.btClear.Location = new System.Drawing.Point(15, 439);
             this.btClear.Name = "btClear";
             this.btClear.Size = new System.Drawing.Size(171, 34);
             this.btClear.TabIndex = 18;
@@ -217,90 +208,15 @@
             this.deleteElement.Size = new System.Drawing.Size(134, 24);
             this.deleteElement.Text = "Удалить";
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(189, 416);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(26, 16);
-            this.label6.TabIndex = 27;
-            this.label6.Text = "Ом";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(189, 383);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(16, 16);
-            this.label5.TabIndex = 26;
-            this.label5.Text = "B";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(189, 346);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(16, 16);
-            this.label4.TabIndex = 25;
-            this.label4.Text = "A";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 413);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(114, 16);
-            this.label3.TabIndex = 21;
-            this.label3.Text = "Сопротивление:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 380);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(92, 16);
-            this.label2.TabIndex = 20;
-            this.label2.Text = "Напряжение:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 341);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(76, 16);
-            this.label1.TabIndex = 19;
-            this.label1.Text = "Сила тока:";
-            // 
             // bt_DeleteOne
             // 
-            this.bt_DeleteOne.Location = new System.Drawing.Point(15, 452);
+            this.bt_DeleteOne.Location = new System.Drawing.Point(15, 389);
             this.bt_DeleteOne.Name = "bt_DeleteOne";
             this.bt_DeleteOne.Size = new System.Drawing.Size(171, 44);
             this.bt_DeleteOne.TabIndex = 28;
             this.bt_DeleteOne.Text = "Удалить выделенный элемент";
             this.bt_DeleteOne.UseVisualStyleBackColor = true;
             this.bt_DeleteOne.Click += new System.EventHandler(this.bt_DeleteOne_Click);
-            // 
-            // lbR
-            // 
-            this.lbR.Location = new System.Drawing.Point(0, 0);
-            this.lbR.Name = "lbR";
-            this.lbR.Size = new System.Drawing.Size(100, 23);
-            this.lbR.TabIndex = 59;
-            // 
-            // lbV
-            // 
-            this.lbV.Location = new System.Drawing.Point(0, 0);
-            this.lbV.Name = "lbV";
-            this.lbV.Size = new System.Drawing.Size(100, 23);
-            this.lbV.TabIndex = 58;
-            // 
-            // lbA
-            // 
-            this.lbA.Location = new System.Drawing.Point(0, 0);
-            this.lbA.Name = "lbA";
-            this.lbA.Size = new System.Drawing.Size(100, 23);
-            this.lbA.TabIndex = 57;
             // 
             // btZoom
             // 
@@ -682,6 +598,24 @@
             this.panelPropertyRecloser.TabIndex = 53;
             this.panelPropertyRecloser.Visible = false;
             // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(1, 97);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(97, 16);
+            this.label21.TabIndex = 20;
+            this.label21.Text = "Вычисляемый";
+            // 
+            // cbIsCalculate
+            // 
+            this.cbIsCalculate.AutoSize = true;
+            this.cbIsCalculate.Location = new System.Drawing.Point(196, 97);
+            this.cbIsCalculate.Name = "cbIsCalculate";
+            this.cbIsCalculate.Size = new System.Drawing.Size(18, 17);
+            this.cbIsCalculate.TabIndex = 19;
+            this.cbIsCalculate.UseVisualStyleBackColor = true;
+            // 
             // lbTypeTT
             // 
             this.lbTypeTT.AutoSize = true;
@@ -800,7 +734,7 @@
             // 
             // btnSaveProp
             // 
-            this.btnSaveProp.Location = new System.Drawing.Point(15, 556);
+            this.btnSaveProp.Location = new System.Drawing.Point(15, 493);
             this.btnSaveProp.Name = "btnSaveProp";
             this.btnSaveProp.Size = new System.Drawing.Size(171, 48);
             this.btnSaveProp.TabIndex = 55;
@@ -817,24 +751,6 @@
             this.btnCalculate.Text = "Расчет";
             this.btnCalculate.UseVisualStyleBackColor = true;
             this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
-            // 
-            // cbIsCalculate
-            // 
-            this.cbIsCalculate.AutoSize = true;
-            this.cbIsCalculate.Location = new System.Drawing.Point(196, 97);
-            this.cbIsCalculate.Name = "cbIsCalculate";
-            this.cbIsCalculate.Size = new System.Drawing.Size(18, 17);
-            this.cbIsCalculate.TabIndex = 19;
-            this.cbIsCalculate.UseVisualStyleBackColor = true;
-            // 
-            // label21
-            // 
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(1, 97);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(97, 16);
-            this.label21.TabIndex = 20;
-            this.label21.Text = "Вычисляемый";
             // 
             // drawPanel1
             // 
@@ -858,16 +774,7 @@
             this.Controls.Add(this.panelPropertyLine);
             this.Controls.Add(this.panelPropertyBus);
             this.Controls.Add(this.btZoom);
-            this.Controls.Add(this.lbA);
-            this.Controls.Add(this.lbV);
-            this.Controls.Add(this.lbR);
             this.Controls.Add(this.bt_DeleteOne);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.btClear);
             this.Controls.Add(this.btLine);
             this.Controls.Add(this.btRecloser);
@@ -916,16 +823,7 @@
         private System.Windows.Forms.Button btClear;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem deleteElement;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button bt_DeleteOne;
-        private System.Windows.Forms.Label lbR;
-        private System.Windows.Forms.Label lbV;
-        private System.Windows.Forms.Label lbA;
         private System.Windows.Forms.Button btZoom;
         private System.Windows.Forms.Panel panelPropertyBus;
         private System.Windows.Forms.Label label9;

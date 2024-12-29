@@ -21,7 +21,7 @@ namespace ElectroMod
 
         private bool IsSelected = false;
         public bool IsFirstInit { get; set; } = true;
-        public bool IsVisited { get; set; } 
+        public bool IsVisited { get; set; }
         private SerializableGraphicsPath path;
 
         public virtual bool AcceptWare => true;
@@ -143,13 +143,13 @@ namespace ElectroMod
             int magnetRange = 25;
             foreach (var otherElement in Elements.OfType<Element>())
             {
-                if (otherElement == this) 
+                if (otherElement == this)
                     continue;
                 foreach (var thisWare in Wares)
                 {
                     foreach (var otherElementWare in otherElement.Wares)
                     {
-                        if (thisWare.IsNear(otherElementWare, magnetRange) && isCanConnected(otherElement))
+                        if (thisWare.IsNear(otherElementWare, magnetRange) && IsCanConnected(otherElement))
                         {
                             var diffBetweenLocation = new Point(thisWare.Location.X - otherElementWare.Location.X,
                                                                 thisWare.Location.Y - otherElementWare.Location.Y);
@@ -168,7 +168,7 @@ namespace ElectroMod
             }
         }
 
-        protected bool isCanConnected(Element otherElement)
+        protected bool IsCanConnected(Element otherElement)
         {
             switch (GetType())
             {
@@ -179,16 +179,9 @@ namespace ElectroMod
                 case Type type when type == typeof(Line):
                     return true;
             }
-            if (this.GetType() != otherElement.GetType()) return false;
+            //if (GetType() != otherElement.GetType()) return false;
             return false;
         }
-        //public List<Element> GetConnectedElements()
-        //{
-        //    return Links.Select(link => link.Element1 == this ? link.Element2 : link.Element1)
-        //                .Where(e => e != null)
-        //                .Distinct()
-        //                .ToList();
-        //}
 
         public virtual void Rotate(float angel = 90)
         {
@@ -201,18 +194,17 @@ namespace ElectroMod
             {
                 using (Matrix matrix = new Matrix())
                 {
-                    matrix.RotateAt(90, center); // Поворачиваем на 90 градусов вокруг центра
-                    Path.Transform(matrix);      // Применяем матрицу к пути (форме) элемента
+                    matrix.RotateAt(90, center); 
+                    Path.Transform(matrix);      
                 }
                 foreach (var ware in Wares)
                 {
                     ware.RotateAroundParent(90, center);
                 }
-                Angle += 90; //ToDo: поттом сделать если равно 180 то равно 0
+                Angle += 90; 
             }
         }
 
-        //при наведение на элемент поиск ближайшего подключения для провода
         public ConnectingWare FindNearestWare(Point p)
         {
             return Wares.OrderBy(ware => ware.Location.StartPoint(p).LengthSqr()).FirstOrDefault();
@@ -220,7 +212,17 @@ namespace ElectroMod
 
         public void Remove()
         {
-            Elements.Remove(this); //ToDo: надо чтобы у всех ругих с ним связанных элементов тоже удалялись связи
+            foreach (var ware in Wares)
+            {
+                foreach (var element in ConnectedElements)
+                {
+                    element.Wares.ForEach(x => x.ConnectedWares.Remove(ware));
+                    element.ConnectedElements.Remove(this);
+                }
+            }
+
+            ConnectedElements.Clear();
+            Elements.Remove(this);
         }
 
         public void Select()
@@ -263,11 +265,6 @@ namespace ElectroMod
             if (Path.GetBounds().Contains(point.StartPoint(Location)))
                 return this;
 
-            return null;
-        }
-
-        public virtual List<(string, string, string)> GetElementData()
-        { 
             return null;
         }
     }

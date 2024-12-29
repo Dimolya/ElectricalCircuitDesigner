@@ -28,7 +28,6 @@ namespace ElectroMod
 
         private Elements _elements = new Elements();
         private ISelectable _slctElement;
-        private double _voltage;
 
         public MainCalculatForm()
         {
@@ -67,7 +66,6 @@ namespace ElectroMod
         {
             _elements.Add(new Transormator(_elements));
             drawPanel1.Invalidate();
-            //DialogResult result = MessageBox.Show("Вы не добавили источник питания!", "Предупреждение", MessageBoxButtons.OK);
         }
 
         private void OpenFile_Click(object sender, EventArgs e)
@@ -79,6 +77,7 @@ namespace ElectroMod
                     _elements = (Elements)new BinaryFormatter().Deserialize(fs);
                     drawPanel1.Build(_elements);
                 }
+            drawPanel1.Invalidate();
         }
 
         private void SaveFile_Click(object sender, EventArgs e)
@@ -105,6 +104,8 @@ namespace ElectroMod
         {
             drawPanel1.RemoveSelected();
             drawPanel1.Invalidate();
+            if(_slctElement is Bus)
+                btBus.Enabled = true;
         }
 
         private void btnCalculate_Click(object sender, EventArgs e)
@@ -273,7 +274,6 @@ namespace ElectroMod
             {
                 bus.Name = tbBusName.Text;
                 bus.Voltage = double.Parse(cbBusVoltage.Text);
-                _voltage = bus.Voltage;
                 if (bus.isCurrent)
                 {
                     bus.IcsMax = double.Parse(tbBusCurrentMax.Text);
