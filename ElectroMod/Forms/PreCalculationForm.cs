@@ -12,6 +12,7 @@ namespace ElectroMod.Forms
 {
     public partial class PreCalculationForm : Form
     {
+        public string Reconnect { get; set; }
         public string NumberTY { get; set; }
         public double PowerKBT { get; set; }
         public double PowerSuchKBT { get; set; }
@@ -30,8 +31,9 @@ namespace ElectroMod.Forms
             double powerKBA;
             double powerSuchKBT;
             double powerSuchKBA;
-
             NumberTY = tbNumberTY.Text;
+            Reconnect = cbReconnect.Text;
+
             if (double.TryParse(tbPowerSuchKBT.Text, out powerSuchKBT))
                 PowerSuchKBT = powerSuchKBT;
             if (double.TryParse(tbPowerSuchKBA.Text, out powerSuchKBA))
@@ -41,7 +43,6 @@ namespace ElectroMod.Forms
             if (double.TryParse(tbPowerKBA.Text, out powerKBA))
                 PowerKBA = powerKBA;
             DialogResult = DialogResult.OK;
-
         }
 
         private void cbReconnect_SelectedIndexChanged(object sender, EventArgs e)

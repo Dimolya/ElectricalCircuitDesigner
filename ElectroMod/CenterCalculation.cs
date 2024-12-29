@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Interop.Word;
+﻿using ElectroMod.Forms;
+using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -9,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xceed.Document.NET;
 
 namespace ElectroMod
 {
@@ -16,7 +18,6 @@ namespace ElectroMod
     {
         private static Elements _elements;
         private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
-        private List<(double, double)> _resistanceForBusResistance = new List<(double, double)>();
 
         public CenterCalculation(Elements elements)
         {
@@ -28,6 +29,31 @@ namespace ElectroMod
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
 
         public double Voltage { get; set; }
+        public string ReconnectName { get; set; }
+        public int RecloserNtt { get; set; }
+        public Element LastElementList { get; set; }
+        public Element SecondLastElementList { get; set; }
+        public string NamberTY { get; set; }
+        public double PowerSuchKBT { get; set; }
+        public double PowerKBT { get; set; }
+        public double PowerSuchKBA { get; set; }
+        public double PowerKBA { get; set; }
+
+        public double Iust { get; set; }
+        public double IszMTO { get; set; }
+        public (double, double) Isz2MTO { get; set; }
+        public double Isz3MTO { get; set; }
+        public double KchuvMTO { get; set; }
+        public string resoultMTO { get; set; }
+        public double IszMTZ { get; set; }
+        public double KchuvMTZ { get; set; }
+        public double Kchuv2MTZ { get; set; }
+        public double Kchuv3MTZ { get; set; }
+        public double Ip { get; set; }
+        public double Ip1 { get; set; }
+        public double Ip2 { get; set; }
+        public double Ikz1 { get; set; }
+        public double Ikz1low { get; set; }
 
         public void CalculationFormuls()
         {
@@ -37,60 +63,50 @@ namespace ElectroMod
             }
         }
 
-        public void CalculationMTOWithTY(double powerSuchKBT, double powerKBT)
+        public void CalculationMTOandMTZ(PreCalculationForm preCalculationForm)
         {
-            double Iust;
-            double Ics;
-            double Ics2;
-            double Kchuv;
-            string resoult;
-
+            ReconnectName = preCalculationForm.Reconnect;
+            NamberTY = preCalculationForm.NumberTY;
+            PowerSuchKBT = preCalculationForm.PowerSuchKBT;
+            PowerKBT = preCalculationForm.PowerKBT;
+            PowerSuchKBA = preCalculationForm.PowerSuchKBA;
+            PowerKBA = preCalculationForm.PowerKBA;
             foreach (var elementsList in CalculationElementList)
             {
                 var recloser = elementsList.OfType<Recloser>().FirstOrDefault(x => x.isCalculated);
+                var transformator = elementsList.OfType<Transormator>().FirstOrDefault();
+                LastElementList = elementsList.ElementAt(elementsList.Count - 1);
+                SecondLastElementList = elementsList.ElementAt(elementsList.Count - 2);
                 if (recloser != null)
                 {
-                    var lastElemntList = elementsList.ElementAt(elementsList.Count - 1);
-                    var preLastElemntList = elementsList.ElementAt(elementsList.Count - 2);
-                    Iust = (powerSuchKBT + powerKBT) / (Math.Sqrt(3) * Voltage * 0.95);
-                    Ics = 1.2 * Iust;
-                    Ics2 = 1.2 * (lastElemntList.IcsMax * 1000);
-                    Kchuv = preLastElemntList.IcsMin * 0.865 * 1000 / Ics;
+                    RecloserNtt = recloser.Ntt;
 
-                    resoult = (Kchuv > 1.2)
-                        ? "условие выполняется (для зон дальнего резервирования)"
-                        : "условие не выполняется, уставка не чувствительная";
+                    Iust = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
+                        ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT)
+                            / (Math.Sqrt(3) * Voltage * 0.95)
+                        : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA)
+                            / (Math.Sqrt(3) * Voltage * 0.95);
+                    IszMTO = 1.2 * Iust;
+                    Isz2MTO = (3 * Iust, 4 * Iust);
+                    Isz3MTO = 1.2 * (LastElementList.IcsMax * 1000);
+                    KchuvMTO = SecondLastElementList.IcsMin * 0.865 * 1000 / IszMTO;
+
+                    //------------------------------дальше МТЗ-----------------------------------------
+                    IszMTZ = recloser.Kn * recloser.Kcz / recloser.Kb * Iust;
+                    KchuvMTZ = SecondLastElementList.IcsMin * 0.865 / IszMTZ;
+
+                    Ip = 1 * IszMTZ / recloser.Ntt;
+                    Ip2 = 0.5 * LastElementList.IcsMax * 1000 / recloser.Ntt;
+                    Kchuv2MTZ = Ip2 / Ip;
+                    if (transformator.Scheme == "Звезда-Звезда") //ToDo: тут пока неясно что
+                    {
+                        Ikz1 = 220 / (1 / 3.0 * transformator.FullResistance);
+                        Ikz1low = Ikz1 * (0.4 / Voltage);
+                        Ip1 = Ikz1low / Math.Sqrt(3) * recloser.Ntt;
+                        Kchuv3MTZ = Ip1 / Ip;
+                    }
+
                     break;
-                }
-            }
-        }
-
-        public void CalculationMTZWithTY(double powerSuchKBT, double powerKBT)
-        {
-            double Iust;
-            double Ics;
-            double Ics2;
-            double Kchuv;
-            double Kchuv2;
-            double Ip;
-            double Ip2;
-
-            foreach (var elementsList in CalculationElementList)
-            {
-                var recloser = elementsList.OfType<Recloser>().FirstOrDefault(x => x.isCalculated);
-                var transformator = elementsList.OfType<Transormator>();
-                if (recloser != null)
-                {
-                    var lastElemntList = elementsList.ElementAt(elementsList.Count - 1);
-                    var preLastElemntList = elementsList.ElementAt(elementsList.Count - 2);
-
-                    Iust = (powerSuchKBT + powerKBT) / (Math.Sqrt(3) * Voltage * 0.95);
-                    Ics = recloser.Kn * recloser.Kcz / recloser.Kb * Iust;
-                    Kchuv = preLastElemntList.IcsMin * 0.865 / Ics;
-
-                    Ip = 1 * Ics / recloser.Ntt;
-                    Ip2 = 0.5 * lastElemntList.IcsMax * 1000 / recloser.Ntt;
-                    Kchuv2 = Ip2 / Ip;
                 }
             }
         }

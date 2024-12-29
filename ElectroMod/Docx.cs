@@ -1,157 +1,185 @@
 ﻿using System;
-using System.IO;
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.AccessControl;
+using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
+using Application = Microsoft.Office.Interop.Word.Application;
 
 namespace ElectroMod
 {
     public class Docx
     {
-        //public void CreateReportDocument(CenterCalculation calc)
-        //{
-        //    string filePath = "C:\\Users\\79871\\OneDrive\\Рабочий стол\\ElectroMod\\ty.docx";
-        //    var currents = calc.Currents;
-        //    Создаем документ
-        //    using (var doc = DocX.Create(filePath))
-        //    {
-        //        Добавляем заголовок
-        //        var title = doc.InsertParagraph("Результирующая таблица:");
-        //        title.FontSize(10).Alignment = Alignment.left;
-
-        //        Создаем таблицу с размером 3 столбца и числом строк = размер списка
-        //       var table = doc.AddTable(1, 3);
-
-        //        Заполняем таблицу
-        //        for (int i = 0; i < currents.Count; i++)
-        //        {
-        //            var newRowParagraph = table.InsertRow();
-        //            newRowParagraph.MergeCells(0, 2);
-        //            newRowParagraph.InsertParagraph(0, $"Расчет токов К.З. в точке K{i + 1}", false).Bold().Alignment = Alignment.center; ;
-
-        //            var newRowCurrentMax = table.InsertRow();
-        //            newRowCurrentMax.Cells[0].Paragraphs[0].Append("Ток К.З. в максимальном режиме");
-        //            newRowCurrentMax.Cells[1].Width = 150;
-        //            newRowCurrentMax.Cells[1].Paragraphs[0].Append($"({currents[i].Item1})");
-        //            newRowCurrentMax.Cells[2].Paragraphs[0].Append("кА");
-
-        //            var newRowCurrentMin = table.InsertRow();
-        //            newRowCurrentMin.Cells[0].Paragraphs[0].Append("Ток К.З. в минимальном режиме");
-        //            newRowCurrentMin.Cells[1].Paragraphs[0].Append($"({currents[i].Item2})");
-        //            newRowCurrentMin.Cells[2].Paragraphs[0].Append("кА");
-        //        }
-
-        //        Вставляем таблицу в документ
-        //        doc.InsertTable(table);
-
-        //        Сохраняем документ
-        //        doc.Save();
-        //    }
-
-        //}
-
+        [STAThread]
         public void CreateReportDocument(CenterCalculation calc)
         {
-            string filePath = "C:\\Users\\79871\\OneDrive\\Рабочий стол\\ElectroMod\\ty.docx";
+            Application wordApp = null;
+            Document doc = null;
+
+            try
+            {
+                wordApp = new Application();
+                doc = wordApp.Documents.Add();
+
+                // Добавляем заголовок документа
+                AddParagraph(doc, "Отчет по расчету токов короткого замыкания", isBold: true, isCenterAligned: true);
+
+                // Добавляем оглавление
+                AddParagraph(doc, "Оглавление", isBold: true);
+                Range tocRange = doc.Content.Paragraphs.Add().Range;
+                doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
+
+                AddParagraph(doc, "Результаты расчетов", isBold: true);
+                AddCalculationTable(doc, calc);
+
+                AddParagraph(doc, "");
+                AddParagraph(doc, "Выбор уставок защиты фидера", isBold: true);
+                AddParagraph(doc, "КТТ=ntt (из БД на ТТ)");
+                if (calc.ReconnectName == "Расчет по мощности ТУ")
+                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NamberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт");
+                else
+                    AddParagraph(doc, $"Согласно исходных данных мощность на фидере {calc.PowerSuchKBA} кВа");
+
+                AddParagraph(doc, "Токовая отсечка (ТО)", isBold: true, fontSize: 14);
+                AddParagraph(doc, "Отстройка защиты от броска тока намагничивания");
+                if (calc.ReconnectName == "Расчет по мощности ТУ")
+                    AddFormula(doc, $"I_уст = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
+                else
+                    AddFormula(doc, $"I_уст = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
+
+                AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ {calc.IszMTO}");
+                AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ ({calc.Isz2MTO.Item1}...{calc.Isz2MTO.Item2})");
+
+                AddParagraph(doc, "Где ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n" +
+                    "Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора КТП S кВа");
+                AddFormula(doc, $"I_сз > k_н * ({calc.LastElementList?.IcsMax} * 1000) > {calc.Isz3MTO}");
+                AddParagraph(doc, "Где  k_н=1,2 для МПУ\r\n" +
+                    "Проверка чувствительности при 3-х фазном К.З. в максимальном режиме:");
+                AddFormula(doc, $"k_чувст=({calc.SecondLastElementList?.IcsMin}*0,865*1000)/I_сз = {calc.KchuvMTO}");
+                if (calc.KchuvMTO > 1.2)
+                    AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) ");
+                else
+                    AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
+
+                //Тут надо отступить на новый лист 
+                AddParagraph(doc, "Максимальная токовая защита МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
+                if (calc.ReconnectName == "Расчет по мощности ТУ")
+                {
+                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NamberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт");
+                    AddFormula(doc, $"I_уст = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
+                }
+                else
+                {
+                    AddParagraph(doc, $"Согласно исходных данных мощность на фидере {calc.PowerSuchKBA} кВа");
+                    AddFormula(doc, $"I_уст = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
+                }
+                AddParagraph(doc, "Условие отстройки от максимального рабочего тока");
+                AddFormula(doc, $"I_сз>((k_н*k_сз)/k_в )*I_уст = {calc.IszMTZ}");
+                AddParagraph(doc, "Принимаем уставку I_сз\r\n" +
+                    "Проверим чувствительность к минимальному току КЗ (Кч>1,5 по ПУЭ):");
+                AddFormula(doc, $"k_чувст=({calc.SecondLastElementList?.IcsMin}*0,865)/(I_(c.з.)) = {calc.KchuvMTZ}");
+
+                AddParagraph(doc, "Проверка чувствительности МТЗ (для схемы D/Y)", isBold: true, fontSize: 14, isCenterAligned: true);
+                AddParagraph(doc, "");
+                AddFormula(doc, $"I_р=(K_сx·I_сз)/{calc.RecloserNtt} = {calc.Ip}");
+                AddParagraph(doc, "Где K_сx - коэффициент схемы принимаем 1, ntt коэффициент трансформации трансформатора тока.\r\n" +
+                    "Определяем ток в реле при КЗ за трансформатором:");
+                AddFormula(doc, $"I_р2=(0,5∙{calc.LastElementList?.IcsMax}·1000)/{calc.RecloserNtt} = {calc.Ip2}");
+                AddParagraph(doc, "Определяем коэффициент чувствительности при двухфазном КЗ за трансформатором по схеме неполная звезда:");
+                AddFormula(doc, $"k_чувст=I_р2/I_р = {calc.Kchuv2MTZ}");
+                AddFormula(doc, "k_чувст > 1,5");
+                AddParagraph(doc, "Рассчитываем ток однофазного К.З., за трансформатором:");
+                AddFormula(doc, $"I_кз1= U_ф/((1/3)*Z_тр) = {calc.Ikz1}");
+                AddParagraph(doc, "Приведем ток однофазного КЗ на стороне 0,4 кВ к напряжению 10,5 кВ");
+                AddFormula(doc, $"I_(кз1-10кВ)=I_кз1*(U_нн/{calc.Voltage}) = {calc.Ikz1low}");
+                AddParagraph(doc, "Определяем ток в реле при однофазном КЗ за трансформатором:");
+                AddFormula(doc, $"I_р1=I_(кз1-10кВ)/(√(3) * {calc.RecloserNtt}) = {calc.Ip1}");
+                AddParagraph(doc, "Определяем коэффициент чувствительности при однофазном КЗ за трансформатором:");
+                AddFormula(doc, $"k_чувст=I_р1/I_р = {calc.Kchuv3MTZ}");
+
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Filter = "Документы Word (*.docx)|*.docx";
+                    saveFileDialog.Title = "Сохранить документ Word";
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        string filePath = saveFileDialog.FileName;
+
+                        // Сохраняем документ
+                        doc.SaveAs2(filePath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка: " + ex.Message);
+            }
+            finally
+            {
+                doc?.Close(false);
+                wordApp?.Quit();
+            }
+        }
+
+        private void AddParagraph(Document doc,
+                                  string text,
+                                  bool isBold = false,
+                                  bool isCenterAligned = false,
+                                  int fontSize = 10)
+        {
+            Paragraph paragraph = doc.Content.Paragraphs.Add();
+            paragraph.Range.Text = text;
+            paragraph.Range.Font.Size = fontSize;
+            paragraph.Alignment = WdParagraphAlignment.wdAlignParagraphLeft;
+
+            if (isBold)
+                paragraph.Range.Font.Bold = 1;
+            else
+                paragraph.Range.Font.Bold = 0;
+
+            if (isCenterAligned)
+                paragraph.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+
+            paragraph.Range.InsertParagraphAfter();
+        }
+
+        private void AddCalculationTable(Document doc, CenterCalculation calc)
+        {
             var currents = calc.Currents;
 
-            // Создаем документ Word
-            using (WordprocessingDocument wordDoc = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
+            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, currents.Count * 3 + 1, 3);
+            table.Borders.Enable = 1; // Устанавливаем границы таблицы
+
+            for (int i = 0; i < currents.Count; i++)
             {
-                // Добавляем основные части документа
-                MainDocumentPart mainPart = wordDoc.AddMainDocumentPart();
-                mainPart.Document = new Document(new Body());
+                int rowOffset = i * 3 + 1;
 
-                Body body = mainPart.Document.Body;
+                // Добавляем заголовок для точки расчета
+                table.Cell(rowOffset, 1).Merge(table.Cell(rowOffset, 3));
+                table.Cell(rowOffset, 1).Range.Text = $"Расчет токов К.З. в точке K{i + 1}";
+                table.Cell(rowOffset, 1).Range.Bold = 1;
+                table.Cell(rowOffset, 1).Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
 
-                // Добавляем заголовок
-                AddParagraph(body, "Результирующая таблица:", fontSize: 24);
+                // Добавляем данные для максимального режима
+                table.Cell(rowOffset + 1, 1).Range.Text = "Ток К.З. в максимальном режиме";
+                table.Cell(rowOffset + 1, 2).Range.Text = $"{currents[i].Item1} кА";
 
-                // Создаем таблицу
-                Table table = new Table();
-
-                // Устанавливаем свойства таблицы (границы и размеры)
-                TableProperties tableProperties = new TableProperties(
-                    new TableBorders(
-                        new TopBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 8 },
-                        new BottomBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 8 },
-                        new LeftBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 8 },
-                        new RightBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 8 },
-                        new InsideHorizontalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 8 },
-                        new InsideVerticalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 8 }
-                    )
-                );
-                table.AppendChild(tableProperties);
-
-                // Заполняем таблицу
-                foreach (var (currentMax, currentMin) in currents)
-                {
-                    // Вставляем заголовок для расчета
-                    TableRow headerRow = new TableRow();
-                    TableCell headerCell = new TableCell(new Paragraph(new Run(new Text($"Расчет токов К.З. в точке K{currents.IndexOf((currentMax, currentMin)) + 1}"))));
-                    headerCell.AppendChild(new TableCellProperties(new GridSpan { Val = 3 }, new Justification { Val = JustificationValues.Center }));
-                    headerRow.AppendChild(headerCell);
-                    table.AppendChild(headerRow);
-
-                    // Добавляем строку для максимального тока
-                    TableRow maxRow = new TableRow();
-                    maxRow.Append(
-                        CreateTableCell("Ток К.З. в максимальном режиме"),
-                        CreateTableCell($"({currentMax})", width: "1500"),
-                        CreateTableCell("кА")
-                    );
-                    table.AppendChild(maxRow);
-
-                    // Добавляем строку для минимального тока
-                    TableRow minRow = new TableRow();
-                    minRow.Append(
-                        CreateTableCell("Ток К.З. в минимальном режиме"),
-                        CreateTableCell($"({currentMin})", width: "1500"),
-                        CreateTableCell("кА")
-                    );
-                    table.AppendChild(minRow);
-                }
-
-                // Вставляем таблицу в документ
-                body.AppendChild(table);
-
-                // Сохраняем документ
-                mainPart.Document.Save();
+                // Добавляем данные для минимального режима
+                table.Cell(rowOffset + 2, 1).Range.Text = "Ток К.З. в минимальном режиме";
+                table.Cell(rowOffset + 2, 2).Range.Text = $"{currents[i].Item2} кА";
             }
-
-            Console.WriteLine("Документ успешно создан.");
         }
 
-        // Метод для добавления параграфа
-        private static void AddParagraph(Body body, string text, int fontSize = 24)
+        private void AddFormula(Document doc, string formula)
         {
-            Paragraph paragraph = new Paragraph(
-                new ParagraphProperties(new Justification { Val = JustificationValues.Left }),
-                new Run(new RunProperties(new FontSize { Val = fontSize.ToString() }), new Text(text))
-            );
-            body.AppendChild(paragraph);
+            Paragraph formulaParagraph = doc.Content.Paragraphs.Add();
+            formulaParagraph.Range.Text = formula;
+
+            // Форматируем текст как OMML (формула)
+            OMaths maths = formulaParagraph.Range.OMaths;
+            maths.Add(formulaParagraph.Range);
+            maths[1].BuildUp();
+
+            formulaParagraph.Range.InsertParagraphAfter();
         }
-
-        // Метод для создания ячейки таблицы
-        private static TableCell CreateTableCell(string text, string width = null)
-        {
-            TableCell cell = new TableCell(new Paragraph(new Run(new Text(text))));
-
-            if (width != null)
-            {
-                cell.AppendChild(new TableCellProperties(
-                    new TableCellWidth { Type = TableWidthUnitValues.Dxa, Width = width }
-                ));
-            }
-
-            return cell;
-        }
-
     }
 }

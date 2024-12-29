@@ -116,12 +116,10 @@ namespace ElectroMod
                     var calcul = new CenterCalculation(_elements);
                     calcul.CalculationFormuls();
 
-                    calcul.CalculationMTOWithTY(preCalculateForm.PowerSuchKBT, preCalculateForm.PowerKBT);
-                    calcul.CalculationMTZWithTY(preCalculateForm.PowerSuchKBT, preCalculateForm.PowerKBT);
+                    calcul.CalculationMTOandMTZ(preCalculateForm);
 
                     var docx = new Docx();
                     docx.CreateReportDocument(calcul);
-
                 }
             }
         }
