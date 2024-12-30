@@ -21,7 +21,6 @@ namespace ElectroMod
         }
 
         public override Color BorderColor => Color.DarkBlue;
-        public string Name { get; set; }
         public string Type { get; set; }
         public double Voltage { get; set; }
         public bool isCurrent { get; set; } 

@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
-using System.Threading;
 using ElectroMod.Forms;
-using static System.Windows.Forms.AxHost;
-using ElectroMod.Forms.InputForms;
-using System.Collections.Generic;
-using Newtonsoft.Json;
 using ElectroMod.DataBase.Dtos;
 using ElectroMod.DataBase;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using Microsoft.Office.Interop.Word;
-using System.Windows.Forms.VisualStyles;
 using ElectroMod.DataBase.Dtos.StaticDtos;
-using System.Globalization;
 using ElectroMod.Dtos.StaticDtos;
 
 namespace ElectroMod
@@ -139,6 +129,16 @@ namespace ElectroMod
         {
             if (selectedElement is Bus bus)
             {
+                var directoryPath = @"C:\Users\79871";
+                var fileName = "DataBus.json";
+                try
+                {
+                    var file = Directory.GetFiles(directoryPath, fileName, SearchOption.AllDirectories);
+                }
+                catch(Exception ex)
+                {
+
+                }
                 var dto = JsonProvider.LoadData<DataBusDto>("..\\..\\DataBase\\StaticData\\DataBus.json");
                 _slctElement = bus;
                 panelPropertyBus.Visible = true;

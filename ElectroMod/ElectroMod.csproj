@@ -124,7 +124,6 @@
     <Compile Include="Interfaces\IDragable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\ISelectable.cs" />
-    <Compile Include="Link.cs" />
     <Compile Include="Elements\Bus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

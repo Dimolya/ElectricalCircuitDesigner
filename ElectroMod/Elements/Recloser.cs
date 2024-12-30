@@ -19,9 +19,9 @@ namespace ElectroMod
             Path.AddRectangle(new Rectangle(0, 37, 50, 50));
             Path.AddLine(25, 87, 25, 126);
             Path.CloseFigure();
+            Angle = 90;
         }
 
-        public string Name { get; set; }
         public string TypeTT { get; set; }
         public int Ntt { get; set; }
 

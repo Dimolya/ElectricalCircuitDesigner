@@ -47,7 +47,7 @@ namespace ElectroMod
 
             //отрисовываем объекты, относящиеся к типу IDrawable
             foreach (var obj in model.OfType<IDrawable>())
-                obj.Paint(e.Graphics);
+                obj.Paint(e.Graphics, scale);
         }
         //Перевод координат из одной системы отсчета в другую.
         //В данном случае - перевод в систему координат, связанную с контролом.

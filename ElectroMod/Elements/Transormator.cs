@@ -20,10 +20,11 @@ namespace ElectroMod
             Path.AddEllipse(0, 50, 50, 50);
             Path.AddLine(25, 100, 25, 125);
             Path.CloseFigure();
+
+            Angle = 90;
         }
 
         public override Color BorderColor => Color.DarkBlue;
-        public string Name { get; set; }
         public string TypeKTP { get; set; }
         public string Scheme { get; set; }
 

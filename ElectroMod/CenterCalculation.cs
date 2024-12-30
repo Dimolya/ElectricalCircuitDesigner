@@ -31,8 +31,12 @@ namespace ElectroMod
         public double Voltage { get; set; }
         public string ReconnectName { get; set; }
         public int RecloserNtt { get; set; }
+        public double RecloserKn { get; set; }
+        public double RecloserKcz { get; set; }
+        public double RecloserKb { get; set; }
         public Element LastElementList { get; set; }
         public Element SecondLastElementList { get; set; }
+        public double TransformatorFullResistance { get; set; }
         public string NamberTY { get; set; }
         public double PowerSuchKBT { get; set; }
         public double PowerKBT { get; set; }
@@ -77,21 +81,24 @@ namespace ElectroMod
                 var transformator = elementsList.OfType<Transormator>().FirstOrDefault();
                 LastElementList = elementsList.ElementAt(elementsList.Count - 1);
                 SecondLastElementList = elementsList.ElementAt(elementsList.Count - 2);
+                TransformatorFullResistance = transformator.FullResistance;
                 if (recloser != null)
                 {
                     RecloserNtt = recloser.Ntt;
-
+                    RecloserKn = recloser.Kn;
+                    RecloserKcz = recloser.Kcz;
+                    RecloserKb = recloser.Kb;
                     Iust = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
                         ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT)
                             / (Math.Sqrt(3) * Voltage * 0.95)
                         : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA)
-                            / (Math.Sqrt(3) * Voltage * 0.95);
+                            / (Math.Sqrt(3) * Voltage);
                     IszMTO = 1.2 * Iust;
                     Isz2MTO = (3 * Iust, 4 * Iust);
                     Isz3MTO = 1.2 * (LastElementList.IcsMax * 1000);
                     KchuvMTO = SecondLastElementList.IcsMin * 0.865 * 1000 / IszMTO;
 
-                    //------------------------------дальше МТЗ-----------------------------------------
+                    //дальше МТЗ
                     IszMTZ = recloser.Kn * recloser.Kcz / recloser.Kb * Iust;
                     KchuvMTZ = SecondLastElementList.IcsMin * 0.865 / IszMTZ;
 
@@ -132,7 +139,7 @@ namespace ElectroMod
             visited.Add(current);
             currentPath.Add(current);
 
-            // Если текущий элемент - конечный, сохраняем путь
+            // Если текущий элемент конечный, сохраняем путь
             if (current is Transormator)
             {
                 CalculationElementList.Add(new List<Element>(currentPath));

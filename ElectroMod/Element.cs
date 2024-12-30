@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.CodeDom;
 using System.Windows.Forms.VisualStyles;
+using DocumentFormat.OpenXml.Presentation;
 
 namespace ElectroMod
 {
@@ -33,6 +34,7 @@ namespace ElectroMod
         public double IcsMin { get; set; }
         public Point Location { get; set; }
         public Elements Elements { get; set; }
+        public int Angle { get; set; }
         public GraphicsPath Path
         {
             get { return path; }
@@ -41,8 +43,6 @@ namespace ElectroMod
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
 
-        public int Angle { get; private set; }
-
         public Element() { }
         public Element(Elements elements)
         {
@@ -50,11 +50,11 @@ namespace ElectroMod
             Location = new Point(250, 200);
         }
 
-        public virtual void Paint(Graphics g)
+        public virtual void Paint(Graphics g, float scale)
         {
             //отрисовка соед. проводов
             foreach (ConnectingWare ware in Wares)
-                ware.Paint(g);
+                ware.Paint(g, scale);
 
             //отрисовка элементов
             GraphicsState state = g.Save();
@@ -63,39 +63,29 @@ namespace ElectroMod
             if (IsSelected)
                 Addition.DrawHalo(Path, g, Color.Red, Color.Red.Pen(), 4);
 
-            //наверное не надо
-            //g.FillPath(FillColor.Brush(), Path);
             g.DrawPath(BorderColor.Pen(2), Path);
 
             if (!string.IsNullOrEmpty(Name))
             {
-                using (var font = new Font("Arial", 10))
+                using (var font = new System.Drawing.Font("Arial", 10))
                 using (var brush = new SolidBrush(Color.Black))
                 {
-                    // Координаты для текста (находятся под элементом)
-                    PointF textLocation = new PointF(Location.X, Location.Y - 20);
-
-                    // Если элемент повёрнут, измените расположение текста
-                    if (Angle != 0)
+                    PointF textLocation;
+                    if (Angle%180 == 0)
                     {
-                        using (var matrix = new Matrix())
-                        {
-                            matrix.RotateAt(Angle, Location);
-                            g.Transform = matrix;
-                        }
+                        textLocation = new PointF(10 * scale,
+                                                  15 * scale);
+                    }
+                    else
+                    {
+                        textLocation = new PointF(20 * scale,
+                                                  20 * scale);
                     }
 
                     g.DrawString(Name, font, brush, textLocation);
                 }
                 g.ResetTransform();
             }
-
-            //отрисовка Tag
-            RectangleF rect = Path.GetBounds();//прямоугольник ограничивающий поле надписи
-            rect.Inflate(25, 25);
-            if (Name != null)
-                g.DrawString(Name, Addition.Font, Brushes.Black, rect, new StringFormat
-                { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Near });//выравнивание строки
             g.Restore(state);//нужное позиционирование всех эелементов
         }
 
@@ -194,14 +184,14 @@ namespace ElectroMod
             {
                 using (Matrix matrix = new Matrix())
                 {
-                    matrix.RotateAt(90, center); 
-                    Path.Transform(matrix);      
+                    matrix.RotateAt(90, center);
+                    Path.Transform(matrix);
                 }
                 foreach (var ware in Wares)
                 {
                     ware.RotateAroundParent(90, center);
                 }
-                Angle += 90; 
+                Angle += 90;
             }
         }
 

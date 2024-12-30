@@ -47,7 +47,7 @@ namespace ElectroMod
             double resoult = Math.Sqrt(X * X + Y * Y);
             return resoult < magnetRange;
         }
-        public void Paint (Graphics g)
+        public void Paint(Graphics g, float scale)
         {
             if (drag != Point.Empty)
                 g.DrawLine(Addition.Pen(Color.DarkBlue, 2), Location, Location.Add(drag));
