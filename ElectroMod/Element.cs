@@ -73,16 +73,13 @@ namespace ElectroMod
                 {
                     if (Angle % 180 == 0)
                     {
-                        //rect.Inflate(LocationNameHorizontal.X, LocationNameHorizontal.Y);
-                        //textLocation = new PointF(LocationNameHorizontal.X * scale, LocationNameHorizontal.Y * scale);
                         g.DrawString(Name, font, brush, LocationNameHorizontal);
                     }
                     else
                     {
-                    RectangleF rect = new RectangleF(LocationNameVertical.X,
-                                                     LocationNameVertical.Y, 
-                                                     80, 400);
-                        //textLocation = new PointF(LocationNameVertical.X * scale, LocationNameVertical.Y * scale);
+                        var rect = new RectangleF(LocationNameVertical.X,
+                                                  LocationNameVertical.Y, 
+                                                  80, 400);
                         g.DrawString(Name, font, brush, rect);
                     }
 

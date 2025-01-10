@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Xceed.Document.NET;
+using System.Xml.Linq;
 
 namespace ElectroMod
 {
@@ -61,11 +61,17 @@ namespace ElectroMod
         public double Ikz1 { get; set; }
         public double Ikz1low { get; set; }
 
+
+        private bool _flagForFirstInitK = true;
+
         public void CalculationFormuls()
         {
             foreach (var elementsList in CalculationElementList)
             {
+                
                 CalculateCurrents(elementsList);
+                _flagForFirstInitK = false;
+
             }
         }
 
@@ -155,11 +161,9 @@ namespace ElectroMod
                     {
                         if (visited.Count > 1)
                         {
-                            connectedWare.Label = $"K{_countK}";
-                            _countK++;
-                            var last = visited.ElementAt(visited.Count - 2).Wares
-                                              .SelectMany(x => x.ConnectedWares).ToList(); //ToDo: починить этот колхоз ебучий
-                            if (last.Contains(connectedWare))
+                            var lastElementWares = visited.ElementAt(visited.Count - 2).Wares
+                                              .SelectMany(x => x.ConnectedWares).ToList();
+                            if (lastElementWares.Contains(connectedWare))
                                 continue;
                         }
                         var nextElement = connectedWare.ParentElement;
@@ -189,8 +193,21 @@ namespace ElectroMod
 
             (double, double) sumResistance;
 
+            var commonElements = CalculationElementList
+            .Skip(1)
+            .Aggregate(
+                new HashSet<Element>(CalculationElementList.First()),
+                (h, e) => { h.IntersectWith(e); return h; }
+            ).ToList();
+
             foreach (var element in elements)
             {
+                if ((!commonElements.Contains(element) && !_flagForFirstInitK) || _flagForFirstInitK)
+                {
+                    element.Wares[0].Label = $"K{_countK}";
+                    _countK++;
+                }
+
                 if (element is Bus bus)
                 {
                     Voltage = bus.Voltage;
