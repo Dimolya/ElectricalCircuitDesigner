@@ -18,6 +18,7 @@ namespace ElectroMod
     {
         private static Elements _elements;
         private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
+        private int _countK = 1;
 
         public CenterCalculation(Elements elements)
         {
@@ -27,6 +28,7 @@ namespace ElectroMod
 
         public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
+
 
         public double Voltage { get; set; }
         public string ReconnectName { get; set; }
@@ -153,12 +155,13 @@ namespace ElectroMod
                     {
                         if (visited.Count > 1)
                         {
+                            connectedWare.Label = $"K{_countK}";
+                            _countK++;
                             var last = visited.ElementAt(visited.Count - 2).Wares
                                               .SelectMany(x => x.ConnectedWares).ToList(); //ToDo: починить этот колхоз ебучий
                             if (last.Contains(connectedWare))
                                 continue;
                         }
-                        connectedWare.Label = "gg";
                         var nextElement = connectedWare.ParentElement;
                         RecurceGenerateElementsList(nextElement, visited, currentPath);
                     }

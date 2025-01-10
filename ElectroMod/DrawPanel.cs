@@ -13,13 +13,14 @@ namespace ElectroMod
         public event Action<ISelectable> ElementSelected;
 
         IEnumerable<object> model;
+        private MainCalculatForm _mainCalculatForm;
         IDragable dragable;
         ISelectable selected;
 
         Point offsetPoint; //начальные точки
-        Point mouseDown; 
+        Point mouseDown;
         float scale = 1.0f;
-        
+
         public DrawPanel()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
@@ -29,9 +30,10 @@ namespace ElectroMod
                 | ControlStyles.Selectable, true);
         }
 
-        public void Build(IEnumerable<object> model)
+        public void Build(IEnumerable<object> model, MainCalculatForm mainCalculatForm)
         {
             this.model = model;
+            _mainCalculatForm = mainCalculatForm;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -66,7 +68,7 @@ namespace ElectroMod
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            Point p = GetStartPoint(e.Location);    
+            Point p = GetStartPoint(e.Location);
             IDragable hittable = model.OfType<IDragable>().FirstOrDefault(n => n.Hit(p));
             mouseDown = e.Location;
             if (e.Button == MouseButtons.Left)
@@ -104,7 +106,7 @@ namespace ElectroMod
                     offsetPoint = new Point(offsetPoint.X + movable.X, offsetPoint.Y + movable.Y);
 
                 Invalidate();
-            }            
+            }
         }
         protected override void OnMouseUp(MouseEventArgs e)
         {
@@ -129,6 +131,25 @@ namespace ElectroMod
             ScaleChanged?.Invoke(this, scale);
         }
 
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+            Point p = GetStartPoint(e.Location);
+            List<ConnectingWare> nearestWares = FindNearestConnectingWare(p);
+            if (nearestWares != null)
+            {
+                foreach (var nearestWare in nearestWares)
+                {
+                    nearestWare.IsCalculationPoint = !nearestWare.IsCalculationPoint;
+                    if (nearestWare.IsCalculationPoint)
+                        _mainCalculatForm.AddSelectedPoint(nearestWare);
+                    else
+                        _mainCalculatForm.RemoveSelectedPoint(nearestWare);
+                }
+                Invalidate();
+            }
+        }
+
         public void ZoomIn()
         {
             scale *= 1.1f;
@@ -140,7 +161,7 @@ namespace ElectroMod
             scale /= 1.1f;
             Invalidate();
         }
-            
+
         public void SetDefaultScale(float defaultScale)
         {
             if (Math.Abs(scale - defaultScale) > 0.001f)
@@ -149,6 +170,23 @@ namespace ElectroMod
                 ScaleChanged?.Invoke(this, scale);
                 Invalidate();
             }
+        }
+
+        private List<ConnectingWare> FindNearestConnectingWare(Point p)
+        {
+            var nearestWare = new List<ConnectingWare>();
+            foreach (var obj in model.OfType<Element>())
+            {
+                foreach (var objWare in obj.Wares)
+                {
+                    double distance = objWare.Location.StartPoint(p).LengthSqr();
+                    if (distance < 400)
+                    {
+                        nearestWare.Add(objWare);
+                    }
+                }
+            }
+            return nearestWare;
         }
     }
 }

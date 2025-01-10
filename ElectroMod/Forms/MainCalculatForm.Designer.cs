@@ -98,6 +98,7 @@
             this.btnSaveProp = new System.Windows.Forms.Button();
             this.btnCalculate = new System.Windows.Forms.Button();
             this.drawPanel1 = new ElectroMod.DrawPanel();
+            this.label1 = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -157,7 +158,7 @@
             this.файлToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1406, 28);
+            this.menu.Size = new System.Drawing.Size(1406, 30);
             this.menu.TabIndex = 6;
             this.menu.Text = "menuStrip1";
             // 
@@ -167,20 +168,20 @@
             this.OpenFile,
             this.SaveFile});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
-            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
+            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 26);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
             // OpenFile
             // 
             this.OpenFile.Name = "OpenFile";
-            this.OpenFile.Size = new System.Drawing.Size(224, 26);
+            this.OpenFile.Size = new System.Drawing.Size(166, 26);
             this.OpenFile.Text = "Открыть";
             this.OpenFile.Click += new System.EventHandler(this.OpenFile_Click);
             // 
             // SaveFile
             // 
             this.SaveFile.Name = "SaveFile";
-            this.SaveFile.Size = new System.Drawing.Size(224, 26);
+            this.SaveFile.Size = new System.Drawing.Size(166, 26);
             this.SaveFile.Text = "Сохранить";
             this.SaveFile.Click += new System.EventHandler(this.SaveFile_Click);
             // 
@@ -518,6 +519,7 @@
             // panelPropertyLine
             // 
             this.panelPropertyLine.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyLine.Controls.Add(this.label1);
             this.panelPropertyLine.Controls.Add(this.tbLineLength);
             this.panelPropertyLine.Controls.Add(this.lbLength);
             this.panelPropertyLine.Controls.Add(this.lbMarks);
@@ -591,7 +593,7 @@
             this.panelPropertyRecloser.Controls.Add(this.cbRecloserType);
             this.panelPropertyRecloser.Controls.Add(this.tbRecloserName);
             this.panelPropertyRecloser.Controls.Add(this.label19);
-            this.panelPropertyRecloser.Location = new System.Drawing.Point(228, 545);
+            this.panelPropertyRecloser.Location = new System.Drawing.Point(226, 547);
             this.panelPropertyRecloser.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelPropertyRecloser.Name = "panelPropertyRecloser";
             this.panelPropertyRecloser.Size = new System.Drawing.Size(800, 233);
@@ -675,7 +677,7 @@
             this.panelPropertyTransformator.Controls.Add(this.cbTransformatorTypesKTP);
             this.panelPropertyTransformator.Controls.Add(this.tbTransformatorName);
             this.panelPropertyTransformator.Controls.Add(this.label20);
-            this.panelPropertyTransformator.Location = new System.Drawing.Point(228, 545);
+            this.panelPropertyTransformator.Location = new System.Drawing.Point(226, 547);
             this.panelPropertyTransformator.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelPropertyTransformator.Name = "panelPropertyTransformator";
             this.panelPropertyTransformator.Size = new System.Drawing.Size(800, 235);
@@ -760,6 +762,15 @@
             this.drawPanel1.Name = "drawPanel1";
             this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
             this.drawPanel1.TabIndex = 0;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(476, 32);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(24, 16);
+            this.label1.TabIndex = 30;
+            this.label1.Text = "Км";
             // 
             // MainCalculatForm
             // 
@@ -880,6 +891,7 @@
         private System.Windows.Forms.ComboBox cbBusVoltage;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox cbIsCalculate;
+        private System.Windows.Forms.Label label1;
     }
 }
 

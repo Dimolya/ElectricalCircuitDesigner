@@ -9,7 +9,7 @@ namespace ElectroMod
     public class Docx
     {
         [STAThread]
-        public void CreateReportDocument(CenterCalculation calc)
+        public void CreateReportDocument(CenterCalculation calc, Form owner)
         {
             Application wordApp = null;
             Document doc = null;
@@ -23,7 +23,6 @@ namespace ElectroMod
                 AddParagraph(doc, "Отчет по расчету токов короткого замыкания", isBold: true, isCenterAligned: true);
 
                 // Добавляем оглавление
-                AddParagraph(doc, "Оглавление", isBold: true);
                 Range tocRange = doc.Content.Paragraphs.Add().Range;
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
 
@@ -99,7 +98,9 @@ namespace ElectroMod
                 {
                     saveFileDialog.Filter = "Документы Word (*.docx)|*.docx";
                     saveFileDialog.Title = "Сохранить документ Word";
-
+                    //saveFileDialog.Owner = owner;
+                    owner?.Activate();
+                    owner?.Focus();
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         string filePath = saveFileDialog.FileName;
@@ -161,11 +162,11 @@ namespace ElectroMod
 
                 // Добавляем данные для максимального режима
                 table.Cell(rowOffset + 1, 1).Range.Text = "Ток К.З. в максимальном режиме";
-                table.Cell(rowOffset + 1, 2).Range.Text = $"{currents[i].Item1} кА";
+                table.Cell(rowOffset + 1, 2).Range.Text = $"{Math.Round(currents[i].Item1, 3)} кА";
 
                 // Добавляем данные для минимального режима
                 table.Cell(rowOffset + 2, 1).Range.Text = "Ток К.З. в минимальном режиме";
-                table.Cell(rowOffset + 2, 2).Range.Text = $"{currents[i].Item2} кА";
+                table.Cell(rowOffset + 2, 2).Range.Text = $"{Math.Round(currents[i].Item2, 3)} кА";
             }
         }
 

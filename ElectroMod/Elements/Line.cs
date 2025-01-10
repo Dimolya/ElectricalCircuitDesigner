@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace ElectroMod
 {
@@ -15,7 +16,8 @@ namespace ElectroMod
         {
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(-5, 0) });
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(130, 0) });
-
+            LocationNameHorizontal = new PointF(20, -25);
+            LocationNameVertical = new PointF(70, -10);
             Path = new GraphicsPath();
             Path.AddLine(0, 0, 125, 0);
             Path.CloseFigure();

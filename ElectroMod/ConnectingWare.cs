@@ -40,6 +40,8 @@ namespace ElectroMod
             get { return ParentElement.Location.Add(RelativeLocation); }
         }
 
+        public bool IsCalculationPoint { get; set; }
+
         public bool IsNear(ConnectingWare other, int magnetRange)
         {
             int X = Location.X - other.Location.X;
@@ -66,6 +68,12 @@ namespace ElectroMod
                 g.DrawEllipse(BorderColor.Pen(), drag.X - 5, drag.Y - 5, 10, 10);
                 g.FillEllipse(FillColor.Brush(), drag.X - 5, drag.Y - 5, 10, 10);
             }
+
+            if (IsCalculationPoint)
+                g.FillEllipse(Brushes.LightGreen, drag.X - 5, drag.Y - 5, 10, 10);
+            else
+                g.FillEllipse(FillColor.Brush(), drag.X - 5, drag.Y - 5, 10, 10);
+
             //отрисовка Tag
             RectangleF rect = Path.GetBounds();//прямоугольник ограничивающий поле надписи
             rect.Inflate(25, 25);
@@ -90,38 +98,13 @@ namespace ElectroMod
 
         public void EndDrag()
         {
-            //var p = Location.Add(drag);
-
-            //// Находим целевой элемент для соединения
-            //foreach (Element element in ParentElement.Elements.OfType<Element>())
-            //{
-            //    if (element != ParentElement && element.AcceptWare && element.Hit(p))
-            //    {
-            //        var nearestWare = element.FindNearestWare(p);
-            //        if (nearestWare != null)
-            //        {
-            //            var newLink = new Link { Ware1 = this, Ware2 = nearestWare };
-            //            ParentElement.Links.Add(newLink);
-            //            element.Links.Add(newLink); // Теперь оба элемента знают о связи
-
-            //            break;
-            //        }
-            //    }
-            //}
-            //drag = Point.Empty;
             var targetWare = FindClosestConnectingWare();
             if (targetWare != null)
             {
                 // Примагнитить текущий `ConnectingWare` к целевому
                 RelativeLocation = targetWare.Location.StartPoint(ParentElement.Location);
-                //var newLink = new Link { Ware1 = this, Ware2 = targetWare };
-                //ParentElement.Links.Add(newLink);
-                //targetWare.ParentElement.Links.Add(newLink);
-
                 // Соединяем элементы в цепочку
                 LinkElements(ParentElement, targetWare.ParentElement);
-                // Здесь можно добавить связь между элементами, если это необходимо
-                //ParentElement.Links.Add(new Link { Ware1 = this, Ware2 = targetWare });
             }
             drag = Point.Empty;
         }

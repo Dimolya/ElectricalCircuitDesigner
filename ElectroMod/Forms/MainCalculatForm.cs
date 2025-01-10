@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
@@ -7,6 +8,9 @@ using ElectroMod.DataBase.Dtos;
 using ElectroMod.DataBase;
 using ElectroMod.DataBase.Dtos.StaticDtos;
 using ElectroMod.Dtos.StaticDtos;
+using System.Collections.Generic;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
+using System.Globalization;
 
 namespace ElectroMod
 {
@@ -15,6 +19,7 @@ namespace ElectroMod
     {
         private float _defaultScale = 1.0f;
         private float _currentScale = 1.0f;
+        private string _baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         private Elements _elements = new Elements();
         private ISelectable _slctElement;
@@ -22,11 +27,13 @@ namespace ElectroMod
         public MainCalculatForm()
         {
             InitializeComponent();
-            drawPanel1.Build(_elements);
+            drawPanel1.Build(_elements, this);
             drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
             drawPanel1.ElementSelected += UpdateElementDetails;
             UpdateZoomInfo(1.0f);
         }
+
+        public List<ConnectingWare> SelectedCalculationPoints { get; private set; } = new List<ConnectingWare>();
 
         private void DrawPanel1_ScaleChanged(object sender, float scale)
         {
@@ -65,7 +72,7 @@ namespace ElectroMod
                 using (FileStream fs = File.OpenRead(ofd.FileName))
                 {
                     _elements = (Elements)new BinaryFormatter().Deserialize(fs);
-                    drawPanel1.Build(_elements);
+                    drawPanel1.Build(_elements, this);
                 }
             drawPanel1.Invalidate();
         }
@@ -94,7 +101,7 @@ namespace ElectroMod
         {
             drawPanel1.RemoveSelected();
             drawPanel1.Invalidate();
-            if(_slctElement is Bus)
+            if (_slctElement is Bus)
                 btBus.Enabled = true;
         }
 
@@ -110,9 +117,27 @@ namespace ElectroMod
                     calcul.CalculationMTOandMTZ(preCalculateForm);
 
                     var docx = new Docx();
-                    docx.CreateReportDocument(calcul);
+                    if (this.InvokeRequired)
+                    {
+                        this.Invoke(new Action(() => docx.CreateReportDocument(calcul, this)));
+                    }
+                    else
+                    {
+                        docx.CreateReportDocument(calcul, this);
+
+                    }
                 }
             }
+        }
+
+        public void AddSelectedPoint(ConnectingWare ware)
+        {
+            SelectedCalculationPoints.Add(ware);
+        }
+
+        public void RemoveSelectedPoint(ConnectingWare ware)
+        {
+            SelectedCalculationPoints.Remove(ware);
         }
 
         private void UpdateZoomInfo(float scale)
@@ -129,25 +154,23 @@ namespace ElectroMod
         {
             if (selectedElement is Bus bus)
             {
-                var directoryPath = @"C:\Users\79871";
-                var fileName = "DataBus.json";
-                try
-                {
-                    var file = Directory.GetFiles(directoryPath, fileName, SearchOption.AllDirectories);
-                }
-                catch(Exception ex)
-                {
+                var dataBusJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataBus.json");
 
+                if (File.Exists(dataBusJsonPath))
+                {
+                    var dto = JsonProvider.LoadData<DataBusDto>(dataBusJsonPath);
+                    cbBusVoltage.DataSource = dto[0].Voltage;
+                    cbBusVoltage.DisplayMember = "Voltage";
                 }
-                var dto = JsonProvider.LoadData<DataBusDto>("..\\..\\DataBase\\StaticData\\DataBus.json");
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {dataBusJsonPath}");
+
                 _slctElement = bus;
                 panelPropertyBus.Visible = true;
                 panelPropertyLine.Visible = false;
                 panelPropertyRecloser.Visible = false;
                 panelPropertyTransformator.Visible = false;
                 tbBusName.Text = bus.Name;
-                cbBusVoltage.DataSource = dto[0].Voltage;
-                cbBusVoltage.DisplayMember = "Voltage";
                 if (rbBusCurrent.Checked)
                 {
                     bus.isCurrent = true;
@@ -169,6 +192,8 @@ namespace ElectroMod
             }
             else if (selectedElement is Line line)
             {
+                var dataLineJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataLine.json");
+
                 _slctElement = line;
                 panelPropertyLine.Visible = true;
                 panelPropertyBus.Visible = false;
@@ -177,25 +202,42 @@ namespace ElectroMod
 
                 tbLineName.Text = line.Name;
                 tbLineLength.Text = line.Length.ToString();
-                var dto = JsonProvider.LoadData<DataLineDto>("..\\..\\DataBase\\StaticData\\DataLine.json");
-                cbLineMarks.DataSource = dto[0].Marks;
+
+                if (File.Exists(dataLineJsonPath))
+                {
+                    var dto = JsonProvider.LoadData<DataLineDto>(dataLineJsonPath);
+                    cbLineMarks.DataSource = dto[0].Marks;
+                }
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {dataLineJsonPath}");
             }
             else if (selectedElement is Recloser recloser)
             {
+                var dataRecloserJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataRecloser.json");
+
                 _slctElement = recloser;
                 panelPropertyRecloser.Visible = true;
                 panelPropertyLine.Visible = false;
                 panelPropertyBus.Visible = false;
                 panelPropertyTransformator.Visible = false;
 
-                var dto = JsonProvider.LoadData<DataRecloserDto>("..\\..\\DataBase\\StaticData\\DataRecloser.json");
                 tbRecloserName.Text = recloser.Name;
-                cbRecloserType.DataSource = dto[0].TypeRecloser;
-                cbRecloserTypeTT.DataSource = dto[0].TypeTT;
                 cbIsCalculate.Checked = recloser.isCalculated;
+
+                if (File.Exists(dataRecloserJsonPath))
+                {
+                    var dto = JsonProvider.LoadData<DataRecloserDto>(dataRecloserJsonPath);
+                    cbRecloserType.DataSource = dto[0].TypeRecloser;
+                    cbRecloserTypeTT.DataSource = dto[0].TypeTT;
+                }
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {dataRecloserJsonPath}");
+
             }
             else if (selectedElement is Transormator transormator)
             {
+                var dataTransformatorJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataTransformator.json");
+
                 _slctElement = transormator;
                 panelPropertyTransformator.Visible = true;
                 panelPropertyRecloser.Visible = false;
@@ -203,11 +245,17 @@ namespace ElectroMod
                 panelPropertyBus.Visible = false;
 
                 tbTransformatorName.Text = transormator.Name;
-                var dto = JsonProvider.LoadData<DataTransformatorDto>("..\\..\\DataBase\\StaticData\\DataTransformator.json");
-                cbTransformatorTypesKTP.DataSource = dto[0].TypeKTP;
-                cbTransformatorTypesKTP.DisplayMember = "TypeKTP";
-                cbTransformatorSchemes.DataSource = dto[0].Scheme;
-                cbTransformatorSchemes.DisplayMember = "Scheme";
+
+                if (File.Exists(dataTransformatorJsonPath))
+                {
+                    var dto = JsonProvider.LoadData<DataTransformatorDto>(dataTransformatorJsonPath);
+                    cbTransformatorTypesKTP.DataSource = dto[0].TypeKTP;
+                    cbTransformatorTypesKTP.DisplayMember = "TypeKTP";
+                    cbTransformatorSchemes.DataSource = dto[0].Scheme;
+                    cbTransformatorSchemes.DisplayMember = "Scheme";
+                }
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {dataTransformatorJsonPath}");
             }
             else
             {
@@ -273,79 +321,123 @@ namespace ElectroMod
             if (_slctElement is Bus bus)
             {
                 bus.Name = tbBusName.Text;
-                bus.Voltage = double.Parse(cbBusVoltage.Text);
-                if (bus.isCurrent)
+                try
                 {
-                    bus.IcsMax = double.Parse(tbBusCurrentMax.Text);
-                    bus.IcsMin = double.Parse(tbBusCurrentMin.Text);
+                    bus.Voltage = double.Parse(cbBusVoltage.Text.Replace('.', ','));
+                    if (bus.isCurrent)
+                    {
+                        bus.IcsMax = double.Parse(tbBusCurrentMax.Text.Replace('.', ','));
+                        bus.IcsMin = double.Parse(tbBusCurrentMin.Text.Replace('.', ','));
+                    }
+                    else if (bus.isResistanse)
+                    {
+                        bus.ActiveResistMax = double.Parse(tbBusActiveResistMax.Text.Replace('.', ','));
+                        bus.ReactiveResistMax = double.Parse(tbBusReactiveResistMax.Text.Replace('.', ','));
+                        bus.ActiveResistMin = double.Parse(tbBusActiveResistMin.Text.Replace('.', ','));
+                        bus.ReactiveResistMin = double.Parse(tbBusReactiveResistMin.Text.Replace('.', ','));
+                    }
                 }
-                else if (bus.isResistanse)
+                catch (FormatException ex)
                 {
-                    bus.ActiveResistMax = double.Parse(tbBusActiveResistMax.Text);
-                    bus.ReactiveResistMax = double.Parse(tbBusReactiveResistMax.Text);
-                    bus.ActiveResistMin = double.Parse(tbBusActiveResistMin.Text);
-                    bus.ReactiveResistMin = double.Parse(tbBusReactiveResistMin.Text);
+                    MessageBox.Show(ex.Message);
                 }
             }
             else if (_slctElement is Line line)
             {
                 line.Name = tbLineName.Text;
-                line.Length = double.Parse(tbLineLength.Text);
-                var dto = JsonProvider.LoadData<LineDataTypeDto>("..\\..\\DataBase\\LineDataTypesDB.json"); //ToDo: нужно как то сдлеать универсальный поиск независимо от места
-                for (int i = 0; i < dto.Count; i++)
+                try
                 {
-                    if (cbLineMarks.Text == dto[i].Mark)
+                    line.Length = double.Parse(tbLineLength.Text.Replace('.', ','));
+                }
+                catch (FormatException ex)
+                {
+                    MessageBox.Show(ex.Message); 
+                }
+
+                var lineTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "LineTypes.json");
+                if (File.Exists(lineTypesJsonPath))
+                {
+                    var dto = JsonProvider.LoadData<LineDataTypeDto>(lineTypesJsonPath);
+                    for (int i = 0; i < dto.Count; i++)
                     {
-                        line.ActiveResistance = dto[i].ActiveResistance * line.Length;
-                        line.ReactiveResistance = dto[i].ReactiveResistance * line.Length;
-                        break;
+                        if (cbLineMarks.Text == dto[i].Mark)
+                        {
+                            line.ActiveResistance = dto[i].ActiveResistance * line.Length;
+                            line.ReactiveResistance = dto[i].ReactiveResistance * line.Length;
+                            break;
+                        }
                     }
                 }
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {lineTypesJsonPath}");
+
             }
             else if (_slctElement is Recloser recloser)
             {
-                var dtoRec = JsonProvider.LoadData<RecloserDataTypeDto>("..\\..\\DataBase\\RecloserDataType.json");
-                var dtoTT = JsonProvider.LoadData<DataTypeTTDto>("..\\..\\DataBase\\DataTypeTT.json");
+                var recloserTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "RecloserTypes.json");
+                var typeTTJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TypeTT.json");
+
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
                 recloser.TypeTT = cbRecloserTypeTT.Text;
                 recloser.isCalculated = cbIsCalculate.Checked;
-                foreach(var recType in dtoRec)
+
+                if (File.Exists(recloserTypesJsonPath))
                 {
-                    if(recloser.TypeRecloser == recType.TypeRecloser)
+                    var dtoRec = JsonProvider.LoadData<RecloserDataTypeDto>(recloserTypesJsonPath);
+                    foreach (var recType in dtoRec)
                     {
-                        recloser.Kb = recType.Kb;
-                        recloser.Kcz = recType.Kcz;
-                        recloser.Kn = recType.Kn;
-                        break;
+                        if (recloser.TypeRecloser == recType.TypeRecloser)
+                        {
+                            recloser.Kb = recType.Kb;
+                            recloser.Kcz = recType.Kcz;
+                            recloser.Kn = recType.Kn;
+                            break;
+                        }
                     }
                 }
-                foreach(var typeTT in dtoTT)
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {recloserTypesJsonPath}");
+
+                if (File.Exists(typeTTJsonPath))
                 {
-                    if(recloser.TypeTT == typeTT.TypeTT)
+                    var dtoTT = JsonProvider.LoadData<DataTypeTTDto>(typeTTJsonPath);
+                    foreach (var typeTT in dtoTT)
                     {
-                        recloser.Ntt = typeTT.Ntt;
-                        break;
+                        if (recloser.TypeTT == typeTT.TypeTT)
+                        {
+                            recloser.Ntt = typeTT.Ntt;
+                            break;
+                        }
                     }
                 }
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {recloserTypesJsonPath}");
             }
             else if (_slctElement is Transormator transormator)
             {
+                var transformatorTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TransformatorTypes.json");
                 transormator.Name = tbTransformatorName.Text;
                 transormator.TypeKTP = cbTransformatorTypesKTP.Text;
                 transormator.Scheme = cbTransformatorSchemes.Text;
-                var dto = JsonProvider.LoadData<TransformatorContainerDto>("..\\..\\DataBase\\TransformatorContainer.json");
 
-                for (int i = 0; i < dto.Count; i++)
+                if (File.Exists(transformatorTypesJsonPath))
                 {
-                    if (transormator.TypeKTP == dto[i].TypeKTP)
+                    var dto = JsonProvider.LoadData<TransformatorContainerDto>(transformatorTypesJsonPath);
+
+                    for (int i = 0; i < dto.Count; i++)
                     {
-                        transormator.FullResistance = 10 * (dto[i].Uk * Math.Pow(0.4, 2) / dto[i].S);
-                        transormator.ActiveResistance = dto[i].Pk * Math.Pow(0.4, 2) / Math.Pow(dto[i].S, 2);
-                        transormator.ReactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
-                        break;
+                        if (transormator.TypeKTP == dto[i].TypeKTP)
+                        {
+                            transormator.FullResistance = 10 * (dto[i].Uk * Math.Pow(0.4, 2) / dto[i].S);
+                            transormator.ActiveResistance = dto[i].Pk * Math.Pow(0.4, 2) / Math.Pow(dto[i].S, 2);
+                            transormator.ReactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
+                            break;
+                        }
                     }
                 }
+                else
+                    MessageBox.Show($"Неверно указан путь к файлу {transformatorTypesJsonPath}");
             }
         }
     }

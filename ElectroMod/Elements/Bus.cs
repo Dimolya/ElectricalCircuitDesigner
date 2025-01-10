@@ -13,7 +13,8 @@ namespace ElectroMod
         public Bus(Elements elements) : base(elements)
         {
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(37, -5) });
-
+            LocationNameHorizontal = new PointF(80, 15);
+            LocationNameVertical = new PointF(25, -40);
             Path = new GraphicsPath();
             Path.AddLine(37, 0, 37, 25);
             Path.AddRectangle(new Rectangle(0, 25, 75, 25));

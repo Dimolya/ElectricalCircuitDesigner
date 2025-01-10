@@ -18,18 +18,19 @@ namespace ElectroMod
     public class Element : IDrawable, IDragable, ISelectable
     {
         public delegate void DataChangedHandler(double cStr, double volt, double resist);
-        public event DataChangedHandler DataChanged;
 
-        private bool IsSelected = false;
+        private bool _isSelected = false;
+        private SerializableGraphicsPath _path;
         public bool IsFirstInit { get; set; } = true;
         public bool IsVisited { get; set; }
-        private SerializableGraphicsPath path;
 
         public virtual bool AcceptWare => true;
         public virtual Color BorderColor => Color.White;
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public string Name { get; set; }
+        protected PointF LocationNameHorizontal { get; set; }
+        protected PointF LocationNameVertical { get; set; }
         public double IcsMax { get; set; }
         public double IcsMin { get; set; }
         public Point Location { get; set; }
@@ -37,8 +38,8 @@ namespace ElectroMod
         public int Angle { get; set; }
         public GraphicsPath Path
         {
-            get { return path; }
-            set { path = value; }
+            get { return _path; }
+            set { _path = value; }
         }
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
@@ -60,7 +61,7 @@ namespace ElectroMod
             GraphicsState state = g.Save();
             g.TranslateTransform(Location.X, Location.Y);
             //если выделены - рисуем гало
-            if (IsSelected)
+            if (_isSelected)
                 Addition.DrawHalo(Path, g, Color.Red, Color.Red.Pen(), 4);
 
             g.DrawPath(BorderColor.Pen(2), Path);
@@ -70,22 +71,25 @@ namespace ElectroMod
                 using (var font = new System.Drawing.Font("Arial", 10))
                 using (var brush = new SolidBrush(Color.Black))
                 {
-                    PointF textLocation;
-                    if (Angle%180 == 0)
+                    if (Angle % 180 == 0)
                     {
-                        textLocation = new PointF(10 * scale,
-                                                  15 * scale);
+                        //rect.Inflate(LocationNameHorizontal.X, LocationNameHorizontal.Y);
+                        //textLocation = new PointF(LocationNameHorizontal.X * scale, LocationNameHorizontal.Y * scale);
+                        g.DrawString(Name, font, brush, LocationNameHorizontal);
                     }
                     else
                     {
-                        textLocation = new PointF(20 * scale,
-                                                  20 * scale);
+                    RectangleF rect = new RectangleF(LocationNameVertical.X,
+                                                     LocationNameVertical.Y, 
+                                                     80, 400);
+                        //textLocation = new PointF(LocationNameVertical.X * scale, LocationNameVertical.Y * scale);
+                        g.DrawString(Name, font, brush, rect);
                     }
 
-                    g.DrawString(Name, font, brush, textLocation);
                 }
                 g.ResetTransform();
             }
+
             g.Restore(state);//нужное позиционирование всех эелементов
         }
 
@@ -169,7 +173,6 @@ namespace ElectroMod
                 case Type type when type == typeof(Line):
                     return true;
             }
-            //if (GetType() != otherElement.GetType()) return false;
             return false;
         }
 
@@ -217,12 +220,12 @@ namespace ElectroMod
 
         public void Select()
         {
-            IsSelected = true;
+            _isSelected = true;
         }
 
         public void Unselect()
         {
-            IsSelected = false;
+            _isSelected = false;
         }
 
         ISelectable ISelectable.Hit(Point point)
