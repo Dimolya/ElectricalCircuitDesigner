@@ -73,6 +73,7 @@
             this.tbBusName = new System.Windows.Forms.TextBox();
             this.lbTextName = new System.Windows.Forms.Label();
             this.panelPropertyLine = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
             this.tbLineLength = new System.Windows.Forms.TextBox();
             this.lbLength = new System.Windows.Forms.Label();
             this.lbMarks = new System.Windows.Forms.Label();
@@ -97,8 +98,9 @@
             this.label20 = new System.Windows.Forms.Label();
             this.btnSaveProp = new System.Windows.Forms.Button();
             this.btnCalculate = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbBusTypeTT = new System.Windows.Forms.ComboBox();
             this.drawPanel1 = new ElectroMod.DrawPanel();
-            this.label1 = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -232,6 +234,8 @@
             // panelPropertyBus
             // 
             this.panelPropertyBus.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyBus.Controls.Add(this.cbBusTypeTT);
+            this.panelPropertyBus.Controls.Add(this.label2);
             this.panelPropertyBus.Controls.Add(this.cbBusVoltage);
             this.panelPropertyBus.Controls.Add(this.label9);
             this.panelPropertyBus.Controls.Add(this.panelForResistance);
@@ -279,7 +283,7 @@
             this.panelForResistance.Controls.Add(this.label13);
             this.panelForResistance.Controls.Add(this.tbBusReactiveResistMax);
             this.panelForResistance.Controls.Add(this.tbBusActiveResistMax);
-            this.panelForResistance.Location = new System.Drawing.Point(3, 106);
+            this.panelForResistance.Location = new System.Drawing.Point(3, 96);
             this.panelForResistance.Name = "panelForResistance";
             this.panelForResistance.Size = new System.Drawing.Size(592, 125);
             this.panelForResistance.TabIndex = 50;
@@ -393,7 +397,7 @@
             this.panelForCurrent.Controls.Add(this.tbBusCurrentMin);
             this.panelForCurrent.Controls.Add(this.label17);
             this.panelForCurrent.Controls.Add(this.tbBusCurrentMax);
-            this.panelForCurrent.Location = new System.Drawing.Point(4, 106);
+            this.panelForCurrent.Location = new System.Drawing.Point(4, 96);
             this.panelForCurrent.Name = "panelForCurrent";
             this.panelForCurrent.Size = new System.Drawing.Size(465, 69);
             this.panelForCurrent.TabIndex = 49;
@@ -452,9 +456,9 @@
             // 
             this.panel1.Controls.Add(this.rbBusResistance);
             this.panel1.Controls.Add(this.rbBusCurrent);
-            this.panel1.Location = new System.Drawing.Point(198, 62);
+            this.panel1.Location = new System.Drawing.Point(196, 62);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(398, 39);
+            this.panel1.Size = new System.Drawing.Size(400, 39);
             this.panel1.TabIndex = 48;
             // 
             // rbBusResistance
@@ -526,24 +530,33 @@
             this.panelPropertyLine.Controls.Add(this.cbLineMarks);
             this.panelPropertyLine.Controls.Add(this.tbLineName);
             this.panelPropertyLine.Controls.Add(this.label18);
-            this.panelPropertyLine.Location = new System.Drawing.Point(228, 546);
+            this.panelPropertyLine.Location = new System.Drawing.Point(226, 547);
             this.panelPropertyLine.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelPropertyLine.Name = "panelPropertyLine";
             this.panelPropertyLine.Size = new System.Drawing.Size(800, 235);
             this.panelPropertyLine.TabIndex = 52;
             this.panelPropertyLine.Visible = false;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(300, 63);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(24, 16);
+            this.label1.TabIndex = 30;
+            this.label1.Text = "Км";
+            // 
             // tbLineLength
             // 
-            this.tbLineLength.Location = new System.Drawing.Point(196, 31);
+            this.tbLineLength.Location = new System.Drawing.Point(196, 60);
             this.tbLineLength.Name = "tbLineLength";
-            this.tbLineLength.Size = new System.Drawing.Size(273, 22);
+            this.tbLineLength.Size = new System.Drawing.Size(101, 22);
             this.tbLineLength.TabIndex = 29;
             // 
             // lbLength
             // 
             this.lbLength.AutoSize = true;
-            this.lbLength.Location = new System.Drawing.Point(-1, 34);
+            this.lbLength.Location = new System.Drawing.Point(-1, 63);
             this.lbLength.Name = "lbLength";
             this.lbLength.Size = new System.Drawing.Size(48, 16);
             this.lbLength.TabIndex = 28;
@@ -552,7 +565,7 @@
             // lbMarks
             // 
             this.lbMarks.AutoSize = true;
-            this.lbMarks.Location = new System.Drawing.Point(-1, 62);
+            this.lbMarks.Location = new System.Drawing.Point(-1, 33);
             this.lbMarks.Name = "lbMarks";
             this.lbMarks.Size = new System.Drawing.Size(108, 16);
             this.lbMarks.TabIndex = 27;
@@ -561,7 +574,7 @@
             // cbLineMarks
             // 
             this.cbLineMarks.FormattingEnabled = true;
-            this.cbLineMarks.Location = new System.Drawing.Point(196, 59);
+            this.cbLineMarks.Location = new System.Drawing.Point(196, 30);
             this.cbLineMarks.Name = "cbLineMarks";
             this.cbLineMarks.Size = new System.Drawing.Size(273, 24);
             this.cbLineMarks.TabIndex = 26;
@@ -605,9 +618,9 @@
             this.label21.AutoSize = true;
             this.label21.Location = new System.Drawing.Point(1, 97);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(97, 16);
+            this.label21.Size = new System.Drawing.Size(113, 16);
             this.label21.TabIndex = 20;
-            this.label21.Text = "Вычисляемый";
+            this.label21.Text = "Проектируемый";
             // 
             // cbIsCalculate
             // 
@@ -641,7 +654,7 @@
             this.cbRecloserTypeTT.FormattingEnabled = true;
             this.cbRecloserTypeTT.Location = new System.Drawing.Point(196, 61);
             this.cbRecloserTypeTT.Name = "cbRecloserTypeTT";
-            this.cbRecloserTypeTT.Size = new System.Drawing.Size(273, 24);
+            this.cbRecloserTypeTT.Size = new System.Drawing.Size(121, 24);
             this.cbRecloserTypeTT.TabIndex = 16;
             // 
             // cbRecloserType
@@ -746,13 +759,30 @@
             // 
             // btnCalculate
             // 
-            this.btnCalculate.Location = new System.Drawing.Point(1223, 593);
+            this.btnCalculate.Location = new System.Drawing.Point(1223, 722);
             this.btnCalculate.Name = "btnCalculate";
             this.btnCalculate.Size = new System.Drawing.Size(171, 48);
             this.btnCalculate.TabIndex = 56;
             this.btnCalculate.Text = "Расчет";
             this.btnCalculate.UseVisualStyleBackColor = true;
             this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(377, 34);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(87, 16);
+            this.label2.TabIndex = 53;
+            this.label2.Text = "Номинал ТТ";
+            // 
+            // cbBusTypeTT
+            // 
+            this.cbBusTypeTT.FormattingEnabled = true;
+            this.cbBusTypeTT.Location = new System.Drawing.Point(471, 30);
+            this.cbBusTypeTT.Name = "cbBusTypeTT";
+            this.cbBusTypeTT.Size = new System.Drawing.Size(125, 24);
+            this.cbBusTypeTT.TabIndex = 54;
             // 
             // drawPanel1
             // 
@@ -763,21 +793,12 @@
             this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
             this.drawPanel1.TabIndex = 0;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(476, 32);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(24, 16);
-            this.label1.TabIndex = 30;
-            this.label1.Text = "Км";
-            // 
             // MainCalculatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1406, 844);
+            this.ClientSize = new System.Drawing.Size(1406, 782);
             this.Controls.Add(this.btnCalculate);
             this.Controls.Add(this.btnSaveProp);
             this.Controls.Add(this.panelPropertyTransformator);
@@ -892,6 +913,8 @@
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox cbIsCalculate;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox cbBusTypeTT;
+        private System.Windows.Forms.Label label2;
     }
 }
 

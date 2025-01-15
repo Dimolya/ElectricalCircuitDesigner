@@ -81,12 +81,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_7310BF785A3D4C0D95F434FB72F48B2A"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -194,6 +188,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -218,6 +220,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
     }
@@ -472,26 +482,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7310BF785A3D4C0D95F434FB72F48B2A"
-            {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\..\\Downloads\\free-icon-electrical-circuit-675795.ico"
-            "TargetName" = "8:free-icon-electrical-circuit-675795.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_6AC60AC185EC490A981AA5AA84705115"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_864F5FF966B44413B79D1B329B266181"
             {
             "SourcePath" = "8:..\\ElectroMod\\DataBase\\JsonProvider.cs"
@@ -713,7 +703,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Setup"
         "ProductCode" = "8:{C973E227-896C-4F4C-A63F-0354BFB6CD77}"
-        "PackageCode" = "8:{1DD25710-BE69-49E0-9905-52DABC6C94DA}"
+        "PackageCode" = "8:{91417F61-2584-452C-9D05-D1590D4CFFCD}"
         "UpgradeCode" = "8:{0DDE36D8-F0EE-4B00-A340-B42919C039D3}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -844,7 +834,7 @@
             "Target" = "8:_7652705707E54DBFAC28810BE0A777C4"
             "Folder" = "8:_6AC60AC185EC490A981AA5AA84705115"
             "WorkingFolder" = "8:_46440D44AFF34920BFA5F684A95F36AB"
-            "Icon" = "8:_7310BF785A3D4C0D95F434FB72F48B2A"
+            "Icon" = "8:"
             "Feature" = "8:"
             }
         }

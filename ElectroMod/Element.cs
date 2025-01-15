@@ -31,8 +31,8 @@ namespace ElectroMod
         public string Name { get; set; }
         protected PointF LocationNameHorizontal { get; set; }
         protected PointF LocationNameVertical { get; set; }
-        public double IcsMax { get; set; }
-        public double IcsMin { get; set; }
+        public double IszMax { get; set; }
+        public double IszMin { get; set; }
         public Point Location { get; set; }
         public Elements Elements { get; set; }
         public int Angle { get; set; }
@@ -153,6 +153,9 @@ namespace ElectroMod
 
                             thisWare.ConnectedWares.Add(otherElementWare);
                             otherElementWare.ConnectedWares.Add(thisWare);
+
+                            thisWare.ConnectedElements.Add(otherElement);
+                            otherElementWare.ConnectedElements.Add(this);
                         }
                     }
                 }

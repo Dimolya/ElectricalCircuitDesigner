@@ -19,6 +19,8 @@ namespace ElectroMod
         private static Elements _elements;
         private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
         private int _countK = 1;
+        private bool _flagForFirstInitK = true;
+
 
         public CenterCalculation(Elements elements)
         {
@@ -28,7 +30,9 @@ namespace ElectroMod
 
         public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
+        public List<(double, double)> ResistanceSchemes { get; set; }
 
+        public bool IsCurrent { get; set; }
 
         public double Voltage { get; set; }
         public string ReconnectName { get; set; }
@@ -39,7 +43,7 @@ namespace ElectroMod
         public Element LastElementList { get; set; }
         public Element SecondLastElementList { get; set; }
         public double TransformatorFullResistance { get; set; }
-        public string NamberTY { get; set; }
+        public string NumberTY { get; set; }
         public double PowerSuchKBT { get; set; }
         public double PowerKBT { get; set; }
         public double PowerSuchKBA { get; set; }
@@ -49,9 +53,12 @@ namespace ElectroMod
         public double IszMTO { get; set; }
         public (double, double) Isz2MTO { get; set; }
         public double Isz3MTO { get; set; }
+        public double IszMTOMax { get; set; }
         public double KchuvMTO { get; set; }
         public string resoultMTO { get; set; }
+
         public double IszMTZ { get; set; }
+        public double IszMTZCeiling { get; set; }
         public double KchuvMTZ { get; set; }
         public double Kchuv2MTZ { get; set; }
         public double Kchuv3MTZ { get; set; }
@@ -62,13 +69,11 @@ namespace ElectroMod
         public double Ikz1low { get; set; }
 
 
-        private bool _flagForFirstInitK = true;
 
         public void CalculationFormuls()
         {
             foreach (var elementsList in CalculationElementList)
             {
-                
                 CalculateCurrents(elementsList);
                 _flagForFirstInitK = false;
 
@@ -78,7 +83,7 @@ namespace ElectroMod
         public void CalculationMTOandMTZ(PreCalculationForm preCalculationForm)
         {
             ReconnectName = preCalculationForm.Reconnect;
-            NamberTY = preCalculationForm.NumberTY;
+            NumberTY = preCalculationForm.NumberTY;
             PowerSuchKBT = preCalculationForm.PowerSuchKBT;
             PowerKBT = preCalculationForm.PowerKBT;
             PowerSuchKBA = preCalculationForm.PowerSuchKBA;
@@ -101,25 +106,37 @@ namespace ElectroMod
                             / (Math.Sqrt(3) * Voltage * 0.95)
                         : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA)
                             / (Math.Sqrt(3) * Voltage);
+                    Iust = Math.Round(Iust,3);
+
                     IszMTO = 1.2 * Iust;
                     Isz2MTO = (3 * Iust, 4 * Iust);
-                    Isz3MTO = 1.2 * (LastElementList.IcsMax * 1000);
-                    KchuvMTO = SecondLastElementList.IcsMin * 0.865 * 1000 / IszMTO;
+                    Isz3MTO = 1.2 * (LastElementList.IszMax * 1000);
+                    Isz3MTO = Math.Round(Isz3MTO, 3);
 
+                    IszMTOMax = Math.Max(Math.Max(IszMTO, Isz2MTO.Item2), Isz3MTO);
+
+                    KchuvMTO = SecondLastElementList.IszMin * 0.865 * 1000 / IszMTOMax;
+                    KchuvMTO = Math.Round(KchuvMTO, 3);
+                        
                     //дальше МТЗ
                     IszMTZ = recloser.Kn * recloser.Kcz / recloser.Kb * Iust;
-                    KchuvMTZ = SecondLastElementList.IcsMin * 0.865 / IszMTZ;
+                    IszMTZ = Math.Round(IszMTZ, 3);
+                    IszMTZCeiling = Math.Ceiling(IszMTZ);
+                    KchuvMTZ = SecondLastElementList.IszMin * 0.865 * 1000 / IszMTZCeiling;
+                    KchuvMTZ = Math.Round(KchuvMTZ, 3);
 
-                    Ip = 1 * IszMTZ / recloser.Ntt;
-                    Ip2 = 0.5 * LastElementList.IcsMax * 1000 / recloser.Ntt;
-                    Kchuv2MTZ = Ip2 / Ip;
-                    if (transformator.Scheme == "Звезда-Звезда") //ToDo: тут пока неясно что
-                    {
-                        Ikz1 = 220 / (1 / 3.0 * transformator.FullResistance);
-                        Ikz1low = Ikz1 * (0.4 / Voltage);
-                        Ip1 = Ikz1low / Math.Sqrt(3) * recloser.Ntt;
-                        Kchuv3MTZ = Ip1 / Ip;
-                    }
+
+                    //Ip = 1 * IszMTZCeiling / recloser.Ntt; //ToDo: либо с реклоузера если он еесть, либо с шины
+                    //Ip2 = 0.5 * LastElementList.IcsMax * 1000 / recloser.Ntt;
+                    //Kchuv2MTZ = Ip2 / Ip;
+
+                    //if (transformator.Scheme == "Звезда-Звезда") //ToDo: тут пока неясно что
+                    //{
+                    //    Ikz1 = 220 / (1 / 3.0 * transformator.FullResistance);
+                    //    Ikz1low = Ikz1 * (0.4 / Voltage);
+                    //    Ip1 = Ikz1low / Math.Sqrt(3) * recloser.Ntt;
+                    //    Kchuv3MTZ = Ip1 / Ip;
+                    //}
 
                     break;
                 }
@@ -179,8 +196,8 @@ namespace ElectroMod
 
         private void CalculateCurrents(List<Element> elements)
         {
-            double IscMax = 0;
-            double IscMin = 0;
+            double IszMax = 0;
+            double IszMin = 0;
             double Rmax = 0;
             double Xmax = 0;
             double Rmin = 0;
@@ -200,12 +217,37 @@ namespace ElectroMod
                 (h, e) => { h.IntersectWith(e); return h; }
             ).ToList();
 
+            Element visitedElement = null;
             foreach (var element in elements)
             {
-                if ((!commonElements.Contains(element) && !_flagForFirstInitK) || _flagForFirstInitK)
+                foreach (var ware in element.Wares)
                 {
-                    element.Wares[0].Label = $"K{_countK}";
-                    _countK++;
+                    if (element is Transormator)
+                    {
+                        if (ware.ConnectedWares.Any())
+                            continue;
+
+                        ware.Label = $"K{_countK}";
+                        _countK++;
+                        break;
+                    }
+                    foreach (var connectedElement in ware.ConnectedElements)
+                    {
+                        if (elements.Contains(connectedElement))
+                        {
+                            if (connectedElement == visitedElement)
+                            {
+                                continue;
+                            }
+                                visitedElement = element;
+                            if ((!commonElements.Contains(element) && !_flagForFirstInitK) || _flagForFirstInitK)
+                            {
+                                ware.Label = $"K{_countK}";
+                                _countK++;
+                            }
+                        }
+                    }
+
                 }
 
                 if (element is Bus bus)
@@ -213,13 +255,13 @@ namespace ElectroMod
                     Voltage = bus.Voltage;
                     if (bus.isCurrent)
                     {
-                        isCurrent = bus.isCurrent;
-                        IscMax = bus.IcsMax;
-                        IscMin = bus.IcsMin;
-                        Zmax = Voltage / (Math.Sqrt(3) * IscMax);
-                        Zmin = Voltage / (Math.Sqrt(3) * IscMin);
-                        if (!Currents.Contains((IscMax, IscMin)))
-                            Currents.Add((IscMax, IscMin));
+                        IsCurrent = bus.isCurrent;
+                        IszMax = bus.IszMax;
+                        IszMin = bus.IszMin;
+                        Zmax = Voltage / (Math.Sqrt(3) * IszMax);
+                        Zmin = Voltage / (Math.Sqrt(3) * IszMin);
+                        if (!Currents.Contains((IszMax, IszMin)))
+                            Currents.Add((IszMax, IszMin));
                     }
                     else
                     {
@@ -228,44 +270,46 @@ namespace ElectroMod
                         Rmin = bus.ActiveResistMin;
                         Xmax = bus.ReactiveResistMax;
                         Xmin = bus.ReactiveResistMin;
+
+                        IszMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + Xmax, 2)));
+                        IszMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + Xmin, 2)));
                     }
-                    continue;
                 }
                 else if (element is Line line)
                 {
                     _resistanceSchemes.Add((line.ActiveResistance, line.ReactiveResistance));
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
-                    if (isCurrent)
+                    if (IsCurrent)
                     {
-                        IscMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
-                        IscMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
+                        IszMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
+                        IszMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
                     }
                     else
                     {
-                        IscMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
-                        IscMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
+                        IszMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
+                        IszMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
                     }
-                    line.IcsMax = IscMax;
-                    line.IcsMin = IscMin;
+                    line.IszMax = Math.Round(IszMax, 3);
+                    line.IszMin = Math.Round(IszMin, 3);
                 }
                 else if (element is Recloser recloser)
                 {
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
-                    if (isCurrent)
+                    if (IsCurrent)
                     {
-                        IscMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
-                        IscMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
+                        IszMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
+                        IszMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
                     }
                     else
                     {
-                        IscMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
-                        IscMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
+                        IszMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
+                        IszMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
                     }
-                    Currents.Add((IscMax, IscMin));
-                    recloser.IcsMax = IscMax;
-                    recloser.IcsMin = IscMin;
+                    Currents.Add((IszMax, IszMin));
+                    recloser.IszMax = IszMax;
+                    recloser.IszMin = IszMin;
                     continue;
                 }
                 else if (element is Transormator transormator)
@@ -273,29 +317,30 @@ namespace ElectroMod
                     _resistanceSchemes.Add((transormator.ActiveResistance, transormator.ReactiveResistance));
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
-                    if (isCurrent)
+                    if (IsCurrent)
                     {
                         var sumResistanceItem1Pow = Math.Pow(sumResistance.Item1, 2);
                         var sumResistanceItem2Pow = Math.Pow(sumResistance.Item2, 2);
                         var sumItems = sumResistanceItem1Pow + sumResistanceItem2Pow;
                         var sqrtSumItems = Math.Sqrt(sumItems);
                         var sqrt3 = Math.Sqrt(3);
-                        IscMax = Voltage / (sqrt3 * (sqrtSumItems + Zmax));
-                        IscMin = Voltage / (sqrt3 * (sqrtSumItems + Zmin));
+                        IszMax = Voltage / (sqrt3 * (sqrtSumItems + Zmax));
+                        IszMin = Voltage / (sqrt3 * (sqrtSumItems + Zmin));
                     }
                     else
                     {
-                        IscMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
-                        IscMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
+                        IszMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
+                        IszMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
                     }
-                    transormator.IcsMax = IscMax;
-                    transormator.IcsMin = IscMin;
+                    transormator.IszMax = Math.Round(IszMax,3);
+                    transormator.IszMin = Math.Round(IszMin, 3);
                 }
 
-                if (Currents.Contains((IscMax, IscMin)))
+                if (Currents.Contains((IszMax, IszMin)))
                     continue;
-                Currents.Add((IscMax, IscMin));
+                Currents.Add((IszMax, IszMin));
             }
+            ResistanceSchemes = new List<(double, double)>(_resistanceSchemes);
             _resistanceSchemes.Clear();
         }
     }

@@ -12,7 +12,7 @@ namespace ElectroMod
         public Transormator(Elements element) : base(element)
         {
             Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, -5) });
-            //Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, 130)});
+            Wares.Add(new ConnectingWare(this) { RelativeLocation = new Point(25, 130)});
 
             LocationNameHorizontal = new PointF(0, 10);
             LocationNameVertical = new PointF(55, 50);

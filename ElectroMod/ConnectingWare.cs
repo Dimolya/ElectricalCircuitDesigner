@@ -25,6 +25,8 @@ namespace ElectroMod
         public bool IsPointCalculation { get; set; }
 
         public List<ConnectingWare> ConnectedWares { get; set; } = new List<ConnectingWare>();
+        public List<Element> ConnectedElements { get; set; } = new List<Element>();
+
         public bool IsVisited { get; set; }
         public string Label { get; set; }
         private Point drag;

@@ -124,7 +124,6 @@ namespace ElectroMod
                     else
                     {
                         docx.CreateReportDocument(calcul, this);
-
                     }
                 }
             }
@@ -160,7 +159,7 @@ namespace ElectroMod
                 {
                     var dto = JsonProvider.LoadData<DataBusDto>(dataBusJsonPath);
                     cbBusVoltage.DataSource = dto[0].Voltage;
-                    cbBusVoltage.DisplayMember = "Voltage";
+                    cbBusTypeTT.DataSource = dto[0].TypeTT;
                 }
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {dataBusJsonPath}");
@@ -175,8 +174,8 @@ namespace ElectroMod
                 {
                     bus.isCurrent = true;
                     bus.isResistanse = false;
-                    tbBusCurrentMax.Text = bus.IcsMax.ToString();
-                    tbBusCurrentMin.Text = bus.IcsMin.ToString();
+                    tbBusCurrentMax.Text = bus.IszMax.ToString();
+                    tbBusCurrentMin.Text = bus.IszMin.ToString();
                 }
                 else if (rbBusResistance.Checked)
                 {
@@ -276,8 +275,8 @@ namespace ElectroMod
             {
                 bus.isCurrent = true;
                 bus.isResistanse = false;
-                tbBusCurrentMax.Text = bus.IcsMax.ToString();
-                tbBusCurrentMin.Text = bus.IcsMin.ToString();
+                tbBusCurrentMax.Text = bus.IszMax.ToString();
+                tbBusCurrentMin.Text = bus.IszMin.ToString();
             }
             else if (rbBusResistance.Checked)
             {
@@ -320,14 +319,33 @@ namespace ElectroMod
                 return;
             if (_slctElement is Bus bus)
             {
-                bus.Name = tbBusName.Text;
+                var typeTTJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TypeTT.json");
+
                 try
                 {
+                    bus.Name = tbBusName.Text;
                     bus.Voltage = double.Parse(cbBusVoltage.Text.Replace('.', ','));
+                    bus.TypeTT = cbBusTypeTT.Text;
+
+                    if (File.Exists(typeTTJsonPath))
+                    {
+                        var dtoTT = JsonProvider.LoadData<DataTypeTTDto>(typeTTJsonPath);
+                        foreach (var typeTT in dtoTT)
+                        {
+                            if (bus.TypeTT == typeTT.TypeTT)
+                            {
+                                bus.Ntt = typeTT.Ntt;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        MessageBox.Show($"Неверно указан путь к файлу {typeTTJsonPath}");
+
                     if (bus.isCurrent)
                     {
-                        bus.IcsMax = double.Parse(tbBusCurrentMax.Text.Replace('.', ','));
-                        bus.IcsMin = double.Parse(tbBusCurrentMin.Text.Replace('.', ','));
+                        bus.IszMax = double.Parse(tbBusCurrentMax.Text.Replace('.', ','));
+                        bus.IszMin = double.Parse(tbBusCurrentMin.Text.Replace('.', ','));
                     }
                     else if (bus.isResistanse)
                     {
@@ -424,13 +442,13 @@ namespace ElectroMod
                 if (File.Exists(transformatorTypesJsonPath))
                 {
                     var dto = JsonProvider.LoadData<TransformatorContainerDto>(transformatorTypesJsonPath);
-
+                    var voltage = double.Parse(cbBusVoltage.Text);
                     for (int i = 0; i < dto.Count; i++)
                     {
                         if (transormator.TypeKTP == dto[i].TypeKTP)
                         {
-                            transormator.FullResistance = 10 * (dto[i].Uk * Math.Pow(0.4, 2) / dto[i].S);
-                            transormator.ActiveResistance = dto[i].Pk * Math.Pow(0.4, 2) / Math.Pow(dto[i].S, 2);
+                            transormator.FullResistance = 10 * (dto[i].Uk * Math.Pow(voltage, 2) / dto[i].S);
+                            transormator.ActiveResistance = dto[i].Pk * Math.Pow(voltage, 2) / Math.Pow(dto[i].S, 2);
                             transormator.ReactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
                             break;
                         }

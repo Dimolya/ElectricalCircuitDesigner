@@ -9,5 +9,6 @@ namespace ElectroMod.DataBase.Dtos.StaticDtos
     public class DataBusDto
     {
         public List<double> Voltage { get; set; }
+        public List<string> TypeTT { get; set; }
     }
 }

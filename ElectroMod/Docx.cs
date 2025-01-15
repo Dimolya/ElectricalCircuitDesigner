@@ -1,46 +1,86 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Security.AccessControl;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using Microsoft.Office.Interop.Word;
+using Xceed.Words.NET;
 using Application = Microsoft.Office.Interop.Word.Application;
 
 namespace ElectroMod
 {
     public class Docx
     {
+        private List<(string,string)> _previousElementType = new List<(string, string)>();
+        private int _lineCount = 1;
+        private int _recloserCount = 1;
+
         [STAThread]
         public void CreateReportDocument(CenterCalculation calc, Form owner)
         {
             Application wordApp = null;
             Document doc = null;
-
             try
             {
                 wordApp = new Application();
+                wordApp.ScreenUpdating = false;
                 doc = wordApp.Documents.Add();
 
                 // Добавляем заголовок документа
-                AddParagraph(doc, "Отчет по расчету токов короткого замыкания", isBold: true, isCenterAligned: true);
+                AddParagraph(doc, "Отчет по расчету токов короткого замыкания", isBold: true, fontSize: 14, isCenterAligned: true);
 
                 // Добавляем оглавление
                 Range tocRange = doc.Content.Paragraphs.Add().Range;
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
+                int count = 2;
+                foreach(var element in calc.CalculationElementList[0])
+                {
+                    if (element is Bus)
+                        continue;
+
+                    AddParagraph(doc, $"Расчеты в точке K{count}", isBold: true, fontSize: 14);
+                    AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
+
+                    var elementsNames = CreateFormulaElementName(doc, element);
+                    if (calc.IsCurrent)
+                    { 
+                        AddFormula(doc, $"I_(к.з.max(k{count})) = " +
+                            $"Sub_voltage/(√(3) + √((R_(sub.max) + {elementsNames.Item1})^2" +
+                                               $" + (X_(sub.max) + {elementsNames.Item2})^2))");
+
+                        AddFormula(doc, $"I_(к.з.min(k{count})) = " +
+                            $"Sub_voltage/(√(3) + √((R_(sub.min) + {elementsNames.Item1})^2" +
+                                               $" + (X_(sub.min) + {elementsNames.Item2})^2))");
+                    }
+                    else
+                    {
+                        AddFormula(doc, $"I_(к.з.max(k{count})) = " +
+                            $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max)))");
+
+                        AddFormula(doc, $"I_(к.з.min(k{count})) = " +
+                            $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min)))");
+
+                    }
+                    count++;
+                }
+
 
                 AddParagraph(doc, "Результаты расчетов", isBold: true);
                 AddCalculationTable(doc, calc);
 
                 AddParagraph(doc, "");
                 AddParagraph(doc, "Выбор уставок защиты фидера", isBold: true);
-                AddParagraph(doc, "КТТ=ntt (из БД на ТТ)");
+                AddParagraph(doc, $"КТТ={calc.RecloserNtt}");
                 if (calc.ReconnectName == "Расчет по мощности ТУ")
-                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NamberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт");
+                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность P_t.u.such {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования P_t.u. {calc.PowerKBT} кВт");
                 else
-                    AddParagraph(doc, $"Согласно исходных данных мощность на фидере {calc.PowerSuchKBA} кВа");
+                    AddParagraph(doc, $"Согласно исходных данных мощность на фидере P_such {calc.PowerSuchKBA} кВа");
 
                 AddParagraph(doc, "Токовая отсечка (ТО)", isBold: true, fontSize: 14);
                 AddParagraph(doc, "Отстройка защиты от броска тока намагничивания");
                 if (calc.ReconnectName == "Расчет по мощности ТУ")
-                    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
+                    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust:F3}");
                 else
                     AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
 
@@ -48,11 +88,11 @@ namespace ElectroMod
                 AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.Isz2MTO.Item1}..{calc.Isz2MTO.Item2})");
 
                 AddParagraph(doc, "Где ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n" +
-                    "Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора КТП S кВа");
-                AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(к4)) * 1000) > 1.2 * ({calc.LastElementList?.IcsMax} * 1000) > {calc.Isz3MTO}");
+                    $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора КТП {calc.PowerKBA} кВа");
+                AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(Klast)) * 1000) > 1.2 * ({calc.LastElementList?.IszMax} * 1000) > {calc.Isz3MTO}");
                 AddParagraph(doc, "Где  k_н=1,2 для МПУ\r\n" +
-                    "Проверка чувствительности при 3-х фазном К.З. в максимальном режиме:");
-                AddFormula(doc, $"k_чувст=(I_(к.з.min(к3))*0,865*1000)/I_сз = ({calc.SecondLastElementList?.IcsMin}*0,865*1000)/{calc.IszMTO}={calc.KchuvMTO}");
+                    "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в наиболее удаленной точке проектируемой отпайки::");
+                AddFormula(doc, $"k_чувст=(I_(к.з.min(KsecondLast))*0,865*1000)/I_сз = ({calc.SecondLastElementList?.IszMin}*0,865*1000)/{calc.IszMTOMax}={calc.KchuvMTO}");
                 if (calc.KchuvMTO > 1.2)
                     AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) ");
                 else
@@ -62,7 +102,7 @@ namespace ElectroMod
                 AddParagraph(doc, "Максимальная токовая защита МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
                 if (calc.ReconnectName == "Расчет по мощности ТУ")
                 {
-                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NamberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт");
+                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт");
                     AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
                 }
                 else
@@ -71,34 +111,33 @@ namespace ElectroMod
                     AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
                 }
                 AddParagraph(doc, "Условие отстройки от максимального рабочего тока");
-                AddFormula(doc, $"I_сз>((k_н*k_сз)/k_в)*I_уст > (({calc.RecloserKn}*{calc.RecloserKcz})/{calc.RecloserKb})*{calc.Iust} > {calc.IszMTZ}");
-                AddParagraph(doc, "Принимаем уставку I_сз\r\n" +
+                AddFormula(doc, $"I_сз>((k_н*k_сз)/k_в)*I_уст > (({calc.RecloserKn}*{calc.RecloserKcz})/{calc.RecloserKb})*{calc.Iust} > {calc.IszMTZ}"); //ToDo: тут надо потом calc.IszMTZ округлить до целого всегда в большую сторону и потом его учитывать в формулах 
+                AddParagraph(doc, $"Принимаем уставку I_сз = {calc.IszMTZCeiling}\r\n" +
                     "Проверим чувствительность к минимальному току КЗ (Кч>1,5 по ПУЭ):");
-                AddFormula(doc, $"k_чувст=(I_(к.з.min(к3))*0,865)/(I_(c.з.)) = ({calc.SecondLastElementList?.IcsMin}*0,865)/{calc.IszMTZ} = {calc.KchuvMTZ}");
+                AddFormula(doc, $"k_чувст=(I_(к.з.min(KsecondLast))*0,865*1000)/(I_(c.з.)) = ({calc.SecondLastElementList?.IszMin}*0,865*1000)/{calc.IszMTZCeiling} = {calc.KchuvMTZ}");
 
-                AddParagraph(doc, "Проверка чувствительности МТЗ (для схемы D/Y)", isBold: true, fontSize: 14, isCenterAligned: true);
-                AddParagraph(doc, "");
-                AddFormula(doc, $"I_р=(K_сx·I_сз)/ntt = (1*{calc.IszMTZ})/{calc.RecloserNtt} = {calc.Ip}");
-                AddParagraph(doc, "Где K_сx - коэффициент схемы принимаем 1, ntt коэффициент трансформации трансформатора тока.\r\n" +
-                    "Определяем ток в реле при КЗ за трансформатором:");
-                AddFormula(doc, $"I_р2=(0,5∙I_(к.з.max(к4))*1000)/ntt = (0,5∙{calc.LastElementList?.IcsMax}·1000)/{calc.RecloserNtt} = {calc.Ip2}");
-                AddParagraph(doc, "Определяем коэффициент чувствительности при двухфазном КЗ за трансформатором по схеме неполная звезда:");
-                AddFormula(doc, $"k_чувст=I_р2/I_р = {calc.Ip2}/{calc.Ip} = {calc.Kchuv2MTZ}");
-                AddFormula(doc, "k_чувст > 1,5");
-                AddParagraph(doc, "Рассчитываем ток однофазного К.З., за трансформатором:");
-                AddFormula(doc, $"I_кз1 = U_ф/((1/3)*Z_тр) = 220/((1/3)*{calc.TransformatorFullResistance}) = {calc.Ikz1}");
-                AddParagraph(doc, "Приведем ток однофазного КЗ на стороне 0,4 кВ к напряжению 10,5 кВ");
-                AddFormula(doc, $"I_(кз1-10кВ)=I_кз1*(U_нн/Sub_voltage) = {calc.Ikz1}*(0.4/{calc.Voltage}) = {calc.Ikz1low}");
-                AddParagraph(doc, "Определяем ток в реле при однофазном КЗ за трансформатором:");
-                AddFormula(doc, $"I_р1=I_(кз1-10кВ)/(√(3) * ntt) = {calc.Ikz1low}/(√(3) * {calc.RecloserNtt}) = {calc.Ip1}");
-                AddParagraph(doc, "Определяем коэффициент чувствительности при однофазном КЗ за трансформатором:");
-                AddFormula(doc, $"k_чувст=I_р1/I_р = {calc.Ip1}/{calc.Ip} = {calc.Kchuv3MTZ}");
+                //AddParagraph(doc, "Проверка чувствительности МТЗ (для схемы D/Y)", isBold: true, fontSize: 14, isCenterAligned: true);
+                //AddParagraph(doc, "");
+                //AddFormula(doc, $"I_р=(K_сx·I_сз)/ntt = (1*{calc.IszMTZ})/{calc.RecloserNtt} = {calc.Ip}");
+                //AddParagraph(doc, "Где K_сx - коэффициент схемы принимаем 1, ntt коэффициент трансформации трансформатора тока.\r\n" +
+                //    "Определяем ток в реле при КЗ за трансформатором:");
+                //AddFormula(doc, $"I_р2=(0,5∙I_(к.з.max(к4))*1000)/ntt = (0,5∙{calc.LastElementList?.IcsMax}·1000)/{calc.RecloserNtt} = {calc.Ip2}");
+                //AddParagraph(doc, "Определяем коэффициент чувствительности при двухфазном КЗ за трансформатором по схеме неполная звезда:");
+                //AddFormula(doc, $"k_чувст=I_р2/I_р = {calc.Ip2}/{calc.Ip} = {calc.Kchuv2MTZ}");
+                //AddFormula(doc, "k_чувст > 1,5");
+                //AddParagraph(doc, "Рассчитываем ток однофазного К.З., за трансформатором:");
+                //AddFormula(doc, $"I_кз1 = U_ф/((1/3)*Z_тр) = 220/((1/3)*{calc.TransformatorFullResistance}) = {calc.Ikz1}");
+                //AddParagraph(doc, "Приведем ток однофазного КЗ на стороне 0,4 кВ к напряжению 10,5 кВ");
+                //AddFormula(doc, $"I_(кз1-10кВ)=I_кз1*(U_нн/Sub_voltage) = {calc.Ikz1}*(0.4/{calc.Voltage}) = {calc.Ikz1low}");
+                //AddParagraph(doc, "Определяем ток в реле при однофазном КЗ за трансформатором:");
+                //AddFormula(doc, $"I_р1=I_(кз1-10кВ)/(√(3) * ntt) = {calc.Ikz1low}/(√(3) * {calc.RecloserNtt}) = {calc.Ip1}");
+                //AddParagraph(doc, "Определяем коэффициент чувствительности при однофазном КЗ за трансформатором:");
+                //AddFormula(doc, $"k_чувст=I_р1/I_р = {calc.Ip1}/{calc.Ip} = {calc.Kchuv3MTZ}");
 
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
                     saveFileDialog.Filter = "Документы Word (*.docx)|*.docx";
                     saveFileDialog.Title = "Сохранить документ Word";
-                    //saveFileDialog.Owner = owner;
                     owner?.Activate();
                     owner?.Focus();
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
@@ -116,6 +155,7 @@ namespace ElectroMod
             }
             finally
             {
+                wordApp.ScreenUpdating = true;
                 doc?.Close(false);
                 wordApp?.Quit();
             }
@@ -182,5 +222,49 @@ namespace ElectroMod
 
             formulaParagraph.Range.InsertParagraphAfter();
         }
+    
+        private (string, string) CreateFormulaElementName(Document doc, Element element)
+        {
+            int elementCount=0;
+            if(element is Line line)
+            {
+                AddParagraph(doc, $"Активное сопротивление линии {line.Name}:", isBold: false);
+                AddFormula(doc, $"R_line{_lineCount} = r*L = {line.ActiveResistance}*{line.Length}");
+                AddParagraph(doc, $"Реактивное сопротивление линии {line.Name}:", isBold: false);
+                AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistance}*{line.Length}");
+                elementCount = _lineCount++;
+            }
+            if (element is Recloser)
+                elementCount = _recloserCount++;
+
+            if(element is Transormator)
+            {
+                AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
+                AddFormula(doc, "Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном))");
+                AddFormula(doc, "R_trans = (P_k*Sub_voltage^2)/(S_ном^2)");
+                AddFormula(doc, "X_trans = √(Z_trans^2 - R_trans^2)");
+            }
+
+            var elementTypeR = $"R_{element.GetType().Name}{elementCount}";
+            var elementTypeX = $"X_{element.GetType().Name}{elementCount}";
+            var elementTypesR = default(string);
+            var elementTypesX = default(string);
+            _previousElementType.Add((elementTypeR, elementTypeX));
+
+            for (int i = 0; i < _previousElementType.Count; i++)
+            {
+                if (i == _previousElementType.Count - 1)
+                {
+                    elementTypesR += _previousElementType[i].Item1;
+                    elementTypesX += _previousElementType[i].Item2;
+                    break;
+                }
+                elementTypesR += _previousElementType[i].Item1 + " + ";
+                elementTypesX += _previousElementType[i].Item2 + " + ";
+            }
+
+            return (elementTypesR, elementTypesX);
+        }
+    
     }
 }
