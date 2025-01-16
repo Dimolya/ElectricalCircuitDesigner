@@ -19,7 +19,7 @@ namespace ElectroMod
         private static Elements _elements;
         private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
         private int _countK = 1;
-        private bool _flagForFirstInitK = true;
+        private bool _firstInitK = true;
 
 
         public CenterCalculation(Elements elements)
@@ -29,19 +29,21 @@ namespace ElectroMod
         }
 
         public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
+        public List<Element> CommonElements { get; set; } = new List<Element>();
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
         public List<(double, double)> ResistanceSchemes { get; set; }
+        public Element LastElementList { get; set; }
+        public Element SecondLastElementList { get; set; }
 
         public bool IsCurrent { get; set; }
 
+        //переменные для формул в отчете
         public double Voltage { get; set; }
         public string ReconnectName { get; set; }
         public int RecloserNtt { get; set; }
         public double RecloserKn { get; set; }
         public double RecloserKcz { get; set; }
         public double RecloserKb { get; set; }
-        public Element LastElementList { get; set; }
-        public Element SecondLastElementList { get; set; }
         public double TransformatorFullResistance { get; set; }
         public string NumberTY { get; set; }
         public double PowerSuchKBT { get; set; }
@@ -49,6 +51,16 @@ namespace ElectroMod
         public double PowerSuchKBA { get; set; }
         public double PowerKBA { get; set; }
 
+        public double IszMax { get; set; }
+        public double IszMin { get; set; }
+        public double Rmax { get; set; }
+        public double Xmax { get; set; }
+        public double Rmin { get; set; }
+        public double Xmin { get; set; }
+        public double Zmax { get; set; }
+        public double Zmin { get; set; }
+
+        //расчеты МТО
         public double Iust { get; set; }
         public double IszMTO { get; set; }
         public (double, double) Isz2MTO { get; set; }
@@ -57,25 +69,24 @@ namespace ElectroMod
         public double KchuvMTO { get; set; }
         public string resoultMTO { get; set; }
 
+        //расчеты МТЗ
         public double IszMTZ { get; set; }
         public double IszMTZCeiling { get; set; }
         public double KchuvMTZ { get; set; }
-        public double Kchuv2MTZ { get; set; }
-        public double Kchuv3MTZ { get; set; }
-        public double Ip { get; set; }
-        public double Ip1 { get; set; }
-        public double Ip2 { get; set; }
-        public double Ikz1 { get; set; }
-        public double Ikz1low { get; set; }
-
-
+        //public double Kchuv2MTZ { get; set; }
+        //public double Kchuv3MTZ { get; set; }
+        //public double Ip { get; set; }
+        //public double Ip1 { get; set; }
+        //public double Ip2 { get; set; }
+        //public double Ikz1 { get; set; }
+        //public double Ikz1low { get; set; }
 
         public void CalculationFormuls()
         {
             foreach (var elementsList in CalculationElementList)
             {
                 CalculateCurrents(elementsList);
-                _flagForFirstInitK = false;
+                _firstInitK = false;
 
             }
         }
@@ -106,7 +117,7 @@ namespace ElectroMod
                             / (Math.Sqrt(3) * Voltage * 0.95)
                         : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA)
                             / (Math.Sqrt(3) * Voltage);
-                    Iust = Math.Round(Iust,3);
+                    Iust = Math.Round(Iust, 3);
 
                     IszMTO = 1.2 * Iust;
                     Isz2MTO = (3 * Iust, 4 * Iust);
@@ -117,7 +128,7 @@ namespace ElectroMod
 
                     KchuvMTO = SecondLastElementList.IszMin * 0.865 * 1000 / IszMTOMax;
                     KchuvMTO = Math.Round(KchuvMTO, 3);
-                        
+
                     //дальше МТЗ
                     IszMTZ = recloser.Kn * recloser.Kcz / recloser.Kb * Iust;
                     IszMTZ = Math.Round(IszMTZ, 3);
@@ -196,26 +207,14 @@ namespace ElectroMod
 
         private void CalculateCurrents(List<Element> elements)
         {
-            double IszMax = 0;
-            double IszMin = 0;
-            double Rmax = 0;
-            double Xmax = 0;
-            double Rmin = 0;
-            double Xmin = 0;
-
-            double Zmax = 0;
-            double Zmin = 0;
-            bool isCurrent = false;
-            bool isResistance = false;
-
             (double, double) sumResistance;
 
-            var commonElements = CalculationElementList
-            .Skip(1)
-            .Aggregate(
-                new HashSet<Element>(CalculationElementList.First()),
-                (h, e) => { h.IntersectWith(e); return h; }
-            ).ToList();
+            CommonElements = CalculationElementList
+                .Skip(1)
+                .Aggregate(
+                    new HashSet<Element>(CalculationElementList.First()),
+                    (h, e) => { h.IntersectWith(e); return h; }
+                ).ToList();
 
             Element visitedElement = null;
             foreach (var element in elements)
@@ -239,15 +238,14 @@ namespace ElectroMod
                             {
                                 continue;
                             }
-                                visitedElement = element;
-                            if ((!commonElements.Contains(element) && !_flagForFirstInitK) || _flagForFirstInitK)
+                            visitedElement = element;
+                            if ((!CommonElements.Contains(element) && !_firstInitK) || _firstInitK)
                             {
                                 ware.Label = $"K{_countK}";
                                 _countK++;
                             }
                         }
                     }
-
                 }
 
                 if (element is Bus bus)
@@ -258,14 +256,13 @@ namespace ElectroMod
                         IsCurrent = bus.isCurrent;
                         IszMax = bus.IszMax;
                         IszMin = bus.IszMin;
-                        Zmax = Voltage / (Math.Sqrt(3) * IszMax);
-                        Zmin = Voltage / (Math.Sqrt(3) * IszMin);
+                        Zmax = Math.Round(Voltage / (Math.Sqrt(3) * IszMax), 3);
+                        Zmin = Math.Round(Voltage / (Math.Sqrt(3) * IszMin), 3);
                         if (!Currents.Contains((IszMax, IszMin)))
                             Currents.Add((IszMax, IszMin));
                     }
                     else
                     {
-                        isResistance = bus.isResistanse;
                         Rmax = bus.ActiveResistMax;
                         Rmin = bus.ActiveResistMin;
                         Xmax = bus.ReactiveResistMax;
@@ -332,7 +329,7 @@ namespace ElectroMod
                         IszMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
                         IszMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
                     }
-                    transormator.IszMax = Math.Round(IszMax,3);
+                    transormator.IszMax = Math.Round(IszMax, 3);
                     transormator.IszMin = Math.Round(IszMin, 3);
                 }
 

@@ -24,10 +24,14 @@ namespace ElectroMod
         }
 
         public override Color BorderColor => Color.DarkBlue;
+        public double ActiveResistanceFromDto { get; set; }
+        public double ReactiveResistanceFromDto { get; set; }
+
         public double Length { get; set; }
         public string Mark { get; set; }
         public double ActiveResistance { get; set; }
         public double ReactiveResistance { get; set; }
+
 
         public override bool Hit(Point pointClick)
         {    

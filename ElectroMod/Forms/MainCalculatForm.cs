@@ -105,7 +105,7 @@ namespace ElectroMod
                 btBus.Enabled = true;
         }
 
-        private void btnCalculate_Click(object sender, EventArgs e)
+        private async void btnCalculate_Click(object sender, EventArgs e)
         {
             using (var preCalculateForm = new PreCalculationForm())
             {
@@ -119,11 +119,11 @@ namespace ElectroMod
                     var docx = new Docx();
                     if (this.InvokeRequired)
                     {
-                        this.Invoke(new Action(() => docx.CreateReportDocument(calcul, this)));
+                        this.Invoke(new Action(() => docx.CreateReportDocumentAsync(calcul, this)));
                     }
                     else
                     {
-                        docx.CreateReportDocument(calcul, this);
+                        await docx.CreateReportDocumentAsync(calcul, this);
                     }
                 }
             }
@@ -380,6 +380,8 @@ namespace ElectroMod
                     {
                         if (cbLineMarks.Text == dto[i].Mark)
                         {
+                            line.ActiveResistanceFromDto = dto[i].ActiveResistance;
+                            line.ReactiveResistanceFromDto = dto[i].ReactiveResistance;
                             line.ActiveResistance = dto[i].ActiveResistance * line.Length;
                             line.ReactiveResistance = dto[i].ReactiveResistance * line.Length;
                             break;
@@ -447,9 +449,12 @@ namespace ElectroMod
                     {
                         if (transormator.TypeKTP == dto[i].TypeKTP)
                         {
-                            transormator.FullResistance = 10 * (dto[i].Uk * Math.Pow(voltage, 2) / dto[i].S);
-                            transormator.ActiveResistance = dto[i].Pk * Math.Pow(voltage, 2) / Math.Pow(dto[i].S, 2);
-                            transormator.ReactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
+                            var fullResistance = 10 * (dto[i].Uk * Math.Pow(voltage, 2) / dto[i].S);
+                            var activeResistance = dto[i].Pk * Math.Pow(voltage, 2) / Math.Pow(dto[i].S, 2);
+                            var reactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
+                            transormator.FullResistance = Math.Round(fullResistance);
+                            transormator.ActiveResistance = Math.Round(activeResistance);
+                            transormator.ReactiveResistance = Math.Round(reactiveResistance);
                             break;
                         }
                     }

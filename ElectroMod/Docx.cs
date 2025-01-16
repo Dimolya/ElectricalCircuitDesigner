@@ -1,23 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 using System.Drawing.Text;
 using System.Security.AccessControl;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Microsoft.Office.Interop.Word;
-using Xceed.Words.NET;
 using Application = Microsoft.Office.Interop.Word.Application;
 
 namespace ElectroMod
 {
     public class Docx
     {
-        private List<(string,string)> _previousElementType = new List<(string, string)>();
+        private List<(string, string)> _elementsTypes = new List<(string, string)>();
+        private List<(string, string)> _elementsResistance = new List<(string, string)>();
         private int _lineCount = 1;
         private int _recloserCount = 1;
 
         [STAThread]
-        public void CreateReportDocument(CenterCalculation calc, Form owner)
+        public async Task CreateReportDocumentAsync(CenterCalculation calc, Form owner)
+        {
+            await Task.Run(() => CreateReportDocument(calc, owner));
+        }
+        private void CreateReportDocument(CenterCalculation calc, Form owner)
         {
             Application wordApp = null;
             Document doc = null;
@@ -34,35 +40,47 @@ namespace ElectroMod
                 Range tocRange = doc.Content.Paragraphs.Add().Range;
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
                 int count = 2;
-                foreach(var element in calc.CalculationElementList[0])
+                var firstListOfElements = true;
+                foreach (var elementList in calc.CalculationElementList)
                 {
-                    if (element is Bus)
-                        continue;
-
-                    AddParagraph(doc, $"Расчеты в точке K{count}", isBold: true, fontSize: 14);
-                    AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
-
-                    var elementsNames = CreateFormulaElementName(doc, element);
-                    if (calc.IsCurrent)
-                    { 
-                        AddFormula(doc, $"I_(к.з.max(k{count})) = " +
-                            $"Sub_voltage/(√(3) + √((R_(sub.max) + {elementsNames.Item1})^2" +
-                                               $" + (X_(sub.max) + {elementsNames.Item2})^2))");
-
-                        AddFormula(doc, $"I_(к.з.min(k{count})) = " +
-                            $"Sub_voltage/(√(3) + √((R_(sub.min) + {elementsNames.Item1})^2" +
-                                               $" + (X_(sub.min) + {elementsNames.Item2})^2))");
-                    }
-                    else
+                    foreach (var element in elementList)
                     {
-                        AddFormula(doc, $"I_(к.з.max(k{count})) = " +
-                            $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max)))");
+                        if ((calc.CommonElements.Contains(element) && !firstListOfElements) || element is Bus)
+                            continue;
 
-                        AddFormula(doc, $"I_(к.з.min(k{count})) = " +
-                            $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min)))");
+                        AddParagraph(doc, $"Расчеты в точке K{count}", isBold: true, fontSize: 14);
 
+                        var elementsNames = CreateFormulaElementName(doc, element);
+                        var elementsResistanceValues = CreateFormulaElementsResistanceValues(element);
+                        AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
+                        if (calc.IsCurrent)
+                        {
+                            AddFormula(doc, $"I_(к.з.max(k{count})) = " +
+                                $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item1})^2) + Z_(sub.max))) = " +
+                                $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
+                                $"{Math.Round(calc.Currents[count - 1].Item1, 3)}");
+
+                            AddFormula(doc, $"I_(к.з.min(k{count})) = " +
+                                $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
+                                $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
+                                $"{Math.Round(calc.Currents[count - 1].Item2, 3)}");
+                        }
+                        else
+                        {
+                            AddFormula(doc, $"I_(к.з.max(k{count})) = " +
+                                $"Sub_voltage/(√(3) + √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
+                                $"{calc.Voltage}/(√(3) + √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
+                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item1, 3)}");
+
+                            AddFormula(doc, $"I_(к.з.min(k{count})) = " +
+                                $"Sub_voltage/(√(3) + √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
+                                $"{calc.Voltage}/(√(3) + √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
+                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item1, 3)}");
+                        }
+
+                        count++;
                     }
-                    count++;
+                    firstListOfElements = false;
                 }
 
 
@@ -133,21 +151,23 @@ namespace ElectroMod
                 //AddFormula(doc, $"I_р1=I_(кз1-10кВ)/(√(3) * ntt) = {calc.Ikz1low}/(√(3) * {calc.RecloserNtt}) = {calc.Ip1}");
                 //AddParagraph(doc, "Определяем коэффициент чувствительности при однофазном КЗ за трансформатором:");
                 //AddFormula(doc, $"k_чувст=I_р1/I_р = {calc.Ip1}/{calc.Ip} = {calc.Kchuv3MTZ}");
-
-                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                owner.Invoke(new Action(() =>
                 {
-                    saveFileDialog.Filter = "Документы Word (*.docx)|*.docx";
-                    saveFileDialog.Title = "Сохранить документ Word";
-                    owner?.Activate();
-                    owner?.Focus();
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                     {
-                        string filePath = saveFileDialog.FileName;
+                        saveFileDialog.Filter = "Документы Word (*.docx)|*.docx";
+                        saveFileDialog.Title = "Сохранить документ Word";
+                        owner?.Activate();
+                        owner?.Focus();
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            string filePath = saveFileDialog.FileName;
 
-                        // Сохраняем документ
-                        doc.SaveAs2(filePath);
+                            // Сохраняем документ
+                            doc.SaveAs2(filePath);
+                        }
                     }
-                }
+                }));
             }
             catch (Exception ex)
             {
@@ -161,11 +181,7 @@ namespace ElectroMod
             }
         }
 
-        private void AddParagraph(Document doc,
-                                  string text,
-                                  bool isBold = false,
-                                  bool isCenterAligned = false,
-                                  int fontSize = 10)
+        private void AddParagraph(Document doc, string text, bool isBold = false, bool isCenterAligned = false, int fontSize = 10)
         {
             Paragraph paragraph = doc.Content.Paragraphs.Add();
             paragraph.Range.Text = text;
@@ -222,49 +238,74 @@ namespace ElectroMod
 
             formulaParagraph.Range.InsertParagraphAfter();
         }
-    
+
         private (string, string) CreateFormulaElementName(Document doc, Element element)
         {
-            int elementCount=0;
-            if(element is Line line)
+            int elementCount = 0;
+            if (element is Line line)
             {
                 AddParagraph(doc, $"Активное сопротивление линии {line.Name}:", isBold: false);
-                AddFormula(doc, $"R_line{_lineCount} = r*L = {line.ActiveResistance}*{line.Length}");
+                AddFormula(doc, $"R_line{_lineCount} = r*L = {line.ActiveResistanceFromDto}*{line.Length}={line.ActiveResistance}");
                 AddParagraph(doc, $"Реактивное сопротивление линии {line.Name}:", isBold: false);
-                AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistance}*{line.Length}");
+                AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistanceFromDto}*{line.Length}={line.ReactiveResistance}");
                 elementCount = _lineCount++;
             }
             if (element is Recloser)
                 elementCount = _recloserCount++;
 
-            if(element is Transormator)
-            {
-                AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
-                AddFormula(doc, "Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном))");
-                AddFormula(doc, "R_trans = (P_k*Sub_voltage^2)/(S_ном^2)");
-                AddFormula(doc, "X_trans = √(Z_trans^2 - R_trans^2)");
-            }
+            //if (element is Transormator trans)
+            //{
+            //    AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
+            //    AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*((U_k*{}^2)/(S_ном))");
+            //    AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2)");
+            //    AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2)");
+            //}
 
             var elementTypeR = $"R_{element.GetType().Name}{elementCount}";
             var elementTypeX = $"X_{element.GetType().Name}{elementCount}";
             var elementTypesR = default(string);
             var elementTypesX = default(string);
-            _previousElementType.Add((elementTypeR, elementTypeX));
+            _elementsTypes.Add((elementTypeR, elementTypeX));
 
-            for (int i = 0; i < _previousElementType.Count; i++)
+            for (int i = 0; i < _elementsTypes.Count; i++)
             {
-                if (i == _previousElementType.Count - 1)
+                if (i == _elementsTypes.Count - 1)
                 {
-                    elementTypesR += _previousElementType[i].Item1;
-                    elementTypesX += _previousElementType[i].Item2;
+                    elementTypesR += _elementsTypes[i].Item1;
+                    elementTypesX += _elementsTypes[i].Item2;
                     break;
                 }
-                elementTypesR += _previousElementType[i].Item1 + " + ";
-                elementTypesX += _previousElementType[i].Item2 + " + ";
+                elementTypesR += _elementsTypes[i].Item1 + " + ";
+                elementTypesX += _elementsTypes[i].Item2 + " + ";
             }
 
             return (elementTypesR, elementTypesX);
         }
-    
+
+        private (string, string) CreateFormulaElementsResistanceValues(Element element)
+        {
+            var elementActiveRes = default(string);
+            var elementReactiveRes = default(string);
+
+            if (element is Line line)
+                _elementsResistance.Add((line.ActiveResistance.ToString(), line.ReactiveResistance.ToString()));
+            if (element is Recloser)
+                _elementsResistance.Add(("0", "0"));
+            if (element is Transormator transormator)
+                _elementsResistance.Add((transormator.ActiveResistance.ToString(), transormator.ReactiveResistance.ToString()));
+            for (int i = 0; i < _elementsResistance.Count; i++)
+            {
+                if (i == _elementsResistance.Count - 1)
+                {
+                    elementActiveRes += _elementsResistance[i].Item1;
+                    elementReactiveRes += _elementsResistance[i].Item2;
+                    break;
+                }
+                elementActiveRes += _elementsResistance[i].Item1 + " + ";
+                elementReactiveRes += _elementsResistance[i].Item2 + " + ";
+            }
+            return (elementActiveRes, elementReactiveRes);
+        }
+
     }
 }
