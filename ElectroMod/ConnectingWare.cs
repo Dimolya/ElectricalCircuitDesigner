@@ -81,7 +81,7 @@ namespace ElectroMod
             rect.Inflate(25, 25);
             if (Label != null)
                 g.DrawString(Label.ToString(), Addition.Font, Brushes.Black, rect, new StringFormat
-                { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Near });//выравнивание строки
+                { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Near });//выравнивание строки
             g.Restore(state);//нужное позиционирование всех эелементов
         }
 

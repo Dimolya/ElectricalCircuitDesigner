@@ -11,6 +11,10 @@ using ElectroMod.Dtos.StaticDtos;
 using System.Collections.Generic;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using System.Globalization;
+using DocumentFormat.OpenXml.Office.Word;
+using Newtonsoft.Json;
+using System.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace ElectroMod
 {
@@ -30,10 +34,9 @@ namespace ElectroMod
             drawPanel1.Build(_elements, this);
             drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
             drawPanel1.ElementSelected += UpdateElementDetails;
+
             UpdateZoomInfo(1.0f);
         }
-
-        public List<ConnectingWare> SelectedCalculationPoints { get; private set; } = new List<ConnectingWare>();
 
         private void DrawPanel1_ScaleChanged(object sender, float scale)
         {
@@ -85,6 +88,21 @@ namespace ElectroMod
                     new BinaryFormatter().Serialize(fs, _elements);
         }
 
+        private void SavePNG_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "PNG Image|*.png";
+                saveFileDialog.Title = "Save an Image File";
+                saveFileDialog.ShowDialog();
+
+                if (!string.IsNullOrEmpty(saveFileDialog.FileName))
+                {
+                    drawPanel1.SaveToPng(saveFileDialog.FileName);
+                }
+            }
+        }
+
         private void btClear_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("Очистить поле?", "Сообщение", MessageBoxButtons.OKCancel);
@@ -107,36 +125,38 @@ namespace ElectroMod
 
         private async void btnCalculate_Click(object sender, EventArgs e)
         {
-            using (var preCalculateForm = new PreCalculationForm())
+            var calcul = new CenterCalculation(_elements);
+            calcul.CalculationFormuls();
+            var transformators = new List<Transormator>(calcul.CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
+
+            using (var preCalculateForm = new PreCalculationForm(transformators))
             {
                 if (preCalculateForm.ShowDialog() == DialogResult.OK)
                 {
-                    var calcul = new CenterCalculation(_elements);
-                    calcul.CalculationFormuls();
-
                     calcul.CalculationMTOandMTZ(preCalculateForm);
-
-                    var docx = new Docx();
-                    if (this.InvokeRequired)
+                    lbProgressProcess.Visible = true;
+                    progressBar.Visible = true;
+                    progressBar.Value = 0;
+                    try
                     {
-                        this.Invoke(new Action(() => docx.CreateReportDocumentAsync(calcul, this)));
+                        var progress = new Progress<int>(percent =>
+                        {
+                            progressBar.Value = percent;
+                        });
+                        var docx = new Docx();
+                        await docx.CreateReportDocumentAsync(calcul, this, progress);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        await docx.CreateReportDocumentAsync(calcul, this);
+                        MessageBox.Show(ex.Message);
+                    }
+                    finally
+                    {
+                        progressBar.Visible = false;
+                        lbProgressProcess.Visible = false;
                     }
                 }
             }
-        }
-
-        public void AddSelectedPoint(ConnectingWare ware)
-        {
-            SelectedCalculationPoints.Add(ware);
-        }
-
-        public void RemoveSelectedPoint(ConnectingWare ware)
-        {
-            SelectedCalculationPoints.Remove(ware);
         }
 
         private void UpdateZoomInfo(float scale)
@@ -159,7 +179,9 @@ namespace ElectroMod
                 {
                     var dto = JsonProvider.LoadData<DataBusDto>(dataBusJsonPath);
                     cbBusVoltage.DataSource = dto[0].Voltage;
+                    cbBusVoltage.Text = bus.Voltage.ToString();
                     cbBusTypeTT.DataSource = dto[0].TypeTT;
+                    cbBusTypeTT.Text = bus.TypeTT;
                 }
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {dataBusJsonPath}");
@@ -170,24 +192,26 @@ namespace ElectroMod
                 panelPropertyRecloser.Visible = false;
                 panelPropertyTransformator.Visible = false;
                 tbBusName.Text = bus.Name;
+                tbBusMTO.Text = bus.MTO.ToString();
+                tbBusMTZ.Text = bus.MTZ.ToString();
+                rbBusCurrent.Checked = bus.IsCurrent;
+                rbBusResistance.Checked = bus.IsResistanse;
                 if (rbBusCurrent.Checked)
                 {
-                    bus.isCurrent = true;
-                    bus.isResistanse = false;
-                    tbBusCurrentMax.Text = bus.IszMax.ToString();
-                    tbBusCurrentMin.Text = bus.IszMin.ToString();
-                }
+                    bus.IsCurrent = true;
+                    bus.IsResistanse = false;
+                    tbBusCurrentMax.Text = bus.IkzMax.ToString();
+                    tbBusCurrentMin.Text = bus.IkzMin.ToString();
+                }   
                 else if (rbBusResistance.Checked)
                 {
-                    bus.isResistanse = true;
-                    bus.isCurrent = false;
+                    bus.IsResistanse = true;
+                    bus.IsCurrent = false;
                     tbBusActiveResistMax.Text = bus.ActiveResistMax.ToString();
                     tbBusReactiveResistMax.Text = bus.ReactiveResistMax.ToString();
                     tbBusActiveResistMin.Text = bus.ActiveResistMin.ToString();
                     tbBusReactiveResistMin.Text = bus.ReactiveResistMin.ToString();
                 }
-                rbBusCurrent.CheckedChanged += RbBusCurrent_CheckedChanged;
-                rbBusResistance.CheckedChanged += RbBusCurrent_CheckedChanged;
             }
             else if (selectedElement is Line line)
             {
@@ -206,6 +230,7 @@ namespace ElectroMod
                 {
                     var dto = JsonProvider.LoadData<DataLineDto>(dataLineJsonPath);
                     cbLineMarks.DataSource = dto[0].Marks;
+                    cbLineMarks.Text = line.Mark;
                 }
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {dataLineJsonPath}");
@@ -221,13 +246,17 @@ namespace ElectroMod
                 panelPropertyTransformator.Visible = false;
 
                 tbRecloserName.Text = recloser.Name;
-                cbIsCalculate.Checked = recloser.isCalculated;
+                cbIsCalculate.Checked = recloser.IsCalculated;
+                tbRecloserMTO.Text = recloser.MTO.ToString();
+                tbRecloserMTZ.Text = recloser.MTZ.ToString();
 
                 if (File.Exists(dataRecloserJsonPath))
                 {
                     var dto = JsonProvider.LoadData<DataRecloserDto>(dataRecloserJsonPath);
                     cbRecloserType.DataSource = dto[0].TypeRecloser;
+                    cbRecloserType.Text = recloser.TypeRecloser;
                     cbRecloserTypeTT.DataSource = dto[0].TypeTT;
+                    cbRecloserTypeTT.Text = recloser.TypeTT;
                 }
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {dataRecloserJsonPath}");
@@ -249,9 +278,9 @@ namespace ElectroMod
                 {
                     var dto = JsonProvider.LoadData<DataTransformatorDto>(dataTransformatorJsonPath);
                     cbTransformatorTypesKTP.DataSource = dto[0].TypeKTP;
-                    cbTransformatorTypesKTP.DisplayMember = "TypeKTP";
+                    cbTransformatorTypesKTP.Text = transormator.TypeKTP;
                     cbTransformatorSchemes.DataSource = dto[0].Scheme;
-                    cbTransformatorSchemes.DisplayMember = "Scheme";
+                    cbTransformatorSchemes.Text = transormator.Scheme;
                 }
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {dataTransformatorJsonPath}");
@@ -265,51 +294,45 @@ namespace ElectroMod
             }
         }
 
-        private void RbBusCurrent_CheckedChanged(object sender, EventArgs e)
-        {
-            var bus = _slctElement as Bus;
-
-            if (bus == null)
-                return;
-            if (rbBusCurrent.Checked)
-            {
-                bus.isCurrent = true;
-                bus.isResistanse = false;
-                tbBusCurrentMax.Text = bus.IszMax.ToString();
-                tbBusCurrentMin.Text = bus.IszMin.ToString();
-            }
-            else if (rbBusResistance.Checked)
-            {
-                bus.isResistanse = true;
-                bus.isCurrent = false;
-                tbBusActiveResistMax.Text = bus.ActiveResistMax.ToString();
-                tbBusReactiveResistMax.Text = bus.ReactiveResistMax.ToString();
-                tbBusActiveResistMin.Text = bus.ActiveResistMin.ToString();
-                tbBusReactiveResistMin.Text = bus.ReactiveResistMin.ToString();
-            }
-        }
-
         private void cbRecloserType_SelectedIndexChanged(object sender, EventArgs e)
         {
         }
 
         private void rbBusCurrent_CheckedChanged(object sender, EventArgs e)
         {
+            var bus = _slctElement as Bus;
+
+            if (bus == null)
+                return;
             RadioButton rb = (RadioButton)sender;
             if (rb.Checked)
             {
                 panelForCurrent.Visible = true;
                 panelForResistance.Visible = false;
+                bus.IsCurrent = true;
+                bus.IsResistanse = false;
+                tbBusCurrentMax.Text = bus.IkzMax.ToString();
+                tbBusCurrentMin.Text = bus.IkzMin.ToString();
             }
         }
 
         private void rbBusResistance_CheckedChanged(object sender, EventArgs e)
         {
+            var bus = _slctElement as Bus;
+
+            if (bus == null)
+                return;
             RadioButton rb = (RadioButton)sender;
             if (rb.Checked)
             {
                 panelForResistance.Visible = true;
                 panelForCurrent.Visible = false;
+                bus.IsResistanse = true;
+                bus.IsCurrent = false;
+                tbBusActiveResistMax.Text = bus.ActiveResistMax.ToString();
+                tbBusReactiveResistMax.Text = bus.ReactiveResistMax.ToString();
+                tbBusActiveResistMin.Text = bus.ActiveResistMin.ToString();
+                tbBusReactiveResistMin.Text = bus.ReactiveResistMin.ToString();
             }
         }
 
@@ -326,7 +349,8 @@ namespace ElectroMod
                     bus.Name = tbBusName.Text;
                     bus.Voltage = double.Parse(cbBusVoltage.Text.Replace('.', ','));
                     bus.TypeTT = cbBusTypeTT.Text;
-
+                    bus.MTO = double.Parse(tbBusMTO.Text.Replace('.', ','));
+                    bus.MTZ = double.Parse(tbBusMTZ.Text.Replace('.', ','));
                     if (File.Exists(typeTTJsonPath))
                     {
                         var dtoTT = JsonProvider.LoadData<DataTypeTTDto>(typeTTJsonPath);
@@ -342,12 +366,12 @@ namespace ElectroMod
                     else
                         MessageBox.Show($"Неверно указан путь к файлу {typeTTJsonPath}");
 
-                    if (bus.isCurrent)
+                    if (bus.IsCurrent)
                     {
-                        bus.IszMax = double.Parse(tbBusCurrentMax.Text.Replace('.', ','));
-                        bus.IszMin = double.Parse(tbBusCurrentMin.Text.Replace('.', ','));
+                        bus.IkzMax = double.Parse(tbBusCurrentMax.Text.Replace('.', ','));
+                        bus.IkzMin = double.Parse(tbBusCurrentMin.Text.Replace('.', ','));
                     }
-                    else if (bus.isResistanse)
+                    else if (bus.IsResistanse)
                     {
                         bus.ActiveResistMax = double.Parse(tbBusActiveResistMax.Text.Replace('.', ','));
                         bus.ReactiveResistMax = double.Parse(tbBusReactiveResistMax.Text.Replace('.', ','));
@@ -363,13 +387,14 @@ namespace ElectroMod
             else if (_slctElement is Line line)
             {
                 line.Name = tbLineName.Text;
+                line.Mark = cbLineMarks.Text;
                 try
                 {
                     line.Length = double.Parse(tbLineLength.Text.Replace('.', ','));
                 }
                 catch (FormatException ex)
                 {
-                    MessageBox.Show(ex.Message); 
+                    MessageBox.Show(ex.Message);
                 }
 
                 var lineTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "LineTypes.json");
@@ -400,7 +425,24 @@ namespace ElectroMod
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
                 recloser.TypeTT = cbRecloserTypeTT.Text;
-                recloser.isCalculated = cbIsCalculate.Checked;
+                recloser.IsCalculated = cbIsCalculate.Checked;
+                if (recloser.IsCalculated)
+                {
+                    recloser.MTO = 0;
+                    recloser.MTZ = 0;
+                }
+                else
+                {
+                    try
+                    {
+                        recloser.MTO = double.Parse(tbRecloserMTO.Text.Replace('.', ','));
+                        recloser.MTZ = double.Parse(tbRecloserMTZ.Text.Replace('.', ','));
+                    }
+                    catch (FormatException ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
 
                 if (File.Exists(recloserTypesJsonPath))
                 {
@@ -444,17 +486,20 @@ namespace ElectroMod
                 if (File.Exists(transformatorTypesJsonPath))
                 {
                     var dto = JsonProvider.LoadData<TransformatorContainerDto>(transformatorTypesJsonPath);
-                    var voltage = double.Parse(cbBusVoltage.Text);
+                    double voltage = 0;
+                    if (!string.IsNullOrEmpty(cbBusVoltage.Text))
+                        voltage = double.Parse(cbBusVoltage.Text);
                     for (int i = 0; i < dto.Count; i++)
                     {
                         if (transormator.TypeKTP == dto[i].TypeKTP)
                         {
                             var fullResistance = 10 * (dto[i].Uk * Math.Pow(voltage, 2) / dto[i].S);
                             var activeResistance = dto[i].Pk * Math.Pow(voltage, 2) / Math.Pow(dto[i].S, 2);
-                            var reactiveResistance = Math.Sqrt(Math.Pow(transormator.FullResistance, 2) - Math.Pow(transormator.ActiveResistance, 2));
-                            transormator.FullResistance = Math.Round(fullResistance);
-                            transormator.ActiveResistance = Math.Round(activeResistance);
-                            transormator.ReactiveResistance = Math.Round(reactiveResistance);
+                            var reactiveResistance = Math.Sqrt(Math.Pow(fullResistance, 2) - Math.Pow(activeResistance, 2));
+                            transormator.FullResistance = Math.Round(fullResistance, 3);
+                            transormator.ActiveResistance = Math.Round(activeResistance, 3);
+                            transormator.ReactiveResistance = Math.Round(reactiveResistance, 3);
+                            transormator.S = dto[i].S;
                             break;
                         }
                     }
@@ -462,6 +507,14 @@ namespace ElectroMod
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {transformatorTypesJsonPath}");
             }
+        }
+
+        private void cbIsCalculate_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cbIsCalculate.Checked)
+                panelRecloserMTOMTZ.Visible = false;
+            else
+                panelRecloserMTOMTZ.Visible = true;
         }
     }
 }

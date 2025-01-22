@@ -26,11 +26,14 @@ namespace ElectroMod
         public double Voltage { get; set; }
         public string TypeTT { get; set; }
         public int Ntt { get; set; }
-        public bool isCurrent { get; set; } 
-        public bool isResistanse { get; set; }
+        public bool IsCurrent { get; set; } 
+        public bool IsResistanse { get; set; }
         public double ActiveResistMax { get; set; }
         public double ReactiveResistMax { get; set; }
         public double ActiveResistMin { get; set; }
         public double ReactiveResistMin { get; set; }
+
+        public double MTO { get; set; }
+        public double MTZ { get; set; }
     }
 }

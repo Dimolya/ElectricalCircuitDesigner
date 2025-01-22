@@ -17,32 +17,29 @@ namespace ElectroMod
     [Serializable]
     public class Element : IDrawable, IDragable, ISelectable
     {
-        public delegate void DataChangedHandler(double cStr, double volt, double resist);
-
         private bool _isSelected = false;
         private SerializableGraphicsPath _path;
-        public bool IsFirstInit { get; set; } = true;
-        public bool IsVisited { get; set; }
 
-        public virtual bool AcceptWare => true;
+        public Elements Elements { get; set; }
+        public List<Element> ConnectedElements { get; set; } = new List<Element>();
+        public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
+        protected PointF LocationNameHorizontal { get; set; }
+        protected PointF LocationNameVertical { get; set; }
+        public Point Location { get; set; }
         public virtual Color BorderColor => Color.White;
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public string Name { get; set; }
-        protected PointF LocationNameHorizontal { get; set; }
-        protected PointF LocationNameVertical { get; set; }
-        public double IszMax { get; set; }
-        public double IszMin { get; set; }
-        public Point Location { get; set; }
-        public Elements Elements { get; set; }
+        public double IkzMax { get; set; }
+        public double IkzMin { get; set; }
+        public bool IsFirstInit { get; set; } = true;
         public int Angle { get; set; }
+
         public GraphicsPath Path
         {
             get { return _path; }
             set { _path = value; }
         }
-        public List<Element> ConnectedElements { get; set; } = new List<Element>();
-        public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
 
         public Element() { }
         public Element(Elements elements)
@@ -198,11 +195,6 @@ namespace ElectroMod
             }
         }
 
-        public ConnectingWare FindNearestWare(Point p)
-        {
-            return Wares.OrderBy(ware => ware.Location.StartPoint(p).LengthSqr()).FirstOrDefault();
-        }
-
         public void Remove()
         {
             foreach (var ware in Wares)
@@ -210,10 +202,9 @@ namespace ElectroMod
                 foreach (var element in ConnectedElements)
                 {
                     element.Wares.ForEach(x => x.ConnectedWares.Remove(ware));
-                    element.ConnectedElements.Remove(this);
+                    element.ConnectedElements.ForEach(x => x.ConnectedElements.Remove(this));
                 }
             }
-
             ConnectedElements.Clear();
             Elements.Remove(this);
         }

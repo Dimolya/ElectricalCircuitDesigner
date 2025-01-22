@@ -12,17 +12,20 @@ namespace ElectroMod.Forms
 {
     public partial class PreCalculationForm : Form
     {
+        private List<Transormator> _transformators;
         public string Reconnect { get; set; }
         public string NumberTY { get; set; }
-        public double PowerKBT { get; set; }
         public double PowerSuchKBT { get; set; }
+        public double PowerKBT { get; set; }
 
-        public double PowerKBA { get; set; }
         public double PowerSuchKBA { get; set; }
+        public double PowerKBA { get; set; }
 
-        public PreCalculationForm()
+        public PreCalculationForm(List<Transormator> transformators)
         {
             InitializeComponent();
+            _transformators = transformators;
+            tbPowerKBA.Text = _transformators.Sum(x => x.S).ToString();
         }
 
         private void btnFormCalculate_Click(object sender, EventArgs e)

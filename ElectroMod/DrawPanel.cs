@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System;
 using static System.Windows.Forms.AxHost;
+using System.Drawing.Imaging;
 
 namespace ElectroMod
 {
@@ -131,25 +132,6 @@ namespace ElectroMod
             ScaleChanged?.Invoke(this, scale);
         }
 
-        protected override void OnMouseDoubleClick(MouseEventArgs e)
-        {
-            base.OnMouseDoubleClick(e);
-            Point p = GetStartPoint(e.Location);
-            List<ConnectingWare> nearestWares = FindNearestConnectingWare(p);
-            if (nearestWares != null)
-            {
-                foreach (var nearestWare in nearestWares)
-                {
-                    nearestWare.IsCalculationPoint = !nearestWare.IsCalculationPoint;
-                    if (nearestWare.IsCalculationPoint)
-                        _mainCalculatForm.AddSelectedPoint(nearestWare);
-                    else
-                        _mainCalculatForm.RemoveSelectedPoint(nearestWare);
-                }
-                Invalidate();
-            }
-        }
-
         public void ZoomIn()
         {
             scale *= 1.1f;
@@ -169,6 +151,18 @@ namespace ElectroMod
                 scale = defaultScale;
                 ScaleChanged?.Invoke(this, scale);
                 Invalidate();
+            }
+        }
+
+        public void SaveToPng(string filePath)
+        {
+            using (Bitmap bitmap = new Bitmap(this.Width, this.Height))
+            {
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    this.DrawToBitmap(bitmap, new Rectangle(0, 0, this.Width, this.Height));
+                }
+                bitmap.Save(filePath, ImageFormat.Png);
             }
         }
 

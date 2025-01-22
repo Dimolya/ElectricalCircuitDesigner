@@ -31,7 +31,10 @@ namespace ElectroMod
         public double Kb { get; set; }
         public double Kcz { get; set; }
         public double Kn { get; set; }
-        public bool isCalculated { get; set; }
+        public bool IsCalculated { get; set; }
+
+        public double MTO { get; set; }
+        public double MTZ { get; set; }
 
         public override Color BorderColor => Color.DarkBlue;
     }

@@ -37,12 +37,21 @@
             this.файлToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenFile = new System.Windows.Forms.ToolStripMenuItem();
             this.SaveFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.SavePNG = new System.Windows.Forms.ToolStripMenuItem();
             this.btClear = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.deleteElement = new System.Windows.Forms.ToolStripMenuItem();
             this.bt_DeleteOne = new System.Windows.Forms.Button();
             this.btZoom = new System.Windows.Forms.Button();
             this.panelPropertyBus = new System.Windows.Forms.Panel();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.tbBusMTZ = new System.Windows.Forms.TextBox();
+            this.tbBusMTO = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cbBusTypeTT = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.cbBusVoltage = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.panelForResistance = new System.Windows.Forms.Panel();
@@ -81,6 +90,13 @@
             this.tbLineName = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.panelPropertyRecloser = new System.Windows.Forms.Panel();
+            this.panelRecloserMTOMTZ = new System.Windows.Forms.Panel();
+            this.tbRecloserMTO = new System.Windows.Forms.TextBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.tbRecloserMTZ = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.cbIsCalculate = new System.Windows.Forms.CheckBox();
             this.lbTypeTT = new System.Windows.Forms.Label();
@@ -98,9 +114,9 @@
             this.label20 = new System.Windows.Forms.Label();
             this.btnSaveProp = new System.Windows.Forms.Button();
             this.btnCalculate = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.cbBusTypeTT = new System.Windows.Forms.ComboBox();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
             this.drawPanel1 = new ElectroMod.DrawPanel();
+            this.lbProgressProcess = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -109,6 +125,7 @@
             this.panel1.SuspendLayout();
             this.panelPropertyLine.SuspendLayout();
             this.panelPropertyRecloser.SuspendLayout();
+            this.panelRecloserMTOMTZ.SuspendLayout();
             this.panelPropertyTransformator.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -168,24 +185,32 @@
             // 
             this.файлToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.OpenFile,
-            this.SaveFile});
+            this.SaveFile,
+            this.SavePNG});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
-            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 26);
+            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
             // OpenFile
             // 
             this.OpenFile.Name = "OpenFile";
-            this.OpenFile.Size = new System.Drawing.Size(166, 26);
+            this.OpenFile.Size = new System.Drawing.Size(210, 26);
             this.OpenFile.Text = "Открыть";
             this.OpenFile.Click += new System.EventHandler(this.OpenFile_Click);
             // 
             // SaveFile
             // 
             this.SaveFile.Name = "SaveFile";
-            this.SaveFile.Size = new System.Drawing.Size(166, 26);
-            this.SaveFile.Text = "Сохранить";
+            this.SaveFile.Size = new System.Drawing.Size(210, 26);
+            this.SaveFile.Text = "Сохранить схему";
             this.SaveFile.Click += new System.EventHandler(this.SaveFile_Click);
+            // 
+            // SavePNG
+            // 
+            this.SavePNG.Name = "SavePNG";
+            this.SavePNG.Size = new System.Drawing.Size(210, 26);
+            this.SavePNG.Text = "Сохранить PNG";
+            this.SavePNG.Click += new System.EventHandler(this.SavePNG_Click);
             // 
             // btClear
             // 
@@ -234,6 +259,12 @@
             // panelPropertyBus
             // 
             this.panelPropertyBus.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyBus.Controls.Add(this.label6);
+            this.panelPropertyBus.Controls.Add(this.label5);
+            this.panelPropertyBus.Controls.Add(this.tbBusMTZ);
+            this.panelPropertyBus.Controls.Add(this.tbBusMTO);
+            this.panelPropertyBus.Controls.Add(this.label4);
+            this.panelPropertyBus.Controls.Add(this.label3);
             this.panelPropertyBus.Controls.Add(this.cbBusTypeTT);
             this.panelPropertyBus.Controls.Add(this.label2);
             this.panelPropertyBus.Controls.Add(this.cbBusVoltage);
@@ -251,6 +282,73 @@
             this.panelPropertyBus.Size = new System.Drawing.Size(800, 235);
             this.panelPropertyBus.TabIndex = 33;
             this.panelPropertyBus.Visible = false;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(764, 33);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(16, 16);
+            this.label6.TabIndex = 59;
+            this.label6.Text = "А";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(764, 6);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(16, 16);
+            this.label5.TabIndex = 58;
+            this.label5.Text = "А";
+            // 
+            // tbBusMTZ
+            // 
+            this.tbBusMTZ.Location = new System.Drawing.Point(658, 31);
+            this.tbBusMTZ.Name = "tbBusMTZ";
+            this.tbBusMTZ.Size = new System.Drawing.Size(100, 22);
+            this.tbBusMTZ.TabIndex = 57;
+            // 
+            // tbBusMTO
+            // 
+            this.tbBusMTO.Location = new System.Drawing.Point(658, 3);
+            this.tbBusMTO.Name = "tbBusMTO";
+            this.tbBusMTO.Size = new System.Drawing.Size(100, 22);
+            this.tbBusMTO.TabIndex = 48;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(610, 34);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(36, 16);
+            this.label4.TabIndex = 56;
+            this.label4.Text = "МТЗ";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(610, 6);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(37, 16);
+            this.label3.TabIndex = 55;
+            this.label3.Text = "МТО";
+            // 
+            // cbBusTypeTT
+            // 
+            this.cbBusTypeTT.FormattingEnabled = true;
+            this.cbBusTypeTT.Location = new System.Drawing.Point(471, 30);
+            this.cbBusTypeTT.Name = "cbBusTypeTT";
+            this.cbBusTypeTT.Size = new System.Drawing.Size(125, 24);
+            this.cbBusTypeTT.TabIndex = 54;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(377, 34);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(87, 16);
+            this.label2.TabIndex = 53;
+            this.label2.Text = "Номинал ТТ";
             // 
             // cbBusVoltage
             // 
@@ -283,7 +381,7 @@
             this.panelForResistance.Controls.Add(this.label13);
             this.panelForResistance.Controls.Add(this.tbBusReactiveResistMax);
             this.panelForResistance.Controls.Add(this.tbBusActiveResistMax);
-            this.panelForResistance.Location = new System.Drawing.Point(3, 96);
+            this.panelForResistance.Location = new System.Drawing.Point(4, 96);
             this.panelForResistance.Name = "panelForResistance";
             this.panelForResistance.Size = new System.Drawing.Size(592, 125);
             this.panelForResistance.TabIndex = 50;
@@ -401,6 +499,7 @@
             this.panelForCurrent.Name = "panelForCurrent";
             this.panelForCurrent.Size = new System.Drawing.Size(465, 69);
             this.panelForCurrent.TabIndex = 49;
+            this.panelForCurrent.Visible = false;
             // 
             // label14
             // 
@@ -468,7 +567,6 @@
             this.rbBusResistance.Name = "rbBusResistance";
             this.rbBusResistance.Size = new System.Drawing.Size(132, 20);
             this.rbBusResistance.TabIndex = 33;
-            this.rbBusResistance.TabStop = true;
             this.rbBusResistance.Text = "Сопротивление";
             this.rbBusResistance.UseVisualStyleBackColor = true;
             this.rbBusResistance.CheckedChanged += new System.EventHandler(this.rbBusResistance_CheckedChanged);
@@ -476,12 +574,10 @@
             // rbBusCurrent
             // 
             this.rbBusCurrent.AutoSize = true;
-            this.rbBusCurrent.Checked = true;
             this.rbBusCurrent.Location = new System.Drawing.Point(3, 3);
             this.rbBusCurrent.Name = "rbBusCurrent";
             this.rbBusCurrent.Size = new System.Drawing.Size(52, 20);
             this.rbBusCurrent.TabIndex = 32;
-            this.rbBusCurrent.TabStop = true;
             this.rbBusCurrent.Text = "Ток";
             this.rbBusCurrent.UseVisualStyleBackColor = true;
             this.rbBusCurrent.CheckedChanged += new System.EventHandler(this.rbBusCurrent_CheckedChanged);
@@ -598,6 +694,7 @@
             // panelPropertyRecloser
             // 
             this.panelPropertyRecloser.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyRecloser.Controls.Add(this.panelRecloserMTOMTZ);
             this.panelPropertyRecloser.Controls.Add(this.label21);
             this.panelPropertyRecloser.Controls.Add(this.cbIsCalculate);
             this.panelPropertyRecloser.Controls.Add(this.lbTypeTT);
@@ -612,6 +709,69 @@
             this.panelPropertyRecloser.Size = new System.Drawing.Size(800, 233);
             this.panelPropertyRecloser.TabIndex = 53;
             this.panelPropertyRecloser.Visible = false;
+            // 
+            // panelRecloserMTOMTZ
+            // 
+            this.panelRecloserMTOMTZ.Controls.Add(this.tbRecloserMTO);
+            this.panelRecloserMTOMTZ.Controls.Add(this.label22);
+            this.panelRecloserMTOMTZ.Controls.Add(this.label25);
+            this.panelRecloserMTOMTZ.Controls.Add(this.label23);
+            this.panelRecloserMTOMTZ.Controls.Add(this.label24);
+            this.panelRecloserMTOMTZ.Controls.Add(this.tbRecloserMTZ);
+            this.panelRecloserMTOMTZ.Location = new System.Drawing.Point(486, 1);
+            this.panelRecloserMTOMTZ.Name = "panelRecloserMTOMTZ";
+            this.panelRecloserMTOMTZ.Size = new System.Drawing.Size(200, 100);
+            this.panelRecloserMTOMTZ.TabIndex = 66;
+            // 
+            // tbRecloserMTO
+            // 
+            this.tbRecloserMTO.Location = new System.Drawing.Point(54, 3);
+            this.tbRecloserMTO.Name = "tbRecloserMTO";
+            this.tbRecloserMTO.Size = new System.Drawing.Size(100, 22);
+            this.tbRecloserMTO.TabIndex = 60;
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(160, 33);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(16, 16);
+            this.label22.TabIndex = 65;
+            this.label22.Text = "А";
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(6, 6);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(37, 16);
+            this.label25.TabIndex = 61;
+            this.label25.Text = "МТО";
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(160, 6);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(16, 16);
+            this.label23.TabIndex = 64;
+            this.label23.Text = "А";
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(6, 34);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(36, 16);
+            this.label24.TabIndex = 62;
+            this.label24.Text = "МТЗ";
+            // 
+            // tbRecloserMTZ
+            // 
+            this.tbRecloserMTZ.Location = new System.Drawing.Point(54, 31);
+            this.tbRecloserMTZ.Name = "tbRecloserMTZ";
+            this.tbRecloserMTZ.Size = new System.Drawing.Size(100, 22);
+            this.tbRecloserMTZ.TabIndex = 63;
             // 
             // label21
             // 
@@ -630,6 +790,7 @@
             this.cbIsCalculate.Size = new System.Drawing.Size(18, 17);
             this.cbIsCalculate.TabIndex = 19;
             this.cbIsCalculate.UseVisualStyleBackColor = true;
+            this.cbIsCalculate.CheckedChanged += new System.EventHandler(this.cbIsCalculate_CheckedChanged);
             // 
             // lbTypeTT
             // 
@@ -767,22 +928,13 @@
             this.btnCalculate.UseVisualStyleBackColor = true;
             this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
             // 
-            // label2
+            // progressBar
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(377, 34);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(87, 16);
-            this.label2.TabIndex = 53;
-            this.label2.Text = "Номинал ТТ";
-            // 
-            // cbBusTypeTT
-            // 
-            this.cbBusTypeTT.FormattingEnabled = true;
-            this.cbBusTypeTT.Location = new System.Drawing.Point(471, 30);
-            this.cbBusTypeTT.Name = "cbBusTypeTT";
-            this.cbBusTypeTT.Size = new System.Drawing.Size(125, 24);
-            this.cbBusTypeTT.TabIndex = 54;
+            this.progressBar.Location = new System.Drawing.Point(15, 755);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(185, 15);
+            this.progressBar.TabIndex = 13;
+            this.progressBar.Visible = false;
             // 
             // drawPanel1
             // 
@@ -793,12 +945,24 @@
             this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
             this.drawPanel1.TabIndex = 0;
             // 
+            // lbProgressProcess
+            // 
+            this.lbProgressProcess.AutoSize = true;
+            this.lbProgressProcess.Location = new System.Drawing.Point(13, 734);
+            this.lbProgressProcess.Name = "lbProgressProcess";
+            this.lbProgressProcess.Size = new System.Drawing.Size(130, 16);
+            this.lbProgressProcess.TabIndex = 57;
+            this.lbProgressProcess.Text = "Создание отчета...";
+            this.lbProgressProcess.Visible = false;
+            // 
             // MainCalculatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1406, 782);
+            this.Controls.Add(this.lbProgressProcess);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnCalculate);
             this.Controls.Add(this.btnSaveProp);
             this.Controls.Add(this.panelPropertyTransformator);
@@ -834,6 +998,8 @@
             this.panelPropertyLine.PerformLayout();
             this.panelPropertyRecloser.ResumeLayout(false);
             this.panelPropertyRecloser.PerformLayout();
+            this.panelRecloserMTOMTZ.ResumeLayout(false);
+            this.panelRecloserMTOMTZ.PerformLayout();
             this.panelPropertyTransformator.ResumeLayout(false);
             this.panelPropertyTransformator.PerformLayout();
             this.ResumeLayout(false);
@@ -915,6 +1081,22 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox cbBusTypeTT;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ToolStripMenuItem SavePNG;
+        private System.Windows.Forms.TextBox tbBusMTZ;
+        private System.Windows.Forms.TextBox tbBusMTO;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox tbRecloserMTZ;
+        private System.Windows.Forms.TextBox tbRecloserMTO;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Panel panelRecloserMTOMTZ;
+        private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Label lbProgressProcess;
     }
 }
 
