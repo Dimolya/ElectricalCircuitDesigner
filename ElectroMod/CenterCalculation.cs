@@ -1,4 +1,5 @@
-﻿using ElectroMod.Forms;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using ElectroMod.Forms;
 using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
@@ -25,26 +26,24 @@ namespace ElectroMod
         {
             _elements = elements;
             GenerateListObjectsForCalculation();
+            CalculationFormuls();
         }
 
         public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
         public List<Element> CommonElements { get; set; } = new List<Element>();
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
-        public List<(double, double)> ResistanceSchemes { get; set; }
         public List<Transormator> Transformators { get; set; } = new List<Transormator>();
         public Transormator TransormatorMaxS { get; set; }
+        public List<Report> ReportsMTO { get; set; } = new List<Report>();
 
-        public Element SecondLastElementList { get; set; }
+
         public int Order { get; set; }
         public bool IsCurrent { get; set; }
-        public string TypeKTP { get; set; }
-        //переменные для формул в отчете
         public double Voltage { get; set; }
+        public string TypeKTP { get; set; }
         public string ReconnectName { get; set; }
         public int Ntt { get; set; }
-        public double RecloserKn { get; set; }
-        public double RecloserKcz { get; set; }
-        public double RecloserKb { get; set; }
+        public string TypeTT { get; set; }
         public double TransformatorFullResistance { get; set; }
         //public int TransformatorS{ get; set; }
         public string NumberTY { get; set; }
@@ -67,21 +66,13 @@ namespace ElectroMod
         public double[] IkzMTO { get; set; }
         public double IkzMTOMax { get; set; }
         public double IkzMTOMaxCeiling { get; set; }
-        public double KchuvMTO { get; set; }
-        public string ResoultMTO { get; set; }
-        public string TypeTT { get; set; }
 
         //расчеты МТЗ
         public double IszMTZ { get; set; }
         public double IszMTZCeiling { get; set; }
         public double KchuvMTZ { get; set; }
         public Bus Bus { get; set; }
-        public Recloser Recloser { get; set; }
-        public double KchuvBusMTO { get; internal set; }
-        public object NewBusMTO { get; internal set; }
-        public double KchuvMTO1 { get; internal set; }
-        public double KchuvRecloserMTO { get; internal set; }
-        public object NewRecloserMTO { get; internal set; }
+        public List<Recloser> Reclosers { get; set; }
 
         //public double Kchuv2MTZ { get; set; }
         //public double Kchuv3MTZ { get; set; }
@@ -102,12 +93,13 @@ namespace ElectroMod
 
         public void CalculationMTOandMTZ(PreCalculationForm preCalculationForm)
         {
+            var firstReportBus = true;
             Transformators.AddRange(CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
             var sumS = Transformators.Sum(x => x.S);
             TransormatorMaxS = Transformators
                 .OrderByDescending(trans => trans.S)
                 .FirstOrDefault();
-            if(TransormatorMaxS != null)
+            if (TransormatorMaxS != null)
                 TypeKTP = TransormatorMaxS.TypeKTP;
             ReconnectName = preCalculationForm.Reconnect;
             NumberTY = preCalculationForm.NumberTY;
@@ -118,19 +110,14 @@ namespace ElectroMod
             foreach (var elementsList in CalculationElementList)
             {
                 Bus = elementsList.OfType<Bus>().FirstOrDefault();
-
-                //Вычесление наличия сущ. реклоузера
-                Recloser = elementsList.OfType<Recloser>().FirstOrDefault();
-                //Вычесление наличия проектируемого реклоузера
-                //var projectedRecloser = elementsList.OfType<Recloser>().FirstOrDefault(x => x.isCalculated);
-                //SecondLastElementList = elementsList.ElementAt(elementsList.Count - 2);
-                //TransformatorFullResistance = Transormator.FullResistance;
-                //TransformatorS = Transormator.S;
+                TypeTT = Bus.TypeTT;
+                Ntt = Bus.Ntt;
+                Reclosers = elementsList.OfType<Recloser>().ToList();
 
                 Iust = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
                     ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT)
                         / (Math.Sqrt(3) * Voltage * 0.95)
-                    : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) //если 2 и более транса то сумма их S
+                    : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA)
                         / (Math.Sqrt(3) * Voltage);
 
                 Iust = Math.Round(Iust, 3);
@@ -146,25 +133,22 @@ namespace ElectroMod
                 IkzMTOMax = IkzMTO.Max();
                 IkzMTOMaxCeiling = Math.Ceiling(IkzMTOMax);
 
-                if (Recloser == null)
+                if (firstReportBus)
                 {
-                    Order = 0;
-                    KchuvMTO = Bus.IkzMin * 0.865 * 1000 / IkzMTOMaxCeiling;
-                    KchuvBusMTO = Bus.IkzMin * 0.865 * 1000 / Bus.MTO;
-                    NewBusMTO = Bus.IkzMin * 0.865 * 1000 / 1.2;
+                    ReportsMTO.Add(new Report(Bus, IkzMTOMaxCeiling));
+                    firstReportBus = false;
                 }
-                else if (Recloser != null && !Recloser.IsCalculated)
-                {
-                    Order = 1;
-                    KchuvMTO1 = Recloser.IkzMin * 0.865 * 1000 / IkzMTOMaxCeiling;
-                    KchuvRecloserMTO = Recloser.IkzMin * 0.865 * 1000 / Recloser.MTO;
-                    NewRecloserMTO = Recloser.IkzMin * 0.865 * 1000 / 1.2;
-                }
-                else if (Recloser != null && Recloser.IsCalculated)
-                {
-                    Order = 2;
-                    KchuvMTO = Recloser.IkzMin * 0.865 * 1000 / IkzMTOMaxCeiling;
-                }
+                
+                if (Reclosers != null)
+                    foreach(var recloser in Reclosers)
+                    {
+                        if (recloser.IsCalculated)
+                        {
+                            TypeTT = recloser.TypeTT;
+                            Ntt = recloser.Ntt;
+                        }
+                        ReportsMTO.Add(new Report(recloser, IkzMTOMaxCeiling));
+                    }
 
                 //if (projectedRecloser != null)
                 //{
@@ -198,13 +182,7 @@ namespace ElectroMod
                 //    Kchuv3MTZ = Ip1 / Ip;
                 //}
 
-                break;
             }
-        }
-
-        private string CreateDocxForResloser()
-        {
-            return "";
         }
 
         private void GenerateListObjectsForCalculation()
@@ -281,6 +259,7 @@ namespace ElectroMod
                         if (ware.ConnectedWares.Any())
                             continue;
 
+                        element.K = _countK;
                         ware.Label = $"K{_countK}";
                         _countK++;
                         break;
@@ -296,6 +275,7 @@ namespace ElectroMod
                             visitedElement = element;
                             if ((!CommonElements.Contains(element) && !_firstInitK) || _firstInitK)
                             {
+                                element.K = _countK;
                                 ware.Label = $"K{_countK}";
                                 _countK++;
                                 alreadyFindElement = true;
@@ -394,7 +374,6 @@ namespace ElectroMod
                     continue;
                 Currents.Add((IszMax, IszMin));
             }
-            ResistanceSchemes = new List<(double, double)>(_resistanceSchemes);
             _resistanceSchemes.Clear();
         }
     }

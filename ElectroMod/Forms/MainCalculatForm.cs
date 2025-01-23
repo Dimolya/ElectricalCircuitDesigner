@@ -126,7 +126,6 @@ namespace ElectroMod
         private async void btnCalculate_Click(object sender, EventArgs e)
         {
             var calcul = new CenterCalculation(_elements);
-            calcul.CalculationFormuls();
             var transformators = new List<Transormator>(calcul.CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
 
             using (var preCalculateForm = new PreCalculationForm(transformators))
@@ -486,20 +485,22 @@ namespace ElectroMod
                 if (File.Exists(transformatorTypesJsonPath))
                 {
                     var dto = JsonProvider.LoadData<TransformatorContainerDto>(transformatorTypesJsonPath);
-                    double voltage = 0;
                     if (!string.IsNullOrEmpty(cbBusVoltage.Text))
-                        voltage = double.Parse(cbBusVoltage.Text);
+                        transormator.Voltage = double.Parse(cbBusVoltage.Text);
                     for (int i = 0; i < dto.Count; i++)
                     {
                         if (transormator.TypeKTP == dto[i].TypeKTP)
                         {
-                            var fullResistance = 10 * (dto[i].Uk * Math.Pow(voltage, 2) / dto[i].S);
-                            var activeResistance = dto[i].Pk * Math.Pow(voltage, 2) / Math.Pow(dto[i].S, 2);
+                            transormator.Uk = dto[i].Uk;
+                            transormator.Pk = dto[i].Pk;
+                            transormator.S = dto[i].S;
+
+                            var fullResistance = 10 * (dto[i].Uk * Math.Pow(transormator.Voltage, 2) / dto[i].S);
+                            var activeResistance = dto[i].Pk * Math.Pow(transormator.Voltage, 2) / Math.Pow(dto[i].S, 2);
                             var reactiveResistance = Math.Sqrt(Math.Pow(fullResistance, 2) - Math.Pow(activeResistance, 2));
                             transormator.FullResistance = Math.Round(fullResistance, 3);
                             transormator.ActiveResistance = Math.Round(activeResistance, 3);
                             transormator.ReactiveResistance = Math.Round(reactiveResistance, 3);
-                            transormator.S = dto[i].S;
                             break;
                         }
                     }

@@ -21,6 +21,7 @@ namespace ElectroMod
         private List<(string, string)> _elementsResistance = new List<(string, string)>();
         private int _lineCount = 1;
         private int _recloserCount = 1;
+        private double _voltage;
 
         [STAThread]
         public async Task CreateReportDocumentAsync(CenterCalculation calc, Form owner, IProgress<int> progress)
@@ -36,7 +37,7 @@ namespace ElectroMod
                 wordApp = new Application();
                 wordApp.ScreenUpdating = false;
                 doc = wordApp.Documents.Add();
-
+                _voltage = calc.Voltage;
                 //Настройка полей для всех разделов документа
                 foreach (Microsoft.Office.Interop.Word.Section section in doc.Sections)
                 {
@@ -92,15 +93,14 @@ namespace ElectroMod
                                 $"{calc.Voltage}/(√(3) + √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
                                                        $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item2, 3)}");
                         }
-
                         count++;
                     }
                     firstListOfElements = false;
                 }
-                progress.Report(30);
+                progress.Report(40);
                 AddParagraph(doc, "");
                 AddParagraph(doc, "Результаты расчетов токов К.З.", isBold: true);
-                AddCalculationTable(doc, calc);
+                AddCalculationTableCurrentsKZ(doc, calc);
 
                 AddParagraph(doc, "");
                 AddParagraph(doc, "Расчет уставок защит МТО, МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
@@ -111,75 +111,43 @@ namespace ElectroMod
                     AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность P_t.u.such {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования P_t.u. {calc.PowerKBT} кВт\r\n");
                 else
                     AddParagraph(doc, $"Согласно исходных данных мощность на фидере P_such {calc.PowerSuchKBA} кВа\r\n");
-                progress.Report(40);
-                switch (calc.Order)
-                {
-                    case 0:
-                        ReportBusMto(doc, calc);
-                        break;
-                    case 1:
-                        ReportBusResloserMto(doc, calc);
-                        break;
-                    case 2:
-                        ReportBusProjectResloserMto(doc, calc);
-                        break;
-                    case 3:
-                        ReportBusProjectResloserAndResloserMto(doc, calc);
-                        break;
-                }
-                progress.Report(60);
-                //AddParagraph(doc, "");
-                //AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{calc.Iust} ≥ {calc.IkzMTO[0]}");
-                //AddParagraph(doc, "");
-                //AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.IkzMTO[1]}..{calc.IkzMTO[2]})");
-                //AddParagraph(doc, "");
 
+                foreach (var reportMTO in calc.ReportsMTO)
+                {
+                    reportMTO.GenerateReportMTO(doc, calc);
+                }
+                progress.Report(80);
+
+                AddTableResoultsMTOMTZ(doc, calc);
+                //Отсутпление на новый лист
+                //var range = doc.Content;
+                //range.Collapse(WdCollapseDirection.wdCollapseEnd); // Перемещаемся в конец документа
+                //range.InsertBreak(WdBreakType.wdPageBreak);
+                //AddParagraph(doc, "Максимальная токовая защита МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
+                //AddParagraph(doc, "");
                 //if (calc.ReconnectName == "Расчет по мощности ТУ")
                 //{
-                //    AddParagraph(doc, $"Где ∑I_уст - сумма токов согласно выданным ТУ {calc.NumberTY}. k_н- коэффициент надежности\r\n");
-                //    AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TypeKTP} кВт\r\n");
+                //    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт\r\n");
+                //    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
+                //    AddParagraph(doc, "");
                 //}
                 //else
                 //{
-                //    AddParagraph(doc, "Где, ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n");
-                //    AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TypeKTP} кВа\r\n");
+                //    AddParagraph(doc, $"Согласно исходных данных мощность на фидере {calc.PowerSuchKBA} кВа\r\n");
+                //    AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");// тут вопрос что подставлять S или PowerKBA (это одно и тоже???)
+                //    AddParagraph(doc, "");
                 //}
-                //AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(Klast)) * 1000) > 1.2 * ({calc.TransormatorMaxS.IkzMax} * 1000) > {calc.IkzMTO[3]}");
+                //AddParagraph(doc, "Условие отстройки от максимального рабочего тока\r\n");
+                //AddFormula(doc, $"I_сз>((k_н*k_сз)/k_в)*I_уст > (({calc.RecloserKn}*{calc.RecloserKcz})/{calc.RecloserKb})*{calc.Iust} > {calc.IszMTZ}"); //ToDo: тут надо потом calc.IszMTZ округлить до целого всегда в большую сторону и потом его учитывать в формулах 
                 //AddParagraph(doc, "");
-                //AddParagraph(doc, "Где,  k_н=1,2 для МПУ\r\n\r\n" +
-                // "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в месте установки защиты:\r\n");
+                //AddParagraph(doc, $"Принимаем уставку I_сз = {calc.IszMTZCeiling}\r\n\r\n" +
+                //    "Проверим чувствительность к минимальному току КЗ (Кч>1,5 по ПУЭ):\r\n");
+                //AddFormula(doc, $"k_чувст=(I_(к.з.min(KsecondLast))*0,865*1000)/(I_(c.з.)) = ({calc.SecondLastElementList?.IkzMin}*0,865*1000)/{calc.IszMTZCeiling} = {calc.KchuvMTZ}");
+                //progress.Report(90);
 
-                //AddFormula(doc, $"k_чувст=(I_(к.з.min(KsecondLast))*0,865*1000)/I_сз = ({calc.SecondLastElementList?.IkzMin}*0,865*1000)/{calc.IkzMTOMaxCeiling}={calc.KchuvMTO}");
-                //AddParagraph(doc, "");
-                //if (calc.KchuvMTO > 1.2)
-                //    AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) ");
-                //else
-                //    AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
-                //Отсутпление на новый лист
-                var range = doc.Content;
-                range.Collapse(WdCollapseDirection.wdCollapseEnd); // Перемещаемся в конец документа
-                range.InsertBreak(WdBreakType.wdPageBreak);
-                AddParagraph(doc, "Максимальная токовая защита МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
-                AddParagraph(doc, "");
-                if (calc.ReconnectName == "Расчет по мощности ТУ")
-                {
-                    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт\r\n");
-                    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
-                    AddParagraph(doc, "");
-                }
-                else
-                {
-                    AddParagraph(doc, $"Согласно исходных данных мощность на фидере {calc.PowerSuchKBA} кВа\r\n");
-                    AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");// тут вопрос что подставлять S или PowerKBA (это одно и тоже???)
-                    AddParagraph(doc, "");
-                }
-                AddParagraph(doc, "Условие отстройки от максимального рабочего тока\r\n");
-                AddFormula(doc, $"I_сз>((k_н*k_сз)/k_в)*I_уст > (({calc.RecloserKn}*{calc.RecloserKcz})/{calc.RecloserKb})*{calc.Iust} > {calc.IszMTZ}"); //ToDo: тут надо потом calc.IszMTZ округлить до целого всегда в большую сторону и потом его учитывать в формулах 
-                AddParagraph(doc, "");
-                AddParagraph(doc, $"Принимаем уставку I_сз = {calc.IszMTZCeiling}\r\n\r\n" +
-                    "Проверим чувствительность к минимальному току КЗ (Кч>1,5 по ПУЭ):\r\n");
-                AddFormula(doc, $"k_чувст=(I_(к.з.min(KsecondLast))*0,865*1000)/(I_(c.з.)) = ({calc.SecondLastElementList?.IkzMin}*0,865*1000)/{calc.IszMTZCeiling} = {calc.KchuvMTZ}");
-                progress.Report(90);
+
+
+
                 //AddParagraph(doc, "Проверка чувствительности МТЗ (для схемы D/Y)", isBold: true, fontSize: 14, isCenterAligned: true);
                 //AddParagraph(doc, "");
                 //AddFormula(doc, $"I_р=(K_сx·I_сз)/ntt = (1*{calc.IszMTZ})/{calc.RecloserNtt} = {calc.Ip}");
@@ -231,6 +199,28 @@ namespace ElectroMod
             }
         }
 
+        private void AddTableResoultsMTOMTZ(Document doc, CenterCalculation calc)
+        {
+            var reports = calc.ReportsMTO;
+            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, calc.ReportsMTO.Count + 1, 3);
+            table.Borders.Enable = 1; // Устанавливаем границы таблицы
+            table.Cell(1, 1).Range.Text = "Наименование";
+            table.Cell(1, 2).Range.Text = "МТО";
+            table.Cell(1, 3).Range.Text = "МТЗ";
+
+            // Форматирование заголовков
+            Microsoft.Office.Interop.Word.Range headerRange = table.Rows[1].Range;
+            headerRange.Bold = 1;
+            headerRange.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter;
+            for (int i = 0; i < reports.Count; i++)
+            {
+                table.Cell(i + 2, 1).Range.Text = reports[i].Element.Name;
+                if (reports[i].Element is Bus bus)
+                    table.Cell(i + 2, 2).Range.Text = bus.MTO.ToString();
+                if (reports[i].Element is Recloser recloser)
+                    table.Cell(i + 2, 2).Range.Text = recloser.MTO.ToString();
+            }
+        }
 
         private void AddParagraph(Document doc, string text, bool isBold = false, bool isCenterAligned = false, int fontSize = 10)
         {
@@ -250,7 +240,7 @@ namespace ElectroMod
             paragraph.Range.InsertParagraphAfter();
         }
 
-        private void AddCalculationTable(Document doc, CenterCalculation calc)
+        public void AddCalculationTableCurrentsKZ(Document doc, CenterCalculation calc)
         {
             var currents = calc.Currents;
 
@@ -281,7 +271,7 @@ namespace ElectroMod
             }
         }
 
-        private void AddFormula(Document doc, string formula)
+        public void AddFormula(Document doc, string formula)
         {
             Paragraph formulaParagraph = doc.Content.Paragraphs.Add();
             formulaParagraph.Range.Text = formula;
@@ -311,9 +301,9 @@ namespace ElectroMod
             if (element is Transormator trans)
             {
                 AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
-                AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*((U_k*^2)/(S_ном))");
-                AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2)");
-                AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2)");
+                AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*(({trans.Uk}*{_voltage}^2)/({trans.S})) = {trans.FullResistance}");
+                AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2) = ({trans.Pk}*{_voltage}^2)/({trans.S}^2) = {trans.ActiveResistance}");
+                AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2) = √({trans.FullResistance}^2 - {trans.ActiveResistance}^2) = {trans.ReactiveResistance}");
             }
 
             var elementTypeR = $"R_{element.GetType().Name}{elementCount}";
@@ -360,324 +350,6 @@ namespace ElectroMod
                 elementReactiveRes += _elementsResistance[i].Item2 + " + ";
             }
             return (elementActiveRes, elementReactiveRes);
-        }
-        public void ReportBusMto(Document doc, CenterCalculation calc)
-        {
-            AddParagraph(doc, $"Расчет токовой отсечки (ТО), для {calc.Bus.Name}", isBold: true, fontSize: 14);
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Отстройка защиты от броска тока намагничивания\r\n");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust:F3}");
-            }
-            else
-            {
-                AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
-            }
-
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{calc.Iust} ≥ {calc.IkzMTO[0]}");
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.IkzMTO[1]}..{calc.IkzMTO[2]})");
-            AddParagraph(doc, "");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddParagraph(doc, $"Где ∑I_уст - сумма токов согласно выданным ТУ {calc.NumberTY}. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВт\r\n");
-            }
-            else
-            {
-                AddParagraph(doc, "Где, ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВа\r\n");
-            }
-
-            AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(K?????????)) * 1000) > 1.2 * ({calc.TransormatorMaxS.IkzMax} * 1000) > {calc.IkzMTO[3]}");
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Где,  k_н=1,2 для МПУ\r\n\r\n" +
-             "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в месте установки защиты:\r\n");
-
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K_1))*0,865*1000)/I_сз = ({calc.Bus.IkzMin}*0,865*1000)/{calc.IkzMTOMaxCeiling}={calc.KchuvMTO}");
-            AddParagraph(doc, "");
-
-            if (calc.KchuvMTO > 1.2)
-            {
-                AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-                if (calc.Bus.MTO > calc.KchuvMTO)
-                {
-                    AddParagraph(doc, "Проверка сущесвующей уставки МТО на чувсвительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K_1))*0,865*1000)/I_сз = ({calc.Bus.IkzMin}*0,865*1000)/{calc.Bus.MTO}={calc.KchuvBusMTO}");
-
-                    if (calc.KchuvBusMTO > 1.2)
-                        AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
-                    else
-                    {
-                        AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
-
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K_1))*0,865*1000)/1,2 = ({calc.Bus.IkzMin}*0,865*1000)/1,2={calc.NewBusMTO}");
-                        AddParagraph(doc, $"Уставка МТО принимается {calc.NewBusMTO}");
-                    }
-                }
-                else
-                {
-                    AddParagraph(doc, $"Уставка МТО принимается {calc.KchuvMTO}");
-                }
-            }
-            else
-                AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
-        }
-
-        private void ReportBusResloserMto(Document doc, CenterCalculation calc)
-        {
-            AddParagraph(doc, $"Расчет токовой отсечки (ТО), для {calc.Bus.Name}", isBold: true, fontSize: 14);
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Отстройка защиты от броска тока намагничивания\r\n");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust:F3}");
-            }
-            else
-            {
-                AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
-            }
-
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{calc.Iust} ≥ {calc.IkzMTO[0]}");
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.IkzMTO[1]}..{calc.IkzMTO[2]})");
-            AddParagraph(doc, "");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddParagraph(doc, $"Где ∑I_уст - сумма токов согласно выданным ТУ {calc.NumberTY}. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВт\r\n");
-            }
-            else
-            {
-                AddParagraph(doc, "Где, ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВа\r\n");
-            }
-
-            AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(K?????????)) * 1000) > 1.2 * ({calc.TransormatorMaxS.IkzMax} * 1000) > {calc.IkzMTO[3]}");
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Где,  k_н=1,2 для МПУ\r\n\r\n" +
-             "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в месте установки защиты:\r\n");
-
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K_1))*0,865*1000)/I_сз = ({calc.Bus.IkzMin}*0,865*1000)/{calc.IkzMTOMaxCeiling}={calc.KchuvMTO}");
-            AddParagraph(doc, "");
-
-            if (calc.KchuvMTO > 1.2)
-            {
-                AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-                if (calc.Bus.MTO > calc.KchuvMTO)
-                {
-                    AddParagraph(doc, "Проверка сущесвующей уставки МТО на чувсвительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K_1))*0,865*1000)/I_сз = ({calc.Bus.IkzMin}*0,865*1000)/{calc.Bus.MTO}={calc.KchuvBusMTO}");
-
-                    if (calc.KchuvBusMTO > 1.2)
-                        AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
-                    else
-                    {
-                        AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
-
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K_1))*0,865*1000)/1,2 = ({calc.Bus.IkzMin}*0,865*1000)/1,2={calc.NewBusMTO}");
-                        AddParagraph(doc, $"Уставка МТО принимается {calc.NewBusMTO}");
-                    }
-                }
-                else
-                {
-                    AddParagraph(doc, $"Уставка МТО принимается {calc.KchuvMTO}");
-                }
-            }
-            else
-                AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
-
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            AddParagraph(doc, $"Расчет токовой отсечки (ТО), для {calc.Recloser.Name}", isBold: true, fontSize: 14);
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Отстройка защиты от броска тока намагничивания\r\n");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust:F3}");
-            }
-            else
-            {
-                AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
-            }
-
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{calc.Iust} ≥ {calc.IkzMTO[0]}");
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.IkzMTO[1]}..{calc.IkzMTO[2]})");
-            AddParagraph(doc, "");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddParagraph(doc, $"Где ∑I_уст - сумма токов согласно выданным ТУ {calc.NumberTY}. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВт\r\n");
-            }
-            else
-            {
-                AddParagraph(doc, "Где, ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВа\r\n");
-            }
-
-            AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(Ktrans * 1000) > 1.2 * ({calc.TransormatorMaxS.IkzMax} * 1000) > {calc.IkzMTO[3]}");
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Где,  k_н=1,2 для МПУ\r\n\r\n" +
-             "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в месте установки защиты:\r\n");
-
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K_recloser))*0,865*1000)/I_сз = ({calc.Recloser.IkzMin}*0,865*1000)/{calc.IkzMTOMaxCeiling}={calc.KchuvMTO1}");
-            AddParagraph(doc, "");
-
-            if (calc.KchuvMTO1 > 1.2)
-            {
-                AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-                if (calc.Recloser.MTO > calc.KchuvMTO1)
-                {
-                    AddParagraph(doc, "Проверка сущесвующей уставки МТО на чувсвительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K_recloser))*0,865*1000)/I_сз = ({calc.Recloser.IkzMin}*0,865*1000)/{calc.Recloser.MTO}={calc.KchuvRecloserMTO}");
-
-                    if (calc.KchuvRecloserMTO > 1.2)
-                        AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
-                    else
-                    {
-                        AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
-
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K_recloser))*0,865*1000)/1,2 = ({calc.Recloser.IkzMin}*0,865*1000)/1,2={calc.NewRecloserMTO}");
-                        AddParagraph(doc, $"Уставка МТО принимается {calc.NewRecloserMTO}");
-                    }
-                }
-                else
-                {
-                    AddParagraph(doc, $"Уставка МТО принимается {calc.KchuvMTO1}");
-                }
-            }
-            else
-                AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
-
-
-        }
-        private void ReportBusProjectResloserMto(Document doc, CenterCalculation calc)
-        {
-            AddParagraph(doc, $"Расчет токовой отсечки (ТО), для {calc.Bus.Name}", isBold: true, fontSize: 14);
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Отстройка защиты от броска тока намагничивания\r\n");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust:F3}");
-            }
-            else
-            {
-                AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
-            }
-
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{calc.Iust} ≥ {calc.IkzMTO[0]}");
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.IkzMTO[1]}..{calc.IkzMTO[2]})");
-            AddParagraph(doc, "");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddParagraph(doc, $"Где ∑I_уст - сумма токов согласно выданным ТУ {calc.NumberTY}. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВт\r\n");
-            }
-            else
-            {
-                AddParagraph(doc, "Где, ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВа\r\n");
-            }
-
-            AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(K?????????)) * 1000) > 1.2 * ({calc.TransormatorMaxS.IkzMax} * 1000) > {calc.IkzMTO[3]}");
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Где,  k_н=1,2 для МПУ\r\n\r\n" +
-             "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в месте установки защиты:\r\n");
-
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K_1))*0,865*1000)/I_сз = ({calc.Bus.IkzMin}*0,865*1000)/{calc.IkzMTOMaxCeiling}={calc.KchuvMTO}");
-            AddParagraph(doc, "");
-
-            if (calc.KchuvMTO > 1.2)
-            {
-                AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-                if (calc.Bus.MTO > calc.KchuvMTO)
-                {
-                    AddParagraph(doc, "Проверка сущесвующей уставки МТО на чувсвительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K_1))*0,865*1000)/I_сз = ({calc.Bus.IkzMin}*0,865*1000)/{calc.Bus.MTO}={calc.KchuvBusMTO}");
-
-                    if (calc.KchuvBusMTO > 1.2)
-                        AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
-                    else
-                    {
-                        AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
-
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K_1))*0,865*1000)/1,2 = ({calc.Bus.IkzMin}*0,865*1000)/1,2={calc.NewBusMTO}");
-                        AddParagraph(doc, $"Уставка МТО принимается {calc.NewBusMTO}");
-                    }
-                }
-                else
-                {
-                    AddParagraph(doc, $"Уставка МТО принимается {calc.KchuvMTO}");
-                }
-            }
-            else
-                AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
-
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            AddParagraph(doc, $"Расчет токовой отсечки (ТО), для {calc.Recloser.Name}", isBold: true, fontSize: 14);
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Отстройка защиты от броска тока намагничивания\r\n");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust:F3}");
-            }
-            else
-            {
-                AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");
-            }
-
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{calc.Iust} ≥ {calc.IkzMTO[0]}");
-            AddParagraph(doc, "");
-            AddFormula(doc, $"I_сз ≥ 3..4 * I_уст ≥ (3..4*{calc.Iust}) ≥ ({calc.IkzMTO[1]}..{calc.IkzMTO[2]})");
-            AddParagraph(doc, "");
-
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-            {
-                AddParagraph(doc, $"Где ∑I_уст - сумма токов согласно выданным ТУ {calc.NumberTY}. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВт\r\n");
-            }
-            else
-            {
-                AddParagraph(doc, "Где, ∑I_уст - сумма номинальных токов всех трансформаторов, которые могут одновременно включаться под напряжение по защищаемой линии. k_н- коэффициент надежности\r\n");
-                AddParagraph(doc, $"Отстройка защиты от тока 3-х фазного К.З. после проектируемого трансформатора {calc.TransormatorMaxS.TypeKTP} кВа\r\n");
-            }
-
-            AddFormula(doc, $"I_сз > k_н * (I_(к.з.max(Ktrans * 1000) > 1.2 * ({calc.TransormatorMaxS.IkzMax} * 1000) > {calc.IkzMTO[3]}");
-            AddParagraph(doc, "");
-            AddParagraph(doc, "Где,  k_н=1,2 для МПУ\r\n\r\n" +
-             "Проверка чувствительности при 2-х фазном К.З. в минимальном режиме в месте установки защиты:\r\n");
-
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K_recloser))*0,865*1000)/I_сз = ({calc.Recloser.IkzMin}*0,865*1000)/{calc.IkzMTOMaxCeiling}={calc.KchuvMTO}");
-            AddParagraph(doc, "");
-
-            if (calc.KchuvMTO > 1.2)
-            {
-                AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-            }
-            else
-                AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
-        }
-        private void ReportBusProjectResloserAndResloserMto(Document doc, CenterCalculation calc)
-        {
-            throw new NotImplementedException();
         }
 
     }

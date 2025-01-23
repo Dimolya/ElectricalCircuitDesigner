@@ -33,6 +33,8 @@ namespace ElectroMod
         public double FullResistance { get; set; }
         public double ActiveResistance { get; set; }
         public double ReactiveResistance { get; set; }
+        public double Uk { get; set; }
+        public int Pk { get; set; }
         public int S { get; set; }
     }
 }

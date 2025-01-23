@@ -30,8 +30,10 @@ namespace ElectroMod
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public string Name { get; set; }
+        public double Voltage { get; set; }
         public double IkzMax { get; set; }
         public double IkzMin { get; set; }
+        public int K { get; set; }
         public bool IsFirstInit { get; set; } = true;
         public int Angle { get; set; }
 

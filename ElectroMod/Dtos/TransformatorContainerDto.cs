@@ -10,7 +10,7 @@ namespace ElectroMod.DataBase.Dtos
     {
         public string TypeKTP { get; set; }
         public double Uk { get; set; }
-        public double Pk { get; set; }
+        public int Pk { get; set; }
         public int S { get; set; }
     }
 }
