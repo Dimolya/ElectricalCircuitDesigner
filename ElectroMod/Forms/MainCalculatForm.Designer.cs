@@ -117,6 +117,8 @@
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.drawPanel1 = new ElectroMod.DrawPanel();
             this.lbProgressProcess = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.cbBusType = new System.Windows.Forms.ComboBox();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -177,7 +179,7 @@
             this.файлToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1406, 30);
+            this.menu.Size = new System.Drawing.Size(1406, 28);
             this.menu.TabIndex = 6;
             this.menu.Text = "menuStrip1";
             // 
@@ -188,7 +190,7 @@
             this.SaveFile,
             this.SavePNG});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
-            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
+            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 26);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
             // OpenFile
@@ -259,6 +261,8 @@
             // panelPropertyBus
             // 
             this.panelPropertyBus.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyBus.Controls.Add(this.cbBusType);
+            this.panelPropertyBus.Controls.Add(this.label26);
             this.panelPropertyBus.Controls.Add(this.label6);
             this.panelPropertyBus.Controls.Add(this.label5);
             this.panelPropertyBus.Controls.Add(this.tbBusMTZ);
@@ -381,7 +385,7 @@
             this.panelForResistance.Controls.Add(this.label13);
             this.panelForResistance.Controls.Add(this.tbBusReactiveResistMax);
             this.panelForResistance.Controls.Add(this.tbBusActiveResistMax);
-            this.panelForResistance.Location = new System.Drawing.Point(4, 96);
+            this.panelForResistance.Location = new System.Drawing.Point(0, 120);
             this.panelForResistance.Name = "panelForResistance";
             this.panelForResistance.Size = new System.Drawing.Size(592, 125);
             this.panelForResistance.TabIndex = 50;
@@ -495,7 +499,7 @@
             this.panelForCurrent.Controls.Add(this.tbBusCurrentMin);
             this.panelForCurrent.Controls.Add(this.label17);
             this.panelForCurrent.Controls.Add(this.tbBusCurrentMax);
-            this.panelForCurrent.Location = new System.Drawing.Point(4, 96);
+            this.panelForCurrent.Location = new System.Drawing.Point(0, 120);
             this.panelForCurrent.Name = "panelForCurrent";
             this.panelForCurrent.Size = new System.Drawing.Size(465, 69);
             this.panelForCurrent.TabIndex = 49;
@@ -555,9 +559,9 @@
             // 
             this.panel1.Controls.Add(this.rbBusResistance);
             this.panel1.Controls.Add(this.rbBusCurrent);
-            this.panel1.Location = new System.Drawing.Point(196, 62);
+            this.panel1.Location = new System.Drawing.Point(196, 86);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(400, 39);
+            this.panel1.Size = new System.Drawing.Size(242, 28);
             this.panel1.TabIndex = 48;
             // 
             // rbBusResistance
@@ -585,7 +589,7 @@
             // lbVoltage
             // 
             this.lbVoltage.AutoSize = true;
-            this.lbVoltage.Location = new System.Drawing.Point(-1, 34);
+            this.lbVoltage.Location = new System.Drawing.Point(-1, 30);
             this.lbVoltage.Name = "lbVoltage";
             this.lbVoltage.Size = new System.Drawing.Size(89, 16);
             this.lbVoltage.TabIndex = 46;
@@ -594,7 +598,7 @@
             // lbDataTypes
             // 
             this.lbDataTypes.AutoSize = true;
-            this.lbDataTypes.Location = new System.Drawing.Point(-1, 62);
+            this.lbDataTypes.Location = new System.Drawing.Point(-1, 86);
             this.lbDataTypes.Name = "lbDataTypes";
             this.lbDataTypes.Size = new System.Drawing.Size(123, 16);
             this.lbDataTypes.TabIndex = 45;
@@ -610,7 +614,7 @@
             // lbTextName
             // 
             this.lbTextName.AutoSize = true;
-            this.lbTextName.Location = new System.Drawing.Point(-1, 6);
+            this.lbTextName.Location = new System.Drawing.Point(-1, 2);
             this.lbTextName.Name = "lbTextName";
             this.lbTextName.Size = new System.Drawing.Size(106, 16);
             this.lbTextName.TabIndex = 43;
@@ -920,7 +924,7 @@
             // 
             // btnCalculate
             // 
-            this.btnCalculate.Location = new System.Drawing.Point(1223, 722);
+            this.btnCalculate.Location = new System.Drawing.Point(1223, 743);
             this.btnCalculate.Name = "btnCalculate";
             this.btnCalculate.Size = new System.Drawing.Size(171, 48);
             this.btnCalculate.TabIndex = 56;
@@ -930,7 +934,7 @@
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(15, 755);
+            this.progressBar.Location = new System.Drawing.Point(15, 776);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(185, 15);
             this.progressBar.TabIndex = 13;
@@ -948,19 +952,36 @@
             // lbProgressProcess
             // 
             this.lbProgressProcess.AutoSize = true;
-            this.lbProgressProcess.Location = new System.Drawing.Point(13, 734);
+            this.lbProgressProcess.Location = new System.Drawing.Point(13, 755);
             this.lbProgressProcess.Name = "lbProgressProcess";
             this.lbProgressProcess.Size = new System.Drawing.Size(130, 16);
             this.lbProgressProcess.TabIndex = 57;
             this.lbProgressProcess.Text = "Создание отчета...";
             this.lbProgressProcess.Visible = false;
             // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(-1, 58);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(32, 16);
+            this.label26.TabIndex = 60;
+            this.label26.Text = "Тип";
+            // 
+            // cbBusType
+            // 
+            this.cbBusType.FormattingEnabled = true;
+            this.cbBusType.Location = new System.Drawing.Point(196, 58);
+            this.cbBusType.Name = "cbBusType";
+            this.cbBusType.Size = new System.Drawing.Size(273, 24);
+            this.cbBusType.TabIndex = 61;
+            // 
             // MainCalculatForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1406, 782);
+            this.ClientSize = new System.Drawing.Size(1406, 803);
             this.Controls.Add(this.lbProgressProcess);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnCalculate);
@@ -1097,6 +1118,8 @@
         private System.Windows.Forms.Panel panelRecloserMTOMTZ;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Label lbProgressProcess;
+        private System.Windows.Forms.ComboBox cbBusType;
+        private System.Windows.Forms.Label label26;
     }
 }
 

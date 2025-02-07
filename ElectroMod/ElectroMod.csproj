@@ -159,6 +159,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Elements\Transormator.cs" />
+    <Compile Include="SecurityHash.cs" />
     <Compile Include="SerializableGraphicsPath.cs" />
     <Compile Include="Elements\Line.cs" />
     <EmbeddedResource Include="DrawPanel.resx">

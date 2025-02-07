@@ -74,24 +74,24 @@ namespace ElectroMod
                             AddFormula(doc, $"I_(к.з.max(k{count})) = " +
                                 $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item1})^2) + Z_(sub.max))) = " +
                                 $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
-                                $"{Math.Round(calc.Currents[count - 1].Item1, 3)}");
+                                $"{Math.Round(calc.Currents[count - 1].Item1, 3)} кА");
 
                             AddFormula(doc, $"I_(к.з.min(k{count})) = " +
                                 $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
                                 $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
-                                $"{Math.Round(calc.Currents[count - 1].Item2, 3)}");
+                                $"{Math.Round(calc.Currents[count - 1].Item2, 3)} кА");
                         }
                         else
                         {
                             AddFormula(doc, $"I_(к.з.max(k{count})) = " +
                                 $"Sub_voltage/(√(3) + √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
                                 $"{calc.Voltage}/(√(3) + √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item1, 3)}");
+                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item1, 3)} кА");
 
                             AddFormula(doc, $"I_(к.з.min(k{count})) = " +
                                 $"Sub_voltage/(√(3) + √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
                                 $"{calc.Voltage}/(√(3) + √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item2, 3)}");
+                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item2, 3)} кА");
                         }
                         count++;
                     }
@@ -117,6 +117,10 @@ namespace ElectroMod
                     reportMTO.GenerateReportMTO(doc, calc);
                 }
                 progress.Report(80);
+
+
+
+
 
                 AddTableResoultsMTOMTZ(doc, calc);
                 //Отсутпление на новый лист
@@ -290,9 +294,9 @@ namespace ElectroMod
             if (element is Line line)
             {
                 AddParagraph(doc, $"Активное сопротивление линии {line.Name}:", isBold: false);
-                AddFormula(doc, $"R_line{_lineCount} = r*L = {line.ActiveResistanceFromDto}*{line.Length}={line.ActiveResistance}");
+                AddFormula(doc, $"R_line{_lineCount} = r*L = {line.ActiveResistanceFromDto}*{line.Length}={line.ActiveResistance} Ом");
                 AddParagraph(doc, $"Реактивное сопротивление линии {line.Name}:", isBold: false);
-                AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistanceFromDto}*{line.Length}={line.ReactiveResistance}");
+                AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistanceFromDto}*{line.Length}={line.ReactiveResistance} Ом");
                 elementCount = _lineCount++;
             }
             if (element is Recloser)
@@ -301,9 +305,9 @@ namespace ElectroMod
             if (element is Transormator trans)
             {
                 AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
-                AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*(({trans.Uk}*{_voltage}^2)/({trans.S})) = {trans.FullResistance}");
-                AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2) = ({trans.Pk}*{_voltage}^2)/({trans.S}^2) = {trans.ActiveResistance}");
-                AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2) = √({trans.FullResistance}^2 - {trans.ActiveResistance}^2) = {trans.ReactiveResistance}");
+                AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*(({trans.Uk}*{_voltage}^2)/({trans.S})) = {trans.FullResistance} Ом");
+                AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2) = ({trans.Pk}*{_voltage}^2)/({trans.S}^2) = {trans.ActiveResistance} Ом");
+                AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2) = √({trans.FullResistance}^2 - {trans.ActiveResistance}^2) = {trans.ReactiveResistance} Ом");
             }
 
             var elementTypeR = $"R_{element.GetType().Name}{elementCount}";

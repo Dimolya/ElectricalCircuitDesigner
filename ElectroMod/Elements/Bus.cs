@@ -32,6 +32,10 @@ namespace ElectroMod
         public double ActiveResistMin { get; set; }
         public double ReactiveResistMin { get; set; }
 
+        public double Kb { get; set; }
+        public double Kcz { get; set; }
+        public double Kn { get; set; }
+
         public double MTO { get; set; }
         public double MTZ { get; set; }
     }

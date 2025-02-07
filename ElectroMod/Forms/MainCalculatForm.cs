@@ -173,14 +173,18 @@ namespace ElectroMod
             if (selectedElement is Bus bus)
             {
                 var dataBusJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataBus.json");
+                var dataBusTypeJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataRecloser.json");
 
-                if (File.Exists(dataBusJsonPath))
+                if (File.Exists(dataBusJsonPath) && File.Exists(dataBusTypeJsonPath))
                 {
                     var dto = JsonProvider.LoadData<DataBusDto>(dataBusJsonPath);
+                    var dto2 = JsonProvider.LoadData<DataBusDto>(dataBusTypeJsonPath);
                     cbBusVoltage.DataSource = dto[0].Voltage;
                     cbBusVoltage.Text = bus.Voltage.ToString();
-                    cbBusTypeTT.DataSource = dto[0].TypeTT;
+                    cbBusTypeTT.DataSource = dto2[0].TypeTT;
                     cbBusTypeTT.Text = bus.TypeTT;
+                    cbBusType.DataSource = dto2[0].TypeRecloser;
+                    cbBusType.Text = bus.TypeTT;
                 }
                 else
                     MessageBox.Show($"Неверно указан путь к файлу {dataBusJsonPath}");
@@ -342,15 +346,17 @@ namespace ElectroMod
             if (_slctElement is Bus bus)
             {
                 var typeTTJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TypeTT.json");
+                var recloserTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "RecloserTypes.json");
 
                 try
                 {
                     bus.Name = tbBusName.Text;
                     bus.Voltage = double.Parse(cbBusVoltage.Text.Replace('.', ','));
                     bus.TypeTT = cbBusTypeTT.Text;
+                    bus.Type = cbBusType.Text;
                     bus.MTO = double.Parse(tbBusMTO.Text.Replace('.', ','));
                     bus.MTZ = double.Parse(tbBusMTZ.Text.Replace('.', ','));
-                    if (File.Exists(typeTTJsonPath))
+                    if (File.Exists(typeTTJsonPath) && File.Exists(recloserTypesJsonPath))
                     {
                         var dtoTT = JsonProvider.LoadData<DataTypeTTDto>(typeTTJsonPath);
                         foreach (var typeTT in dtoTT)
@@ -361,9 +367,22 @@ namespace ElectroMod
                                 break;
                             }
                         }
+                        var dtoType = JsonProvider.LoadData<RecloserDataTypeDto>(recloserTypesJsonPath);
+                        foreach (var type in dtoType)
+                        {
+                            if (bus.Type == type.TypeRecloser)
+                            {
+                                bus.Kb = type.Kb;
+                                bus.Kcz = type.Kcz;
+                                bus.Kn = type.Kn;
+                                break;
+                            }
+                        }
                     }
                     else
                         MessageBox.Show($"Неверно указан путь к файлу {typeTTJsonPath}");
+
+                    
 
                     if (bus.IsCurrent)
                     {

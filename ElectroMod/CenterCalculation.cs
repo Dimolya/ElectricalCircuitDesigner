@@ -146,9 +146,13 @@ namespace ElectroMod
                         {
                             TypeTT = recloser.TypeTT;
                             Ntt = recloser.Ntt;
+                            IszMTZ = recloser.Kn * recloser.Kcz / recloser.Kb * Iust; // тут иуст вычисляется без PowerSuch
+                            IszMTZ = Math.Round(IszMTZ, 3);
                         }
                         ReportsMTO.Add(new Report(recloser, IkzMTOMaxCeiling));
                     }
+
+
 
                 //if (projectedRecloser != null)
                 //{
@@ -162,8 +166,6 @@ namespace ElectroMod
                 //    //RecloserKb = projectedRecloser.Kb;
 
                 //    //дальше МТЗ
-                //    //IszMTZ = projectedRecloser.Kn * projectedRecloser.Kcz / projectedRecloser.Kb * Iust;
-                //    //IszMTZ = Math.Round(IszMTZ, 3);
                 //    //IszMTZCeiling = Math.Ceiling(IszMTZ);
                 //    //KchuvMTZ = SecondLastElementList.IkzMin * 0.865 * 1000 / IszMTZCeiling; //ToDo: Надо спросить что тут имеется ввиду 
                 //    //KchuvMTZ = Math.Round(KchuvMTZ, 3);
