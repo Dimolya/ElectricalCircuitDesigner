@@ -54,7 +54,8 @@ namespace ElectroMod
                 // Добавляем оглавление
                 Range tocRange = doc.Content.Paragraphs.Add().Range;
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
-                int count = 2;
+                int countK = 2;
+                int indexCurrent = 0;
                 var firstListOfElements = true;
                 progress.Report(10);
                 foreach (var elementList in calc.CalculationElementList)
@@ -64,36 +65,37 @@ namespace ElectroMod
                         if ((calc.CommonElements.Contains(element) && !firstListOfElements) || element is Bus)
                             continue;
 
-                        AddParagraph(doc, $"Расчеты в точке K{count}", isBold: true, fontSize: 14);
+                        AddParagraph(doc, $"Расчеты в точке K{countK}", isBold: true, fontSize: 14);
 
                         var elementsNames = CreateFormulaElementName(doc, element);
                         var elementsResistanceValues = CreateFormulaElementsResistanceValues(element);
                         AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
                         if (calc.IsCurrent)
                         {
-                            AddFormula(doc, $"I_(к.з.max(k{count})) = " +
+                            AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
                                 $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item1})^2) + Z_(sub.max))) = " +
                                 $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
-                                $"{Math.Round(calc.Currents[count - 1].Item1, 3)} кА");
+                                $"{Math.Round(calc.Currents[indexCurrent].Item1, 3)} кА");
 
-                            AddFormula(doc, $"I_(к.з.min(k{count})) = " +
+                            AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
                                 $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
                                 $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
-                                $"{Math.Round(calc.Currents[count - 1].Item2, 3)} кА");
+                                $"{Math.Round(calc.Currents[indexCurrent].Item2, 3)} кА");
                         }
                         else
                         {
-                            AddFormula(doc, $"I_(к.з.max(k{count})) = " +
+                            AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
                                 $"Sub_voltage/(√(3) + √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
                                 $"{calc.Voltage}/(√(3) + √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item1, 3)} кА");
+                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[indexCurrent].Item1, 3)} кА");
 
-                            AddFormula(doc, $"I_(к.з.min(k{count})) = " +
+                            AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
                                 $"Sub_voltage/(√(3) + √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
                                 $"{calc.Voltage}/(√(3) + √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[count - 1].Item2, 3)} кА");
+                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[indexCurrent].Item2, 3)} кА");
                         }
-                        count++;
+                        countK++;
+                        indexCurrent++;
                     }
                     firstListOfElements = false;
                 }
@@ -112,15 +114,11 @@ namespace ElectroMod
                 else
                     AddParagraph(doc, $"Согласно исходных данных мощность на фидере P_such {calc.PowerSuchKBA} кВа\r\n");
 
-                foreach (var reportMTO in calc.ReportsMTO)
+                foreach (var report in calc.Reports)
                 {
-                    reportMTO.GenerateReportMTO(doc, calc);
+                    report.GenerateReport(doc, calc);
                 }
                 progress.Report(80);
-
-
-
-
 
                 AddTableResoultsMTOMTZ(doc, calc);
                 //Отсутпление на новый лист
@@ -205,25 +203,25 @@ namespace ElectroMod
 
         private void AddTableResoultsMTOMTZ(Document doc, CenterCalculation calc)
         {
-            var reports = calc.ReportsMTO;
-            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, calc.ReportsMTO.Count + 1, 3);
+            var reports = calc.Reports;
+            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, calc.Reports.Count + 1, 3);
             table.Borders.Enable = 1; // Устанавливаем границы таблицы
             table.Cell(1, 1).Range.Text = "Наименование";
             table.Cell(1, 2).Range.Text = "МТО";
             table.Cell(1, 3).Range.Text = "МТЗ";
 
             // Форматирование заголовков
-            Microsoft.Office.Interop.Word.Range headerRange = table.Rows[1].Range;
-            headerRange.Bold = 1;
-            headerRange.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter;
-            for (int i = 0; i < reports.Count; i++)
-            {
-                table.Cell(i + 2, 1).Range.Text = reports[i].Element.Name;
-                if (reports[i].Element is Bus bus)
-                    table.Cell(i + 2, 2).Range.Text = bus.MTO.ToString();
-                if (reports[i].Element is Recloser recloser)
-                    table.Cell(i + 2, 2).Range.Text = recloser.MTO.ToString();
-            }
+            //Microsoft.Office.Interop.Word.Range headerRange = table.Rows[1].Range;
+            //headerRange.Bold = 1;
+            //headerRange.ParagraphFormat.Alignment = Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter;
+            //for (int i = 0; i < reports.Count; i++)
+            //{
+            //    table.Cell(i + 2, 1).Range.Text = reports[i].Element.Name;
+            //    if (reports[i].Element is Bus bus)
+            //        table.Cell(i + 2, 2).Range.Text = bus.MTO.ToString();
+            //    if (reports[i].Element is Recloser recloser)
+            //        table.Cell(i + 2, 2).Range.Text = recloser.MTO.ToString();
+            //}
         }
 
         private void AddParagraph(Document doc, string text, bool isBold = false, bool isCenterAligned = false, int fontSize = 10)

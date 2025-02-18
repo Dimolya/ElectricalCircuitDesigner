@@ -33,6 +33,8 @@ namespace ElectroMod
         public double Kn { get; set; }
         public bool IsCalculated { get; set; }
 
+        public double Psuch { get; set; }
+
         public double MTO { get; set; }
         public double MTZ { get; set; }
 

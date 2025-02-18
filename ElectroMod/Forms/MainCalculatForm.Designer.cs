@@ -44,6 +44,8 @@
             this.bt_DeleteOne = new System.Windows.Forms.Button();
             this.btZoom = new System.Windows.Forms.Button();
             this.panelPropertyBus = new System.Windows.Forms.Panel();
+            this.cbBusType = new System.Windows.Forms.ComboBox();
+            this.label26 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.tbBusMTZ = new System.Windows.Forms.TextBox();
@@ -115,10 +117,11 @@
             this.btnSaveProp = new System.Windows.Forms.Button();
             this.btnCalculate = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.drawPanel1 = new ElectroMod.DrawPanel();
             this.lbProgressProcess = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
-            this.cbBusType = new System.Windows.Forms.ComboBox();
+            this.drawPanel1 = new ElectroMod.DrawPanel();
+            this.label27 = new System.Windows.Forms.Label();
+            this.tbPsuch = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -179,7 +182,7 @@
             this.файлToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1406, 28);
+            this.menu.Size = new System.Drawing.Size(1406, 30);
             this.menu.TabIndex = 6;
             this.menu.Text = "menuStrip1";
             // 
@@ -286,6 +289,23 @@
             this.panelPropertyBus.Size = new System.Drawing.Size(800, 235);
             this.panelPropertyBus.TabIndex = 33;
             this.panelPropertyBus.Visible = false;
+            // 
+            // cbBusType
+            // 
+            this.cbBusType.FormattingEnabled = true;
+            this.cbBusType.Location = new System.Drawing.Point(196, 58);
+            this.cbBusType.Name = "cbBusType";
+            this.cbBusType.Size = new System.Drawing.Size(273, 24);
+            this.cbBusType.TabIndex = 61;
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(-1, 58);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(32, 16);
+            this.label26.TabIndex = 60;
+            this.label26.Text = "Тип";
             // 
             // label6
             // 
@@ -698,8 +718,11 @@
             // panelPropertyRecloser
             // 
             this.panelPropertyRecloser.BackColor = System.Drawing.SystemColors.Control;
+            this.panelPropertyRecloser.Controls.Add(this.label28);
             this.panelPropertyRecloser.Controls.Add(this.panelRecloserMTOMTZ);
+            this.panelPropertyRecloser.Controls.Add(this.tbPsuch);
             this.panelPropertyRecloser.Controls.Add(this.label21);
+            this.panelPropertyRecloser.Controls.Add(this.label27);
             this.panelPropertyRecloser.Controls.Add(this.cbIsCalculate);
             this.panelPropertyRecloser.Controls.Add(this.lbTypeTT);
             this.panelPropertyRecloser.Controls.Add(this.lbTypeRecloser);
@@ -722,9 +745,9 @@
             this.panelRecloserMTOMTZ.Controls.Add(this.label23);
             this.panelRecloserMTOMTZ.Controls.Add(this.label24);
             this.panelRecloserMTOMTZ.Controls.Add(this.tbRecloserMTZ);
-            this.panelRecloserMTOMTZ.Location = new System.Drawing.Point(486, 1);
+            this.panelRecloserMTOMTZ.Location = new System.Drawing.Point(484, 30);
             this.panelRecloserMTOMTZ.Name = "panelRecloserMTOMTZ";
-            this.panelRecloserMTOMTZ.Size = new System.Drawing.Size(200, 100);
+            this.panelRecloserMTOMTZ.Size = new System.Drawing.Size(200, 63);
             this.panelRecloserMTOMTZ.TabIndex = 66;
             // 
             // tbRecloserMTO
@@ -940,15 +963,6 @@
             this.progressBar.TabIndex = 13;
             this.progressBar.Visible = false;
             // 
-            // drawPanel1
-            // 
-            this.drawPanel1.BackColor = System.Drawing.SystemColors.Window;
-            this.drawPanel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.drawPanel1.Location = new System.Drawing.Point(226, 31);
-            this.drawPanel1.Name = "drawPanel1";
-            this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
-            this.drawPanel1.TabIndex = 0;
-            // 
             // lbProgressProcess
             // 
             this.lbProgressProcess.AutoSize = true;
@@ -959,22 +973,39 @@
             this.lbProgressProcess.Text = "Создание отчета...";
             this.lbProgressProcess.Visible = false;
             // 
-            // label26
+            // drawPanel1
             // 
-            this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(-1, 58);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(32, 16);
-            this.label26.TabIndex = 60;
-            this.label26.Text = "Тип";
+            this.drawPanel1.BackColor = System.Drawing.SystemColors.Window;
+            this.drawPanel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.drawPanel1.Location = new System.Drawing.Point(226, 31);
+            this.drawPanel1.Name = "drawPanel1";
+            this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
+            this.drawPanel1.TabIndex = 0;
             // 
-            // cbBusType
+            // label27
             // 
-            this.cbBusType.FormattingEnabled = true;
-            this.cbBusType.Location = new System.Drawing.Point(196, 58);
-            this.cbBusType.Name = "cbBusType";
-            this.cbBusType.Size = new System.Drawing.Size(273, 24);
-            this.cbBusType.TabIndex = 61;
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(486, 5);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(40, 16);
+            this.label27.TabIndex = 66;
+            this.label27.Text = "Pсущ";
+            // 
+            // tbPsuch
+            // 
+            this.tbPsuch.Location = new System.Drawing.Point(538, 4);
+            this.tbPsuch.Name = "tbPsuch";
+            this.tbPsuch.Size = new System.Drawing.Size(100, 22);
+            this.tbPsuch.TabIndex = 67;
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(644, 7);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(16, 16);
+            this.label28.TabIndex = 68;
+            this.label28.Text = "А";
             // 
             // MainCalculatForm
             // 
@@ -1120,6 +1151,9 @@
         private System.Windows.Forms.Label lbProgressProcess;
         private System.Windows.Forms.ComboBox cbBusType;
         private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.TextBox tbPsuch;
+        private System.Windows.Forms.Label label27;
     }
 }
 

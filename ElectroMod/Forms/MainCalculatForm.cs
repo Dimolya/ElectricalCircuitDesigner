@@ -125,14 +125,14 @@ namespace ElectroMod
 
         private async void btnCalculate_Click(object sender, EventArgs e)
         {
-            var calcul = new CenterCalculation(_elements);
-            var transformators = new List<Transormator>(calcul.CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
+            var calculationCenter = new CenterCalculation(_elements);
+            var transformators = new List<Transormator>(calculationCenter.CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
 
             using (var preCalculateForm = new PreCalculationForm(transformators))
             {
                 if (preCalculateForm.ShowDialog() == DialogResult.OK)
                 {
-                    calcul.CalculationMTOandMTZ(preCalculateForm);
+                    calculationCenter.CalculationMTOandMTZ(preCalculateForm);
                     lbProgressProcess.Visible = true;
                     progressBar.Visible = true;
                     progressBar.Value = 0;
@@ -143,7 +143,7 @@ namespace ElectroMod
                             progressBar.Value = percent;
                         });
                         var docx = new Docx();
-                        await docx.CreateReportDocumentAsync(calcul, this, progress);
+                        await docx.CreateReportDocumentAsync(calculationCenter, this, progress);
                     }
                     catch (Exception ex)
                     {
@@ -252,6 +252,7 @@ namespace ElectroMod
                 cbIsCalculate.Checked = recloser.IsCalculated;
                 tbRecloserMTO.Text = recloser.MTO.ToString();
                 tbRecloserMTZ.Text = recloser.MTZ.ToString();
+                tbPsuch.Text = recloser.Psuch.ToString();
 
                 if (File.Exists(dataRecloserJsonPath))
                 {
@@ -382,8 +383,6 @@ namespace ElectroMod
                     else
                         MessageBox.Show($"Неверно указан путь к файлу {typeTTJsonPath}");
 
-                    
-
                     if (bus.IsCurrent)
                     {
                         bus.IkzMax = double.Parse(tbBusCurrentMax.Text.Replace('.', ','));
@@ -443,6 +442,7 @@ namespace ElectroMod
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
                 recloser.TypeTT = cbRecloserTypeTT.Text;
+                recloser.Psuch = double.Parse(tbPsuch.Text);
                 recloser.IsCalculated = cbIsCalculate.Checked;
                 if (recloser.IsCalculated)
                 {
