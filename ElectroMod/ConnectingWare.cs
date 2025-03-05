@@ -11,22 +11,26 @@ namespace ElectroMod
     //соединительные провода
     public class ConnectingWare : IDrawable, IDragable
     {
-        private SerializableGraphicsPath path;
+        private SerializableGraphicsPath _path;
 
         public GraphicsPath Path
         {
-            get { return path; }
-            set { path = value; }
+            get { return _path; }
+            set { _path = value; }
         }
         public Element ParentElement { get; set; }
         public Point RelativeLocation { get; set; }
         public Color BorderColor { get; set; } = Color.Navy;
         public Color FillColor { get; set; } = Color.DeepSkyBlue;
-        public bool IsPointCalculation { get; set; }
+
+        //свойства для нахождения самого длинного пути линий МТЗ
+        public bool IsWareBranching { get; set; }
+        public bool IsFirstUse { get; set; }
 
         public List<ConnectingWare> ConnectedWares { get; set; } = new List<ConnectingWare>();
-        public List<Element> ConnectedElements { get; set; } = new List<Element>();
+        //public List<Element> ConnectedElements { get; set; } = new List<Element>();
 
+        public bool IsInitK { get; set; }
         public bool IsVisited { get; set; }
         public string Label { get; set; }
         private Point drag;

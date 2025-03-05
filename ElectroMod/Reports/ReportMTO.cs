@@ -91,7 +91,7 @@ namespace ElectroMod.Reports
                 if (calc.Bus.MTO > _kchuvMTO)
                 {
                     AddParagraph(doc, "Проверка существующей уставки МТО на чувствительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K1))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)} *0,865*1000)/ {calc.Bus.MTO} = {_kchuvMTO}");
+                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K1))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)} *0,865*1000)/{calc.Bus.MTO} = {_kchuvMTO}"); // вот тут надо привязать к другой переменной
 
                     if (_elementKchuvMTO > 1.2)
                         AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");

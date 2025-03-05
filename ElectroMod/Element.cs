@@ -22,6 +22,7 @@ namespace ElectroMod
 
         public Elements Elements { get; set; }
         public List<Element> ConnectedElements { get; set; } = new List<Element>();
+        public bool IsVisited { get; set; }
         public List<ConnectingWare> Wares { get; set; } = new List<ConnectingWare>();
         protected PointF LocationNameHorizontal { get; set; }
         protected PointF LocationNameVertical { get; set; }
@@ -152,9 +153,8 @@ namespace ElectroMod
 
                             thisWare.ConnectedWares.Add(otherElementWare);
                             otherElementWare.ConnectedWares.Add(thisWare);
-
-                            thisWare.ConnectedElements.Add(otherElement);
-                            otherElementWare.ConnectedElements.Add(this);
+                            //thisWare.ConnectedElements.Add(otherElement);
+                            //otherElementWare.ConnectedElements.Add(this);
                         }
                     }
                 }

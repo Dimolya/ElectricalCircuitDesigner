@@ -5,6 +5,7 @@ using ElectroMod.Reports;
 using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Sockets;
@@ -28,11 +29,27 @@ namespace ElectroMod
         public CenterCalculation(Elements elements)
         {
             _elements = elements;
+            CleanPropElements();
             GenerateListObjectsForCalculation();
             CalculationFormuls();
         }
 
+        private void CleanPropElements()
+        {
+            foreach (var element in _elements)
+            {
+                var elem = element as Element;
+                elem.IsVisited = false;
+                elem.Wares.ForEach(x =>
+                    {
+                        x.IsVisited = false;
+                        x.IsWareBranching = false;
+                    });
+            }
+        }
+
         public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
+        public List<List<Element>> GroupLinesForMTZ { get; set; } = new List<List<Element>>();
         public List<Element> CommonElements { get; set; } = new List<Element>();
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
         public List<Transormator> Transformators { get; set; } = new List<Transormator>();
@@ -83,16 +100,7 @@ namespace ElectroMod
         //public double Ip1 { get; set; }
         //public double Ip2 { get; set; }
         //public double Ikz1 { get; set; }
-        //public double Ikz1low { get; set; }
-
-        public void CalculationFormuls()
-        {
-            foreach (var elementsList in CalculationElementList)
-            {
-                CalculateCurrents(elementsList);
-                _firstInitK = false;
-            }
-        }
+        //public double Ikz1low { get; set; 
 
         public void CalculationMTOandMTZ(PreCalculationForm preCalculationForm)
         {
@@ -110,7 +118,7 @@ namespace ElectroMod
             PowerSuchKBA = preCalculationForm.PowerSuchKBA;
             PowerKBA = preCalculationForm.PowerKBA;
 
-            FarestLineMTZ = FindFarestLineMTZ(CalculationElementList);
+            FarestLineMTZ = FindFarestLineFromBus(CalculationElementList);
             TypeTT = Bus.TypeTT;
             Ntt = Bus.Ntt;
 
@@ -202,7 +210,7 @@ namespace ElectroMod
 
         }
 
-        private Line FindFarestLineMTZ(List<List<Element>> calculationElementList)
+        private Line FindFarestLineFromBus(List<List<Element>> calculationElementList)
         {
             Line farestLine = null;
             double maxSumLength = 0;
@@ -221,6 +229,70 @@ namespace ElectroMod
             return farestLine;
         }
 
+        public void CalculateFarestLineFromRecloser(Element previuosElement, Element startElement)
+        {
+            Traverse(previuosElement, startElement, new List<Element>(), new HashSet<Element>());
+        }
+
+        private void Traverse(Element previuosElement, Element currentElement, List<Element> currentPath, HashSet<Element> visitedElements)
+        {
+            foreach (var ware in currentElement.Wares)
+            {
+                if (ware.ConnectedWares.Any(x => x.ParentElement == previuosElement))
+                    continue;
+                foreach (var connectedWare in ware.ConnectedWares)
+                {
+                    if (ware.ConnectedWares.Count == 1 && connectedWare.ParentElement is Transormator)
+                    {
+                        currentPath.Add(currentElement);
+                        currentElement.IsVisited = true;
+                        GroupLinesForMTZ.Add(new List<Element>(currentPath));
+                        currentPath.Clear();
+                        visitedElements.Remove(currentElement);
+                        break;
+                    }
+
+                    if (connectedWare.ParentElement is Transormator ||
+                       connectedWare.ParentElement.IsVisited)
+                        continue;
+
+                    if (ware.ConnectedWares.Count > 1)
+                    {
+                        var lines = ware.ConnectedWares.Select(x => x.ParentElement).OfType<Line>();
+                        if (lines.Count() > 1)
+                        {
+                            ware.IsWareBranching = true;
+                            ware.ConnectedWares.ForEach(x => x.IsWareBranching = true);
+                        }
+                    }
+
+                    var nextElement = connectedWare.ParentElement;
+                    if(!currentPath.Contains(currentElement))
+                        currentPath.Add(currentElement);
+                    currentElement.IsVisited = true;
+                    visitedElements.Add(currentElement);
+
+                    Traverse(currentElement, nextElement, currentPath, visitedElements);
+
+                    if (ware.IsWareBranching)
+                    { 
+                        if (ware.ConnectedWares.Where(x => x.ParentElement.IsVisited == false).Any())
+                        {
+                            currentPath.AddRange(visitedElements);
+                        }
+                        else
+                        {
+                            visitedElements.Remove(ware.ParentElement);
+                        }
+                    }
+                    else
+                    {
+                        visitedElements.Remove(ware.ParentElement);
+                    }
+                }
+            }
+        }
+
         private void GenerateListObjectsForCalculation()
         {
             foreach (var element in _elements.OfType<Element>())
@@ -231,6 +303,15 @@ namespace ElectroMod
                     var currentPath = new List<Element>();
                     RecurceGenerateElementsList(bus, visited, currentPath);
                 }
+            }
+        }
+
+        private void CalculationFormuls()
+        {
+            foreach (var elementsList in CalculationElementList)
+            {
+                CalculateCurrents(elementsList);
+                _firstInitK = false;
             }
         }
 
@@ -274,9 +355,7 @@ namespace ElectroMod
 
         private void CalculateCurrents(List<Element> elements)
         {
-            Element visitedElement = null;
             (double, double) sumResistance;
-            bool alreadyFindElement = false;
 
             CommonElements = CalculationElementList
                 .Skip(1)
@@ -287,39 +366,24 @@ namespace ElectroMod
 
             foreach (var element in elements)
             {
-                alreadyFindElement = false;
-                foreach (var ware in element.Wares)
+                foreach (var elementWare in element.Wares)
                 {
-                    if (element is Transormator)
-                    {
-                        if (ware.ConnectedWares.Any())
-                            continue;
+                    if (elementWare.IsInitK)
+                        continue;
 
-                        element.K = _countK;
-                        ware.Label = $"K{_countK}";
-                        _countK++;
-                        break;
-                    }
-                    foreach (var connectedElement in ware.ConnectedElements)
-                    {
-                        if (elements.Contains(connectedElement))
-                        {
-                            if (connectedElement == visitedElement)
-                            {
-                                continue;
-                            }
-                            visitedElement = element;
-                            if ((!CommonElements.Contains(element) && !_firstInitK) || _firstInitK)
-                            {
-                                element.K = _countK;
-                                ware.Label = $"K{_countK}";
-                                _countK++;
-                                alreadyFindElement = true;
-                            }
-                        }
-                    }
-                    if (alreadyFindElement) break;
+                    elementWare.IsInitK = true;
+                    element.K = _countK;
+                    elementWare.Label = $"K{_countK}";
+                    _countK++;
+                    elementWare.ConnectedWares.ForEach(otherWare => otherWare.IsInitK = true);
                 }
+
+                if (element is Recloser)
+                {
+                    var index = elements.IndexOf(element);
+                    CalculateFarestLineFromRecloser(elements[index], elements[index + 1]);
+                }
+
 
                 if (element is Bus bus)
                 {
@@ -350,16 +414,7 @@ namespace ElectroMod
                     _resistanceSchemes.Add((line.ActiveResistance, line.ReactiveResistance));
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
-                    if (IsCurrent)
-                    {
-                        IkzMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
-                        IkzMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
-                    }
-                    else
-                    {
-                        IkzMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
-                        IkzMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
-                    }
+                    InitIkz(sumResistance);
                     line.IkzMax = Math.Round(IkzMax, 3);
                     line.IkzMin = Math.Round(IkzMin, 3);
                 }
@@ -367,16 +422,7 @@ namespace ElectroMod
                 {
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
-                    if (IsCurrent)
-                    {
-                        IkzMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
-                        IkzMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
-                    }
-                    else
-                    {
-                        IkzMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
-                        IkzMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
-                    }
+                    InitIkz(sumResistance);
                     Currents.Add((IkzMax, IkzMin));
                     recloser.IkzMax = IkzMax;
                     recloser.IkzMin = IkzMin;
@@ -411,6 +457,20 @@ namespace ElectroMod
                 Currents.Add((IkzMax, IkzMin));
             }
             _resistanceSchemes.Clear();
+        }
+
+        private void InitIkz((double, double) sumResistance)
+        {
+            if (IsCurrent)
+            {
+                IkzMax = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmax));
+                IkzMin = Voltage / (Math.Sqrt(3) * (Math.Sqrt(Math.Pow(sumResistance.Item1, 2) + Math.Pow(sumResistance.Item2, 2)) + Zmin));
+            }
+            else
+            {
+                IkzMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
+                IkzMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
+            }
         }
     }
 }
