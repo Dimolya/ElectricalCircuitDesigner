@@ -73,26 +73,26 @@ namespace ElectroMod
                         if (calc.IsCurrent)
                         {
                             AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
-                                $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item1})^2) + Z_(sub.max))) = " +
-                                $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
-                                $"{Math.Round(calc.Currents[indexCurrent].Item1, 3)} кА");
-
+                                $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max))) = " +
+                                $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
+                                $"{Math.Round(element.IkzMax, 3)} кА");
+                            
                             AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
-                                $"Sub_voltage/(√(3) + (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
-                                $"{calc.Voltage}/(√(3) + (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
-                                $"{Math.Round(calc.Currents[indexCurrent].Item2, 3)} кА");
+                                $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
+                                $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
+                                $"{Math.Round(element.IkzMin, 3)} кА");
                         }
                         else
                         {
                             AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
-                                $"Sub_voltage/(√(3) + √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
-                                $"{calc.Voltage}/(√(3) + √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[indexCurrent].Item1, 3)} кА");
+                                $"Sub_voltage/(√(3) * √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
+                                $"{calc.Voltage}/(√(3) * √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
+                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMax, 3)} кА");
 
                             AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
-                                $"Sub_voltage/(√(3) + √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
-                                $"{calc.Voltage}/(√(3) + √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(calc.Currents[indexCurrent].Item2, 3)} кА");
+                                $"Sub_voltage/(√(3) * √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
+                                $"{calc.Voltage}/(√(3) * √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
+                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMin, 3)} кА");
                         }
                         countK++;
                         indexCurrent++;

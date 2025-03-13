@@ -13,7 +13,7 @@ using DocumentFormat.OpenXml.Presentation;
 namespace ElectroMod
 {
     [Serializable]
-    public class Elements : List<object> { }// Содержит все объекты модели
+    public class Elements : List<Element> { }// Содержит все объекты модели
     [Serializable]
     public class Element : IDrawable, IDragable, ISelectable
     {
@@ -208,6 +208,7 @@ namespace ElectroMod
                 }
             }
             ConnectedElements.Clear();
+            Wares.Clear();
             Elements.Remove(this);
         }
 
