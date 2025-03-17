@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using Xceed.Words.NET;
 
 namespace ElectroMod
 {
@@ -23,7 +24,6 @@ namespace ElectroMod
     {
         private static Elements _elements;
         private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
-        private int _countK = 1;
         private bool _firstInitK = true;
 
         public CenterCalculation(Elements elements)
@@ -40,6 +40,11 @@ namespace ElectroMod
                     (h, e) => { h.IntersectWith(e); return h; }
                 ).ToList();
 
+
+            foreach (var element in CalculationElementList.SelectMany(x => x))
+            {
+                UnionElements.Add(element);
+            }
         }
 
         private void CleanPropElements()
@@ -52,14 +57,14 @@ namespace ElectroMod
                         x.IsVisited = false;
                         x.IsWareBranching = false;
                     });
-                element.K = 0;
-                element.Wares.ForEach(ware => ware.Label = null);
+                element.Wares.ForEach(ware => ware.IsInitK = false);
             }
         }
 
         public List<List<Element>> CalculationElementList { get; set; } = new List<List<Element>>();
         public List<List<Element>> GroupLinesForMTZ { get; set; } = new List<List<Element>>();
         public List<Element> CommonElements { get; set; } = new List<Element>();
+        public HashSet<Element> UnionElements { get; set; } = new HashSet<Element>();
         public List<(double, double)> Currents { get; set; } = new List<(double, double)>();
         public Bus Bus { get; set; }
         public List<Recloser> Reclosers { get; set; }
@@ -173,6 +178,9 @@ namespace ElectroMod
                 //отчет МТЗ когда есть реклоузеры
                 //ищем путь с реклоузером и вычисляем от него самую длинную линию
                 var visitedRecloser = new List<Recloser>();
+                double IszMTZ = 0;
+                Line farestLine = null;
+                double KchuvMTZ = 0;
                 foreach (var elements in CalculationElementList)
                 {
                     foreach (var recloser in Reclosers)
@@ -181,27 +189,43 @@ namespace ElectroMod
                             continue;
 
                         var iustMTZ = (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95);
-                        var iszMTZ = Math.Round(recloser.Kn * recloser.Kcz / recloser.Kb * iustMTZ, 3); // тут иуст вычисляется без PowerSuch
+                        IszMTZ = Math.Round(recloser.Kn * recloser.Kcz / recloser.Kb * iustMTZ, 3); // тут иуст вычисляется без PowerSuch
                         iustMTZ = Math.Round(iustMTZ, 3);
 
                         var index = elements.IndexOf(recloser);
                         visitedRecloser.Add(recloser);
                         //убрать из этого алгоритма isVisited потому что он его запоминается и не стирает при след 
                         //прогоне цикла, но пока что костыль 
-                        var farestLine = CalculateFarestLineFromRecloser(elements[index], elements[index + 1]);
-                        var KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / iszMTZ, 3);
-
+                        farestLine = CalculateFarestLineFromRecloser(elements[index], elements[index + 1]);
+                        KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / IszMTZ, 3);
+                        if (recloser.IsCalculated)
+                            recloser.Isz = IszMTZ;
+                        else
+                        {
+                            if (IszMTZ > recloser.MTZ)
+                                recloser.Isz = IszMTZ;
+                            else
+                                recloser.Isz = recloser.MTZ;
+                        }
                         //без этого флаг на всех элементах остается как будто они посещены НЕ УДАЛЯТЬ ПОКА НЕ ИЗМЕНИТСЯ АЛГОРИТМ
                         _elements.ForEach(elem => elem.IsVisited = false);
-                        Reports.Add(new ReportMTZ(iszMTZ, iustMTZ, farestLine, KchuvMTZ, preCalculationForm.PowerKBT, recloser, Bus, Voltage));
+                        Reports.Add(new ReportMTZ(IszMTZ, iustMTZ, farestLine, KchuvMTZ, preCalculationForm.PowerKBT, recloser, Bus, Voltage));
                     }
                 }
                 //отчет МТЗ для шины полсе всех реклоузеров
-                var IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
-                var farestLineMTZ = FindFarestLineFromBus(CalculationElementList);
-                var KchuvMTZForBus = Math.Round(farestLineMTZ.IkzMin * 0.865 / IszMTZ, 3);
-                Reports.Add(new ReportMTZ(IszMTZ, farestLineMTZ, KchuvMTZForBus));
+                IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
+                farestLine = FindFarestLineFromBus(CalculationElementList);
+                KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / IszMTZ, 3);
+                Reports.Add(new ReportMTZ(IszMTZ, farestLine, KchuvMTZ));
 
+                //отчеты сравнения реклоузеров с шиной
+                foreach (var recloser in Reclosers)
+                {
+                    IszMTZ = 1.2 * recloser.Isz;
+                    farestLine = FindFarestLineFromBus(CalculationElementList);
+                    KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / IszMTZ, 3);
+                    Reports.Add(new ReportCompareProtectionsRecloserWithBus(IszMTZ, farestLine, KchuvMTZ, Bus, recloser));
+                }
             }
             else
             {
@@ -369,9 +393,10 @@ namespace ElectroMod
 
         private void CalculationFormuls()
         {
+            int countK = 1;
             foreach (var elementsList in CalculationElementList)
             {
-                CalculateCurrents(elementsList);
+                CalculateCurrents(elementsList, ref countK);
                 _firstInitK = false;
             }
         }
@@ -414,7 +439,7 @@ namespace ElectroMod
             currentPath.RemoveAt(currentPath.Count - 1);
         }
 
-        private void CalculateCurrents(List<Element> elements)
+        private void CalculateCurrents(List<Element> elements, ref int countK)
         {
             (double, double) sumResistance;
 
@@ -426,9 +451,9 @@ namespace ElectroMod
                         continue;
 
                     elementWare.IsInitK = true;
-                    element.K = _countK;
-                    elementWare.Label = $"K{_countK}";
-                    _countK++;
+                    element.K = countK;
+                    elementWare.Label = $"K{countK}";
+                    countK++;
                     elementWare.ConnectedWares.ForEach(otherWare => otherWare.IsInitK = true);
                 }
 
@@ -470,7 +495,8 @@ namespace ElectroMod
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
                     CalculateIkz(sumResistance);
-                    Currents.Add((IkzMax, IkzMin));
+                    if(recloser.IkzMax == 0 && recloser.IkzMax == 0) 
+                        Currents.Add((IkzMax, IkzMin));
                     recloser.IkzMax = IkzMax;
                     recloser.IkzMin = IkzMin;
                     continue;

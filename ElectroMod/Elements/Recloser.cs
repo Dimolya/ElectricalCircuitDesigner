@@ -38,6 +38,8 @@ namespace ElectroMod
         public double MTO { get; set; }
         public double MTZ { get; set; }
 
+        //Для формул МТЗ
+        public double Isz { get; set; }
         public override Color BorderColor => Color.DarkBlue;
     }
 }

@@ -56,49 +56,45 @@ namespace ElectroMod
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
                 int countK = 2;
                 int indexCurrent = 0;
-                var firstListOfElements = true;
                 progress.Report(10);
-                foreach (var elementList in calc.CalculationElementList)
+                foreach (var element in calc.UnionElements)
                 {
-                    foreach (var element in elementList)
+                    if (element is Bus)
+                        continue;
+
+                    AddParagraph(doc, $"Расчеты в точке K{countK}", isBold: true, fontSize: 14);
+
+                    var elementsNames = CreateFormulaElementName(doc, element);
+                    var elementsResistanceValues = CreateFormulaElementsResistanceValues(element);
+                    AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
+                    if (calc.IsCurrent)
                     {
-                        if ((calc.CommonElements.Contains(element) && !firstListOfElements) || element is Bus)
-                            continue;
+                        AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
+                            $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max))) = " +
+                            $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
+                            $"{Math.Round(element.IkzMax, 3)} кА");
 
-                        AddParagraph(doc, $"Расчеты в точке K{countK}", isBold: true, fontSize: 14);
-
-                        var elementsNames = CreateFormulaElementName(doc, element);
-                        var elementsResistanceValues = CreateFormulaElementsResistanceValues(element);
-                        AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
-                        if (calc.IsCurrent)
-                        {
-                            AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
-                                $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max))) = " +
-                                $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
-                                $"{Math.Round(element.IkzMax, 3)} кА");
-                            
-                            AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
-                                $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
-                                $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
-                                $"{Math.Round(element.IkzMin, 3)} кА");
-                        }
-                        else
-                        {
-                            AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
-                                $"Sub_voltage/(√(3) * √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
-                                $"{calc.Voltage}/(√(3) * √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMax, 3)} кА");
-
-                            AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
-                                $"Sub_voltage/(√(3) * √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
-                                $"{calc.Voltage}/(√(3) * √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
-                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMin, 3)} кА");
-                        }
-                        countK++;
-                        indexCurrent++;
+                        AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
+                            $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
+                            $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
+                            $"{Math.Round(element.IkzMin, 3)} кА");
                     }
-                    firstListOfElements = false;
+                    else
+                    {
+                        AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
+                            $"Sub_voltage/(√(3) * √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
+                            $"{calc.Voltage}/(√(3) * √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
+                                                   $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMax, 3)} кА");
+
+                        AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
+                            $"Sub_voltage/(√(3) * √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
+                            $"{calc.Voltage}/(√(3) * √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
+                                                   $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMin, 3)} кА");
+                    }
+                    countK++;
+                    indexCurrent++;
                 }
+
                 progress.Report(40);
                 AddParagraph(doc, "");
                 AddParagraph(doc, "Результаты расчетов токов К.З.", isBold: true);
@@ -195,7 +191,7 @@ namespace ElectroMod
             }
             finally
             {
-                wordApp.ScreenUpdating = true;
+                //wordApp.ScreenUpdating = true;
                 doc?.Close(false);
                 wordApp?.Quit();
             }

@@ -86,32 +86,28 @@ namespace ElectroMod.Reports
                     $"K_сзп - коэффициент самозапуска, принимается 1,1-1,3;\r\n" +
                     $"k_в - коэффициент возврата реле, для {_bus.Type} принимаем {_bus.Kb}");
 
-                double iszMTZ;
                 if (_recloser.IsCalculated)
                 {
                     AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
-                    iszMTZ = _IszMTZ;
                 }
                 else
                 {
                     if(_IszMTZ > _recloser.MTZ)
                     {
                         AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
-                        iszMTZ = _IszMTZ;
                     }
                     else
                     {
                         AddParagraph(doc, $"Принимаем I_сз.сущ = {_recloser.MTZ}");
-                        iszMTZ = _recloser.MTZ;
                     }
                 }
 
                 AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
                 AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = " +
-                    $"({_farestLineMTZ.IkzMin} * 0.865)/{iszMTZ} = {_KchuvMTZ}");
+                    $"({_farestLineMTZ.IkzMin} * 0.865)/{_recloser.Isz} = {_KchuvMTZ}");
                 AddParagraph(doc,
                     $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLineMTZ.K}, равен {_farestLineMTZ.IkzMin} А;\r\n" +
-                    $"I_сз - принятый ток срабатывания МТЗ, равен {iszMTZ} А");
+                    $"I_сз - принятый ток срабатывания МТЗ, равен {_recloser.Isz} А");
                 if (_KchuvMTZ > 1.5)
                     AddParagraph(doc, $"{_KchuvMTZ} > 1.5, условие выполняется");
                 else
