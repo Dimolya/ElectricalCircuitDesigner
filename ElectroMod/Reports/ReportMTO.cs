@@ -88,73 +88,95 @@ namespace ElectroMod.Reports
             if (_kchuvMTO > 1.2)
             {
                 AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-                if (calc.Bus.MTO > _kchuvMTO)
+                if (calc.Bus.MTO > calc.IszMTOMaxCeiling)
                 {
                     AddParagraph(doc, "Проверка существующей уставки МТО на чувствительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K1))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)} *0,865*1000)/{calc.Bus.MTO} = {_kchuvMTO}"); // вот тут надо привязать к другой переменной
+                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K1))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)} *0,865*1000)/{calc.Bus.MTO} = {_elementKchuvMTO}"); // вот тут надо привязать к другой переменной
 
                     if (_elementKchuvMTO > 1.2)
+                    {
                         AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
+                        calc.Bus.TableMTO = calc.Bus.MTO;
+                    }
                     else
                     {
                         AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
 
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K1))*0,865*1000)/1,2 = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/1,2={_newMTO}  А");
+                        AddFormula(doc, $"I_сз=(I_(к.з.min(K1))*0,865*1000)/1,2 = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/1,2={_newMTO}  А"); // ToDo: я вообще не помню уже что это за формулы и почему в знаменателе 1.2 (актуально с 17.03.25)
                         AddParagraph(doc, $"Уставка МТО принимается {_newMTO}");
                     }
                 }
                 else
                 {
                     AddParagraph(doc, $"Уставка МТО принимается {_kchuvMTO}");
+                    calc.Bus.TableMTO = calc.IszMTOMaxCeiling;
                 }
             }
             else
+            {
                 AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
+            }
         }
 
         private void EndReportRecloser(Document doc, CenterCalculation calc)
         {
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K{_element.K}))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/{calc.IszMTOMaxCeiling}={_kchuvMTO}");
+            var recloser = _element as Recloser;
+            if (recloser == null)
+                return;
+            AddFormula(doc, $"k_чувст=(I_(к.з.min(K{recloser.K}))*0,865*1000)/I_сз = ({Math.Round(recloser.IkzMin, 3)}*0,865*1000)/{calc.IszMTOMaxCeiling}={_kchuvMTO}");
             AddParagraph(doc, "");
 
             if (_kchuvMTO > 1.2)
             {
                 AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
-                if (_recloser.MTO > _kchuvMTO)
+                if (recloser.MTO > calc.IszMTOMaxCeiling)
                 {
                     AddParagraph(doc, "Проверка существующей уставки МТО на чувствительность \r\n");
-                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K{_element.K}))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/{_recloser.MTO}={_elementKchuvMTO}");
+                    AddFormula(doc, $"k_чувст=(I_(к.з.min(K{recloser.K}))*0,865*1000)/I_сз = ({Math.Round(recloser.IkzMin, 3)}*0,865*1000)/{recloser.MTO}={_elementKchuvMTO}");
 
                     if (_elementKchuvMTO > 1.2)
+                    {
                         AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
+                        recloser.TableMTO = recloser.MTO;
+                    }
                     else
                     {
                         AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
 
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K{_element.K}))*0,865*1000)/1,2 = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/1,2={_newMTO}  А");
+                        AddFormula(doc, $"I_сз=(I_(к.з.min(K{recloser.K}))*0,865*1000)/1,2 = ({Math.Round(recloser.IkzMin, 3)}*0,865*1000)/1,2={_newMTO} А"); // ToDo: тут аналогично как с шиной 
                         AddParagraph(doc, $"Уставка МТО принимается {_newMTO}");
                     }
                 }
                 else
                 {
                     AddParagraph(doc, $"Уставка МТО принимается {_kchuvMTO}");
+                    recloser.TableMTO = calc.IszMTOMaxCeiling;
                 }
             }
             else
+            {
                 AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
+            }
         }
 
         private void EndReportProjectRecloser(Document doc, CenterCalculation calc)
         {
-            AddFormula(doc, $"k_чувст=(I_(к.з.min(K{_element.K}))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/{calc.IszMTOMaxCeiling}={_kchuvMTO}");
+            var recloser = _element as Recloser;
+            if (recloser == null)
+                return;
+            AddFormula(doc, $"k_чувст=(I_(к.з.min(K{recloser.K}))*0,865*1000)/I_сз = ({Math.Round(recloser.IkzMin, 3)}*0,865*1000)/{calc.IszMTOMaxCeiling}={_kchuvMTO}");
             AddParagraph(doc, "");
 
             if (_kchuvMTO > 1.2)
             {
                 AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
+                recloser.TableMTO = calc.IszMTOMaxCeiling;
             }
             else
+            {
                 AddParagraph(doc, "k_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования) ");
+                recloser.TableMTO = recloser.MTO;
+            }
         }
     }
 }

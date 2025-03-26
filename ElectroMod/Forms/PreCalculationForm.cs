@@ -28,28 +28,26 @@ namespace ElectroMod.Forms
 
         private void btnFormCalculate_Click(object sender, EventArgs e)
         {
-            double powerKBT;
-            double powerKBA;
-            double powerSuchKBT;
-            double powerSuchKBA;
             NumberTY = tbNumberTY.Text;
             Reconnect = cbReconnect.Text;
-
-            if (double.TryParse(tbPowerSuchKBT.Text, out powerSuchKBT))
-                PowerSuchKBT = powerSuchKBT;
-            if (double.TryParse(tbPowerSuchKBA.Text, out powerSuchKBA))
-                PowerSuchKBA = powerSuchKBA;
-            if (double.TryParse(tbPowerKBT.Text, out powerKBT))
-                PowerKBT = powerKBT;
-            if (double.TryParse(tbPowerKBA.Text, out powerKBA))
-                PowerKBA = powerKBA;
-            DialogResult = DialogResult.OK;
+            try
+            {
+                PowerSuchKBT = double.Parse(tbPowerSuchKBT.Text.Replace('.', ','));
+                PowerSuchKBA = double.Parse(tbPowerSuchKBA.Text.Replace('.', ','));
+                PowerKBT = double.Parse(tbPowerKBT.Text.Replace('.', ','));
+                PowerKBA = double.Parse(tbPowerKBA.Text.Replace('.', ','));
+                DialogResult = DialogResult.OK;
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void cbReconnect_SelectedIndexChanged(object sender, EventArgs e)
         {
             var cb = sender as ComboBox;
-            if(cb.Text == "Расчет по мощности ТУ")
+            if (cb.Text == "Расчет по мощности ТУ")
             {
                 panelHasTY.Visible = true;
                 panelNotTY.Visible = false;

@@ -92,6 +92,7 @@
             this.tbLineName = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.panelPropertyRecloser = new System.Windows.Forms.Panel();
+            this.label28 = new System.Windows.Forms.Label();
             this.panelRecloserMTOMTZ = new System.Windows.Forms.Panel();
             this.tbRecloserMTO = new System.Windows.Forms.TextBox();
             this.label22 = new System.Windows.Forms.Label();
@@ -99,7 +100,9 @@
             this.label23 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
             this.tbRecloserMTZ = new System.Windows.Forms.TextBox();
+            this.tbPsuch = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
             this.cbIsCalculate = new System.Windows.Forms.CheckBox();
             this.lbTypeTT = new System.Windows.Forms.Label();
             this.lbTypeRecloser = new System.Windows.Forms.Label();
@@ -119,9 +122,6 @@
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.lbProgressProcess = new System.Windows.Forms.Label();
             this.drawPanel1 = new ElectroMod.DrawPanel();
-            this.label27 = new System.Windows.Forms.Label();
-            this.tbPsuch = new System.Windows.Forms.TextBox();
-            this.label28 = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panelPropertyBus.SuspendLayout();
@@ -550,7 +550,7 @@
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(215, 16);
             this.label16.TabIndex = 35;
-            this.label16.Text = "Введите ток К.З. а макс. режиме";
+            this.label16.Text = "Введите ток К.З. в макс. режиме";
             // 
             // tbBusCurrentMin
             // 
@@ -566,7 +566,7 @@
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(209, 16);
             this.label17.TabIndex = 36;
-            this.label17.Text = "Введите ток К.З. а мин. режиме";
+            this.label17.Text = "Введите ток К.З. в мин. режиме";
             // 
             // tbBusCurrentMax
             // 
@@ -737,6 +737,15 @@
             this.panelPropertyRecloser.TabIndex = 53;
             this.panelPropertyRecloser.Visible = false;
             // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(644, 7);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(30, 16);
+            this.label28.TabIndex = 68;
+            this.label28.Text = "кВт";
+            // 
             // panelRecloserMTOMTZ
             // 
             this.panelRecloserMTOMTZ.Controls.Add(this.tbRecloserMTO);
@@ -800,6 +809,13 @@
             this.tbRecloserMTZ.Size = new System.Drawing.Size(100, 22);
             this.tbRecloserMTZ.TabIndex = 63;
             // 
+            // tbPsuch
+            // 
+            this.tbPsuch.Location = new System.Drawing.Point(538, 4);
+            this.tbPsuch.Name = "tbPsuch";
+            this.tbPsuch.Size = new System.Drawing.Size(100, 22);
+            this.tbPsuch.TabIndex = 67;
+            // 
             // label21
             // 
             this.label21.AutoSize = true;
@@ -808,6 +824,15 @@
             this.label21.Size = new System.Drawing.Size(113, 16);
             this.label21.TabIndex = 20;
             this.label21.Text = "Проектируемый";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(486, 5);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(40, 16);
+            this.label27.TabIndex = 66;
+            this.label27.Text = "Pсущ";
             // 
             // cbIsCalculate
             // 
@@ -888,7 +913,7 @@
             // lbShemeConnectWinding
             // 
             this.lbShemeConnectWinding.AutoSize = true;
-            this.lbShemeConnectWinding.Location = new System.Drawing.Point(2, 66);
+            this.lbShemeConnectWinding.Location = new System.Drawing.Point(-3, 66);
             this.lbShemeConnectWinding.Name = "lbShemeConnectWinding";
             this.lbShemeConnectWinding.Size = new System.Drawing.Size(186, 16);
             this.lbShemeConnectWinding.TabIndex = 12;
@@ -897,7 +922,7 @@
             // lbTypeKTP
             // 
             this.lbTypeKTP.AutoSize = true;
-            this.lbTypeKTP.Location = new System.Drawing.Point(2, 36);
+            this.lbTypeKTP.Location = new System.Drawing.Point(-3, 36);
             this.lbTypeKTP.Name = "lbTypeKTP";
             this.lbTypeKTP.Size = new System.Drawing.Size(62, 16);
             this.lbTypeKTP.TabIndex = 11;
@@ -906,7 +931,7 @@
             // cbTransformatorSchemes
             // 
             this.cbTransformatorSchemes.FormattingEnabled = true;
-            this.cbTransformatorSchemes.Location = new System.Drawing.Point(205, 63);
+            this.cbTransformatorSchemes.Location = new System.Drawing.Point(200, 63);
             this.cbTransformatorSchemes.Name = "cbTransformatorSchemes";
             this.cbTransformatorSchemes.Size = new System.Drawing.Size(273, 24);
             this.cbTransformatorSchemes.TabIndex = 10;
@@ -914,14 +939,14 @@
             // cbTransformatorTypesKTP
             // 
             this.cbTransformatorTypesKTP.FormattingEnabled = true;
-            this.cbTransformatorTypesKTP.Location = new System.Drawing.Point(205, 33);
+            this.cbTransformatorTypesKTP.Location = new System.Drawing.Point(200, 33);
             this.cbTransformatorTypesKTP.Name = "cbTransformatorTypesKTP";
             this.cbTransformatorTypesKTP.Size = new System.Drawing.Size(273, 24);
             this.cbTransformatorTypesKTP.TabIndex = 9;
             // 
             // tbTransformatorName
             // 
-            this.tbTransformatorName.Location = new System.Drawing.Point(205, 6);
+            this.tbTransformatorName.Location = new System.Drawing.Point(200, 6);
             this.tbTransformatorName.Name = "tbTransformatorName";
             this.tbTransformatorName.Size = new System.Drawing.Size(273, 22);
             this.tbTransformatorName.TabIndex = 8;
@@ -929,7 +954,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(2, 7);
+            this.label20.Location = new System.Drawing.Point(-3, 7);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(106, 16);
             this.label20.TabIndex = 7;
@@ -981,31 +1006,6 @@
             this.drawPanel1.Name = "drawPanel1";
             this.drawPanel1.Size = new System.Drawing.Size(1181, 510);
             this.drawPanel1.TabIndex = 0;
-            // 
-            // label27
-            // 
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(486, 5);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(40, 16);
-            this.label27.TabIndex = 66;
-            this.label27.Text = "Pсущ";
-            // 
-            // tbPsuch
-            // 
-            this.tbPsuch.Location = new System.Drawing.Point(538, 4);
-            this.tbPsuch.Name = "tbPsuch";
-            this.tbPsuch.Size = new System.Drawing.Size(100, 22);
-            this.tbPsuch.TabIndex = 67;
-            // 
-            // label28
-            // 
-            this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(644, 7);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(16, 16);
-            this.label28.TabIndex = 68;
-            this.label28.Text = "А";
             // 
             // MainCalculatForm
             // 

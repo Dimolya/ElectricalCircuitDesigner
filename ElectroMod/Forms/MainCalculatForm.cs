@@ -442,7 +442,14 @@ namespace ElectroMod
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
                 recloser.TypeTT = cbRecloserTypeTT.Text;
-                recloser.Psuch = double.Parse(tbPsuch.Text);
+                try
+                {
+                    recloser.Psuch = double.Parse(tbPsuch.Text.Replace('.', ','));
+                }
+                catch (FormatException ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
                 recloser.IsCalculated = cbIsCalculate.Checked;
                 if (recloser.IsCalculated)
                 {

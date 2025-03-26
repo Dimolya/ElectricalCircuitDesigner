@@ -12,6 +12,8 @@ using DocumentFormat.OpenXml.Vml;
 using DocumentFormat.OpenXml.ExtendedProperties;
 using Xceed.Words.NET;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using System.Linq;
 
 namespace ElectroMod
 {
@@ -199,12 +201,26 @@ namespace ElectroMod
 
         private void AddTableResoultsMTOMTZ(Document doc, CenterCalculation calc)
         {
-            var reports = calc.Reports;
-            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, calc.Reports.Count + 1, 3);
+            var countRows = calc.UnionElements.OfType<Recloser>().Count(); 
+            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, countRows + 1, 3); // + 1 потому что надо заголовок
             table.Borders.Enable = 1; // Устанавливаем границы таблицы
             table.Cell(1, 1).Range.Text = "Наименование";
+            table.Cell(1, 1).Range.Bold = 1;
             table.Cell(1, 2).Range.Text = "МТО";
+            table.Cell(1, 2).Range.Bold = 1;
             table.Cell(1, 3).Range.Text = "МТЗ";
+            table.Cell(1, 3).Range.Bold = 1;
+
+            table.Cell(2, 1).Range.Text = $"{calc.Bus.Name}";
+            table.Cell(2, 2).Range.Text = $"{calc.Bus.TableMTO}";
+            table.Cell(2, 3).Range.Text = $"{calc.Bus.TableMTZ}";
+
+            for (int i = 3; i < countRows; i++)
+            {
+                table.Cell(i, 1).Range.Text = $"{calc.Reclosers[i].Name}";
+                table.Cell(i, 2).Range.Text = $"{calc.Reclosers[i].TableMTO}";
+                table.Cell(i, 3).Range.Text = $"{calc.Reclosers[i].TableMTZ}";
+            }
 
             // Форматирование заголовков
             //Microsoft.Office.Interop.Word.Range headerRange = table.Rows[1].Range;
@@ -257,15 +273,19 @@ namespace ElectroMod
 
                 // Добавляем данные для максимального режима
                 table.Cell(rowOffset + 1, 1).Range.Text = "Ток К.З. в максимальном режиме";
-                table.Cell(rowOffset + 1, 2).Range.Text = $"{Math.Round(currents[i].Item1, 3)} кА";
+                table.Cell(rowOffset + 1, 2).Range.Text = $"{Math.Round(currents[i].Item1, 3)}";
                 table.Cell(rowOffset + 1, 2).Range.Bold = 0;
                 table.Cell(rowOffset + 1, 2).Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+                table.Cell(rowOffset + 1, 3).Range.Text = "кА";
+                table.Cell(rowOffset + 1, 3).Range.Bold = 0;
 
                 // Добавляем данные для минимального режима
                 table.Cell(rowOffset + 2, 1).Range.Text = "Ток К.З. в минимальном режиме";
-                table.Cell(rowOffset + 2, 2).Range.Text = $"{Math.Round(currents[i].Item2, 3)} кА";
+                table.Cell(rowOffset + 2, 2).Range.Text = $"{Math.Round(currents[i].Item2, 3)}";
                 table.Cell(rowOffset + 2, 2).Range.Bold = 0;
                 table.Cell(rowOffset + 2, 2).Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
+                table.Cell(rowOffset + 2, 3).Range.Text = "кА";
+                table.Cell(rowOffset + 2, 3).Range.Bold = 0;
             }
         }
 

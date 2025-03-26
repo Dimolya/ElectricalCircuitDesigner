@@ -15,18 +15,17 @@ namespace ElectroMod.Reports
         private Bus _bus;
         private Recloser _recloser;
 
-        public ReportCompareProtectionsRecloserWithBus(double iszMTZ, Line farestLine, double kchuvMTZ, Bus bus, Recloser recloser)
+        public ReportCompareProtectionsRecloserWithBus(double iszMTZ, Line farestLine, Bus bus, Recloser recloser)
         {
             _IszMTZ = iszMTZ;
             _farestLine = farestLine;
-            _KchuvMTZ = kchuvMTZ;
             _bus = bus;
             _recloser = recloser;
         }
 
         public override void GenerateReport(Document doc, CenterCalculation calc)
         {
-            AddParagraph(doc, "Сравнение защит реклозера с шиной", true, true, 14);
+            AddParagraph(doc, $"Сравнение защит реклозера {_recloser.Name} с шиной", true, true, 14);
             AddParagraph(doc, $"По согласованию с предыдущей защитой {_recloser.Name}:");
             AddParagraph(doc, $"2.1 По току:");
             AddFormula(doc, $"I_(с.з.) ≥ k_нс*I_(с.з.)пред");
@@ -36,30 +35,35 @@ namespace ElectroMod.Reports
             AddFormula(doc, $"I_(с.з.) ≥ 1.2*{_recloser.Isz} ≥ {_IszMTZ} А");
             AddParagraph(doc, $"I_с.з. - ток срабатывания для шины");
 
-            double Isz = 0;
             if(_IszMTZ > _bus.MTZ)
             {
                 AddParagraph(doc, $"I_с.з. {_IszMTZ} > I_с.з.сущ. {_bus.MTZ}");
                 AddParagraph(doc, $"Принимаем I_с.з. = {_IszMTZ} ");
-                Isz = _IszMTZ;
+                _bus.Isz = _IszMTZ;
             }
             else
             {
                 AddParagraph(doc, $"I_с.з. {_IszMTZ} < I_с.з.сущ. {_bus.MTZ}");
                 AddParagraph(doc, $"Принимаем I_с.з.сущ. = {_bus.MTZ}");
-                Isz = _bus.MTZ;
+                _bus.Isz = _bus.MTZ;
             }
-
+            _KchuvMTZ = Math.Round(_farestLine.IkzMin * 0.865 / _bus.Isz, 3);
             AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
             AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = " +
-                $"({_farestLine.IkzMin} * 0.865)/{Isz} = {_KchuvMTZ}");
+                $"({_farestLine.IkzMin} * 0.865)/{_bus.Isz} = {_KchuvMTZ}");
             AddParagraph(doc,
                 $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLine.K}, равен {_farestLine.IkzMin} А;\r\n" +
-                $"I_сз - принятый ток срабатывания МТЗ, равен {Isz} А");
+                $"I_сз - принятый ток срабатывания МТЗ, равен {_bus.Isz} А");
             if (_KchuvMTZ > 1.5)
+            {
                 AddParagraph(doc, $"{_KchuvMTZ} > 1.5, условие выполняется");
+                calc.Bus.TableMTZ = calc.Bus.Isz;
+            }
             else
+            {
                 AddParagraph(doc, $"{_KchuvMTZ} < 1.5, условие не выполняется");
+                calc.Bus.TableMTZ = calc.Bus.MTZ;
+            }
 
         }
     }

@@ -22,19 +22,17 @@ namespace ElectroMod.Reports
         public ReportMTZ() { }
 
         //когда у нас нет реклоузеров
-        public ReportMTZ(double iszMTZ, Line farestLineMTZ, double kchuvMTZ)
+        public ReportMTZ(double iszMTZ, Line farestLineMTZ)
         {
             _IszMTZ = iszMTZ;
             _farestLineMTZ = farestLineMTZ;
-            _KchuvMTZ = kchuvMTZ;
         }
 
-        public ReportMTZ(double iszMTZ, double iustMTZ, Line farestLineMTZ, double KchuvMTZ, double powerKBT, Recloser recloser, Bus bus, double voltage) 
+        public ReportMTZ(double iszMTZ, double iustMTZ, Line farestLineMTZ, double powerKBT, Recloser recloser, Bus bus, double voltage) 
         {
             _IszMTZ = iszMTZ;
             _IustMTZ = iustMTZ;
             _farestLineMTZ = farestLineMTZ;
-            _KchuvMTZ = KchuvMTZ;
             _powerKBT = powerKBT;
             _recloser = recloser;
             _bus = bus;
@@ -56,19 +54,31 @@ namespace ElectroMod.Reports
                     $"k_в - коэффициент возврата реле, для {calc.Bus.Type} принимаем {calc.Bus.Kb}");
 
                 if (_IszMTZ > calc.Bus.MTZ)
+                {
                     AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
+                    calc.Bus.Isz = _IszMTZ;
+                }
                 else
+                {
                     AddParagraph(doc, $"Принимаем I_сз.сущ = {calc.Bus.MTZ}");
-
+                    calc.Bus.Isz = calc.Bus.MTZ;
+                }
+                _KchuvMTZ = Math.Round(_farestLineMTZ.IkzMin * 0.865 / calc.Bus.Isz, 3);
                 AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
-                AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = ({_farestLineMTZ.IkzMin} * 0.865)/{_IszMTZ} = {_KchuvMTZ}");
+                AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = ({_farestLineMTZ.IkzMin} * 0.865)/{calc.Bus.Isz} = {_KchuvMTZ}");
                 AddParagraph(doc,
                     $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLineMTZ.K}, равен {_farestLineMTZ.IkzMin} А;\r\n" +
                     $"I_сз - принятый ток срабатывания МТЗ, равен {_IszMTZ} А");
                 if (_KchuvMTZ > 1.5)
+                {
                     AddParagraph(doc, $"{_KchuvMTZ} > 1.5, условие выполняется");
+                    calc.Bus.TableMTZ = calc.Bus.Isz;
+                }
                 else
+                {
                     AddParagraph(doc, $"{_KchuvMTZ} < 1.5, условие не выполняется");
+                    calc.Bus.TableMTZ = calc.Bus.MTZ;
+                }
             }
             else
             {
@@ -89,19 +99,22 @@ namespace ElectroMod.Reports
                 if (_recloser.IsCalculated)
                 {
                     AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
+                    _recloser.Isz = _IszMTZ;
                 }
                 else
                 {
                     if(_IszMTZ > _recloser.MTZ)
                     {
                         AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
+                        _recloser.Isz = _IszMTZ;
                     }
                     else
                     {
                         AddParagraph(doc, $"Принимаем I_сз.сущ = {_recloser.MTZ}");
+                        _recloser.Isz = _recloser.MTZ;
                     }
                 }
-
+                _KchuvMTZ = Math.Round(_farestLineMTZ.IkzMin * 0.865 / _recloser.Isz, 3);
                 AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
                 AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = " +
                     $"({_farestLineMTZ.IkzMin} * 0.865)/{_recloser.Isz} = {_KchuvMTZ}");
@@ -109,10 +122,15 @@ namespace ElectroMod.Reports
                     $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLineMTZ.K}, равен {_farestLineMTZ.IkzMin} А;\r\n" +
                     $"I_сз - принятый ток срабатывания МТЗ, равен {_recloser.Isz} А");
                 if (_KchuvMTZ > 1.5)
+                {
                     AddParagraph(doc, $"{_KchuvMTZ} > 1.5, условие выполняется");
+                    _recloser.TableMTZ = _recloser.Isz;
+                }
                 else
+                {
                     AddParagraph(doc, $"{_KchuvMTZ} < 1.5, условие не выполняется");
-
+                    _recloser.TableMTZ = _recloser.MTZ;
+                }
             }
 
             //и эту проверку надо потом для оставщихся трансформаторов для галочки Iк.з.мин уже для них будет свой

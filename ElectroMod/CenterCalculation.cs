@@ -136,6 +136,7 @@ namespace ElectroMod
             TypeTT = Bus.TypeTT;
             Ntt = Bus.Ntt;
 
+            //ToDo: это подходит только для bus для реклоузера надо как в мтз
             Iust = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
                 ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT)
                     / (Math.Sqrt(3) * Voltage * 0.95)
@@ -149,7 +150,7 @@ namespace ElectroMod
                 1.2 * Iust,
                 3 * Iust,
                 4 * Iust,
-                Math.Round(1.2 * (TransormatorMaxS.IkzMax * 1000), 3)
+                Math.Round(1.2 * (TransormatorMaxS.IkzMax * 1000), 3) //ToDo: тут должен быть максимальный после определенного реклоузера если он есть 
             };
 
             IszMTOMax = IszMTO.Max();
@@ -161,7 +162,9 @@ namespace ElectroMod
 
             //первый отчет по мто для шины
             Reports.Add(new ReportMTO(Bus, IszMTOMaxCeiling));
-
+            double IszMTZ = 0;
+            Line farestLine = null;
+            double KchuvMTZ = 0;
             if (Reclosers != null)
             {
                 foreach (var recloser in Reclosers)
@@ -178,18 +181,16 @@ namespace ElectroMod
                 //отчет МТЗ когда есть реклоузеры
                 //ищем путь с реклоузером и вычисляем от него самую длинную линию
                 var visitedRecloser = new List<Recloser>();
-                double IszMTZ = 0;
-                Line farestLine = null;
-                double KchuvMTZ = 0;
+                
                 foreach (var elements in CalculationElementList)
                 {
                     foreach (var recloser in Reclosers)
                     {
                         if (visitedRecloser.Contains(recloser) || !elements.Contains(recloser))
                             continue;
-
+                        //Todo: надо добавить КВА и где то добавить умножение на тыщу
                         var iustMTZ = (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95);
-                        IszMTZ = Math.Round(recloser.Kn * recloser.Kcz / recloser.Kb * iustMTZ, 3); // тут иуст вычисляется без PowerSuch
+                        IszMTZ = Math.Round(recloser.Kn * recloser.Kcz / recloser.Kb * iustMTZ, 3);
                         iustMTZ = Math.Round(iustMTZ, 3);
 
                         var index = elements.IndexOf(recloser);
@@ -197,44 +198,33 @@ namespace ElectroMod
                         //убрать из этого алгоритма isVisited потому что он его запоминается и не стирает при след 
                         //прогоне цикла, но пока что костыль 
                         farestLine = CalculateFarestLineFromRecloser(elements[index], elements[index + 1]);
-                        KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / IszMTZ, 3);
-                        if (recloser.IsCalculated)
-                            recloser.Isz = IszMTZ;
-                        else
-                        {
-                            if (IszMTZ > recloser.MTZ)
-                                recloser.Isz = IszMTZ;
-                            else
-                                recloser.Isz = recloser.MTZ;
-                        }
+                        
                         //без этого флаг на всех элементах остается как будто они посещены НЕ УДАЛЯТЬ ПОКА НЕ ИЗМЕНИТСЯ АЛГОРИТМ
                         _elements.ForEach(elem => elem.IsVisited = false);
-                        Reports.Add(new ReportMTZ(IszMTZ, iustMTZ, farestLine, KchuvMTZ, preCalculationForm.PowerKBT, recloser, Bus, Voltage));
+                        Reports.Add(new ReportMTZ(IszMTZ, iustMTZ, farestLine, preCalculationForm.PowerKBT, recloser, Bus, Voltage));
                     }
                 }
-                //отчет МТЗ для шины полсе всех реклоузеров
+                //отчет МТЗ для шины после всех реклоузеров
                 IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
                 farestLine = FindFarestLineFromBus(CalculationElementList);
-                KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / IszMTZ, 3);
-                Reports.Add(new ReportMTZ(IszMTZ, farestLine, KchuvMTZ));
+                Reports.Add(new ReportMTZ(IszMTZ, farestLine));
 
                 //отчеты сравнения реклоузеров с шиной
                 foreach (var recloser in Reclosers)
                 {
+                    // к этому времени recloser.Isz уже имеет значения с прошлых отчетов 
                     IszMTZ = 1.2 * recloser.Isz;
                     farestLine = FindFarestLineFromBus(CalculationElementList);
-                    KchuvMTZ = Math.Round(farestLine.IkzMin * 0.865 / IszMTZ, 3);
-                    Reports.Add(new ReportCompareProtectionsRecloserWithBus(IszMTZ, farestLine, KchuvMTZ, Bus, recloser));
+                    Reports.Add(new ReportCompareProtectionsRecloserWithBus(IszMTZ, farestLine, Bus, recloser));
                 }
             }
             else
             {
                 //отчет МТЗ когда нет реклоузеров
-                var IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
-                var farestLineMTZ = FindFarestLineFromBus(CalculationElementList);
-                var KchuvMTZForBus = Math.Round(farestLineMTZ.IkzMin * 0.865 / IszMTZ, 3); // тут точно самая дальняя линия от Шины???
+                IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
+                farestLine = FindFarestLineFromBus(CalculationElementList);
 
-                Reports.Add(new ReportMTZ(IszMTZ, farestLineMTZ, KchuvMTZForBus));
+                Reports.Add(new ReportMTZ(IszMTZ, farestLine));
             }
 
 
@@ -274,7 +264,7 @@ namespace ElectroMod
 
         public Line CalculateFarestLineFromRecloser(Element previuosElement, Element startElement)
         {
-            // ToDo: почему то по резлультату выполнения в список пробирается реклоузер, не критично, но противоречит
+            // почему то по резлультату выполнения в список пробирается реклоузер, не критично, но противоречит
             // логике метода, из-за этого надо писать костыль на проверку для GroupLinesForMTZ является ли элемент Line
             var groupElementsForMTZ = new List<List<Element>>();
             var groupLinesForMTZ = new List<List<Line>>();

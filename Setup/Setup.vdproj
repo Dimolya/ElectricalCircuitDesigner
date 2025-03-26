@@ -40,7 +40,7 @@
         "Entry"
         {
         "MsmKey" = "8:_3FA93CD2EF612D5CB7DF9D0DAB1B5B5F"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -52,7 +52,7 @@
         "Entry"
         {
         "MsmKey" = "8:_4A27D4073534664C2701778AE530E929"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -64,24 +64,18 @@
         "Entry"
         {
         "MsmKey" = "8:_598E2468A7B6BB3B5D281D6B2692B7B8"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_5BBFC18BCF93B1D4F4DBD285A8C35A6A"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_60A0C350B27A41E29DE1244F0EC07237"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -99,14 +93,26 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_937EB252076A474BACA437D678C60B57"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_C30EF8387D97948B4E5854106D508B1B"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_E635AD60838C83702DB5557FFE7B1A63"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -124,7 +130,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_7652705707E54DBFAC28810BE0A777C4"
+        "OwnerKey" = "8:_C30EF8387D97948B4E5854106D508B1B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_95701DE7FC7240B9BC500CDC1606DBC5"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -155,12 +167,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_598E2468A7B6BB3B5D281D6B2692B7B8"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C30EF8387D97948B4E5854106D508B1B"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -522,6 +528,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_937EB252076A474BACA437D678C60B57"
+            {
+            "SourcePath" = "8:..\\ElectroMod\\hash.txt"
+            "TargetName" = "8:hash.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_46440D44AFF34920BFA5F684A95F36AB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C30EF8387D97948B4E5854106D508B1B"
             {
             "AssemblyRegister" = "3:1"
@@ -634,7 +660,7 @@
             {
             "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
             "Name" = "8:#1925"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:TARGETDIR"
@@ -678,7 +704,7 @@
             "{1525181F-901A-416C-8A58-119130FE478E}:_6AC60AC185EC490A981AA5AA84705115"
             {
             "Name" = "8:#1916"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:DesktopFolder"
@@ -703,7 +729,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Setup"
         "ProductCode" = "8:{C973E227-896C-4F4C-A63F-0354BFB6CD77}"
-        "PackageCode" = "8:{91417F61-2584-452C-9D05-D1590D4CFFCD}"
+        "PackageCode" = "8:{BF16BFB9-ABEE-4CA4-89A4-46F6556BA94F}"
         "UpgradeCode" = "8:{0DDE36D8-F0EE-4B00-A340-B42919C039D3}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -823,16 +849,30 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_5CDCF768C4BC468D9DA365C27E14D84C"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_912A7C3FC3284D9CBD3863EF945E6EED"
             {
-            "Name" = "8:Circuit Designer"
+            "Name" = "8:CalcScheme"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_7652705707E54DBFAC28810BE0A777C4"
+            "Target" = "8:_6AC60AC185EC490A981AA5AA84705115"
             "Folder" = "8:_6AC60AC185EC490A981AA5AA84705115"
+            "WorkingFolder" = "8:_6AC60AC185EC490A981AA5AA84705115"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_B9453DEAF5004D838E3C7D17EBAF415B"
+            {
+            "Name" = "8:CalcScheme"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_46440D44AFF34920BFA5F684A95F36AB"
+            "Folder" = "8:_46440D44AFF34920BFA5F684A95F36AB"
             "WorkingFolder" = "8:_46440D44AFF34920BFA5F684A95F36AB"
             "Icon" = "8:"
             "Feature" = "8:"
@@ -1236,7 +1276,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_7652705707E54DBFAC28810BE0A777C4"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_95701DE7FC7240B9BC500CDC1606DBC5"
             {
             "SourcePath" = "8:..\\ElectroMod\\obj\\Debug\\ElectroMod.exe"
             "TargetName" = "8:"
