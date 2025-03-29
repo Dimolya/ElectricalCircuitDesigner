@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using static System.Windows.Forms.AxHost;
 using System.Drawing.Imaging;
+using ElectroMod.Helper;
 
 namespace ElectroMod
 {
@@ -14,7 +15,6 @@ namespace ElectroMod
         public event Action<ISelectable> ElementSelected;
 
         IEnumerable<object> model;
-        private MainCalculatForm _mainCalculatForm;
         IDragable dragable;
         ISelectable selected;
 
@@ -31,10 +31,9 @@ namespace ElectroMod
                 | ControlStyles.Selectable, true);
         }
 
-        public void Build(IEnumerable<object> model, MainCalculatForm mainCalculatForm)
+        public void Build(IEnumerable<object> model)
         {
             this.model = model;
-            _mainCalculatForm = mainCalculatForm;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -164,23 +163,6 @@ namespace ElectroMod
                 }
                 bitmap.Save(filePath, ImageFormat.Png);
             }
-        }
-
-        private List<ConnectingWare> FindNearestConnectingWare(Point p)
-        {
-            var nearestWare = new List<ConnectingWare>();
-            foreach (var obj in model.OfType<Element>())
-            {
-                foreach (var objWare in obj.Wares)
-                {
-                    double distance = objWare.Location.StartPoint(p).LengthSqr();
-                    if (distance < 400)
-                    {
-                        nearestWare.Add(objWare);
-                    }
-                }
-            }
-            return nearestWare;
         }
     }
 }

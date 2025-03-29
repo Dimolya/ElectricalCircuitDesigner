@@ -15,6 +15,7 @@ using DocumentFormat.OpenXml.Office.Word;
 using Newtonsoft.Json;
 using System.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ElectroMod.Reports;
 
 namespace ElectroMod
 {
@@ -31,7 +32,7 @@ namespace ElectroMod
         public MainCalculatForm()
         {
             InitializeComponent();
-            drawPanel1.Build(_elements, this);
+            drawPanel1.Build(_elements);
             drawPanel1.ScaleChanged += DrawPanel1_ScaleChanged;
             drawPanel1.ElementSelected += UpdateElementDetails;
 
@@ -75,7 +76,7 @@ namespace ElectroMod
                 using (FileStream fs = File.OpenRead(ofd.FileName))
                 {
                     _elements = (Elements)new BinaryFormatter().Deserialize(fs);
-                    drawPanel1.Build(_elements, this);
+                    drawPanel1.Build(_elements);
                 }
             drawPanel1.Invalidate();
         }
@@ -125,36 +126,45 @@ namespace ElectroMod
 
         private async void btnCalculate_Click(object sender, EventArgs e)
         {
-            var calculationCenter = new CenterCalculation(_elements);
-            var transformators = new List<Transormator>(calculationCenter.CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
-
-            using (var preCalculateForm = new PreCalculationForm(transformators))
+            if (_elements.OfType<Bus>().Any() && 
+                _elements.OfType<Line>().Any() && 
+                _elements.OfType<Transormator>().Any())
             {
-                if (preCalculateForm.ShowDialog() == DialogResult.OK)
+                var calculationCenter = new CenterCalculation(_elements);
+                var transformators = new List<Transormator>(calculationCenter.CalculationElementList.Select(x => x.OfType<Transormator>().FirstOrDefault()));
+
+                using (var preCalculateForm = new PreCalculationForm(transformators))
                 {
-                    calculationCenter.CalculationMTOandMTZ(preCalculateForm);
-                    lbProgressProcess.Visible = true;
-                    progressBar.Visible = true;
-                    progressBar.Value = 0;
-                    try
+                    if (preCalculateForm.ShowDialog() == DialogResult.OK)
                     {
-                        var progress = new Progress<int>(percent =>
+                        calculationCenter.CalculationMTOandMTZ(preCalculateForm);
+                        lbProgressProcess.Visible = true;
+                        progressBar.Visible = true;
+                        progressBar.Value = 0;
+                        try
                         {
-                            progressBar.Value = percent;
-                        });
-                        var docx = new Docx();
-                        await docx.CreateReportDocumentAsync(calculationCenter, this, progress);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-                    finally
-                    {
-                        progressBar.Visible = false;
-                        lbProgressProcess.Visible = false;
+                            var progress = new Progress<int>(percent =>
+                            {
+                                progressBar.Value = percent;
+                            });
+                            var docx = new Docx();
+                            await docx.CreateReportDocumentAsync(calculationCenter, this, progress);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                        finally
+                        {
+                            progressBar.Visible = false;
+                            lbProgressProcess.Visible = false;
+                        }
                     }
                 }
+            }
+            else
+            {
+                MessageBox.Show("Расчет невозможен без хотя бы 3 элементов цепи: Шина, Линия, Трансформатор");
             }
         }
 
@@ -172,8 +182,8 @@ namespace ElectroMod
         {
             if (selectedElement is Bus bus)
             {
-                var dataBusJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataBus.json");
-                var dataBusTypeJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataRecloser.json");
+                var dataBusJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataBus.json");
+                var dataBusTypeJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataRecloser.json");
 
                 if (File.Exists(dataBusJsonPath) && File.Exists(dataBusTypeJsonPath))
                 {
@@ -218,7 +228,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Line line)
             {
-                var dataLineJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataLine.json");
+                var dataLineJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataLine.json");
 
                 _slctElement = line;
                 panelPropertyLine.Visible = true;
@@ -240,7 +250,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Recloser recloser)
             {
-                var dataRecloserJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataRecloser.json");
+                var dataRecloserJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataRecloser.json");
 
                 _slctElement = recloser;
                 panelPropertyRecloser.Visible = true;
@@ -268,7 +278,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Transormator transormator)
             {
-                var dataTransformatorJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "StaticData", "DataTransformator.json");
+                var dataTransformatorJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataTransformator.json");
 
                 _slctElement = transormator;
                 panelPropertyTransformator.Visible = true;

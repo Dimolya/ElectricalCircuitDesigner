@@ -97,10 +97,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Addition.cs" />
+    <Compile Include="Helper\Addition.cs" />
     <Compile Include="CenterCalculation.cs" />
     <Compile Include="ConnectingWare.cs" />
-    <Compile Include="Docx.cs" />
+    <Compile Include="Reports\Docx.cs" />
     <Compile Include="Dtos\LineDataTypeDto.cs" />
     <Compile Include="Dtos\RecloserDataTypeDto.cs" />
     <Compile Include="Dtos\StaticDtos\DataBusDto.cs" />
@@ -110,11 +110,12 @@
     <Compile Include="Dtos\StaticDtos\DataTypeTTDto.cs" />
     <Compile Include="Dtos\TransformatorContainerDto.cs" />
     <Compile Include="DataBase\JsonProvider.cs" />
+    <Compile Include="Helper\ElementSearchEngine.cs" />
     <Compile Include="Elements\Recloser.cs" />
     <Compile Include="DrawPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Element.cs" />
+    <Compile Include="Elements\Element.cs" />
     <Compile Include="Forms\InputForms\InputParametersBus.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -199,12 +200,11 @@
     <None Include="DataBase\TypeTT.json" />
     <None Include="DataBase\LineTypes.json" />
     <None Include="DataBase\RecloserTypes.json" />
-    <None Include="DataBase\StaticData\DataBus.json" />
-    <None Include="DataBase\StaticData\DataLine.json" />
-    <None Include="DataBase\StaticData\DataRecloser.json" />
+    <None Include="DataBase\DataForm\DataBus.json" />
+    <None Include="DataBase\DataForm\DataLine.json" />
+    <None Include="DataBase\DataForm\DataRecloser.json" />
     <None Include="DataBase\TransformatorTypes.json" />
-    <None Include="DataBase\StaticData\DataTransformator.json" />
-    <None Include="ElectroMod_TemporaryKey.pfx" />
+    <None Include="DataBase\DataForm\DataTransformator.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

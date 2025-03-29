@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.CodeDom;
 using System.Windows.Forms.VisualStyles;
 using DocumentFormat.OpenXml.Presentation;
+using ElectroMod.Helper;
 
 namespace ElectroMod
 {

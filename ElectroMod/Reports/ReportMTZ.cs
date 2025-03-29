@@ -12,7 +12,7 @@ namespace ElectroMod.Reports
     {
         private Recloser _recloser;
         private Bus _bus;
-        private double _IszMTZ;
+        private double _iszMTZ;
         private double _IustMTZ;
         private double _powerKBT;
         private double _voltage;
@@ -22,15 +22,16 @@ namespace ElectroMod.Reports
         public ReportMTZ() { }
 
         //когда у нас нет реклоузеров
-        public ReportMTZ(double iszMTZ, Line farestLineMTZ)
+        public ReportMTZ(double iust, double iszMTZ, Line farestLineMTZ)
         {
-            _IszMTZ = iszMTZ;
+            _IustMTZ = iust;
+            _iszMTZ = iszMTZ;
             _farestLineMTZ = farestLineMTZ;
         }
 
         public ReportMTZ(double iszMTZ, double iustMTZ, Line farestLineMTZ, double powerKBT, Recloser recloser, Bus bus, double voltage) 
         {
-            _IszMTZ = iszMTZ;
+            _iszMTZ = iszMTZ;
             _IustMTZ = iustMTZ;
             _farestLineMTZ = farestLineMTZ;
             _powerKBT = powerKBT;
@@ -47,28 +48,28 @@ namespace ElectroMod.Reports
                 AddParagraph(doc, "Расчет МТЗ, по отстройке от максимального рабочего тока", isBold: true, fontSize: 14, isCenterAligned: true);
                 AddParagraph(doc, $"Расчет МТЗ для {calc.Bus.Name}");
                 AddFormula(doc, $"I_сз ≥ ((K_н * K_сзп)/K_в)*I_уст ≥ " +
-                    $"(({calc.Bus.Kn}*{calc.Bus.Kcz})/{calc.Bus.Kb})*{calc.Iust} = {_IszMTZ} А, где");
+                    $"(({calc.Bus.Kn}*{calc.Bus.Kcz})/{calc.Bus.Kb})*{_IustMTZ} = {_iszMTZ} А, где");
                 AddParagraph(doc,
                     $"K_н - коэффициент надежности, учитывающий погрешность реле и необходимый запас. В зависимости от типа реле может приниматься 1,1-1,2. Для {calc.Bus.Type} принимаем {calc.Bus.Kn};\r\n" +
                     $"K_сзп - коэффициент самозапуска, принимается 1,1-1,3;\r\n" +
                     $"k_в - коэффициент возврата реле, для {calc.Bus.Type} принимаем {calc.Bus.Kb}");
 
-                if (_IszMTZ > calc.Bus.MTZ)
+                if (_iszMTZ > calc.Bus.MTZ)
                 {
-                    AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
-                    calc.Bus.Isz = _IszMTZ;
+                    AddParagraph(doc, $"Принимаем I_сз = {_iszMTZ}");
+                    calc.Bus.Isz = _iszMTZ;
                 }
                 else
                 {
                     AddParagraph(doc, $"Принимаем I_сз.сущ = {calc.Bus.MTZ}");
                     calc.Bus.Isz = calc.Bus.MTZ;
                 }
-                _KchuvMTZ = Math.Round(_farestLineMTZ.IkzMin * 0.865 / calc.Bus.Isz, 3);
+                _KchuvMTZ = Math.Round(_farestLineMTZ.IkzMin * 0.865 * 1000 / calc.Bus.Isz, 3);
                 AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
-                AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = ({_farestLineMTZ.IkzMin} * 0.865)/{calc.Bus.Isz} = {_KchuvMTZ}");
+                AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865*1000)/I_сз = ({_farestLineMTZ.IkzMin} * 0.865*1000)/{calc.Bus.Isz} = {_KchuvMTZ}");
                 AddParagraph(doc,
                     $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLineMTZ.K}, равен {_farestLineMTZ.IkzMin} А;\r\n" +
-                    $"I_сз - принятый ток срабатывания МТЗ, равен {_IszMTZ} А");
+                    $"I_сз - принятый ток срабатывания МТЗ, равен {_iszMTZ} А");
                 if (_KchuvMTZ > 1.5)
                 {
                     AddParagraph(doc, $"{_KchuvMTZ} > 1.5, условие выполняется");
@@ -90,7 +91,7 @@ namespace ElectroMod.Reports
                                 $"{_IustMTZ} A"); 
 
                 AddFormula(doc, $"I_сз ≥ ((K_н * K_сзп)/K_в)*I_уст ≥ " +
-                    $"(({_bus.Kn}*{_bus.Kcz})/{_bus.Kb})*{_IustMTZ} = {_IszMTZ} А, где");
+                    $"(({_bus.Kn}*{_bus.Kcz})/{_bus.Kb})*{_IustMTZ} = {_iszMTZ} А, где");
                 AddParagraph(doc,
                     $"K_н - коэффициент надежности, учитывающий погрешность реле и необходимый запас. В зависимости от типа реле может приниматься 1,1-1,2. Для {_bus.Type} принимаем {_bus.Kn};\r\n" +
                     $"K_сзп - коэффициент самозапуска, принимается 1,1-1,3;\r\n" +
@@ -98,15 +99,15 @@ namespace ElectroMod.Reports
 
                 if (_recloser.IsCalculated)
                 {
-                    AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
-                    _recloser.Isz = _IszMTZ;
+                    AddParagraph(doc, $"Принимаем I_сз = {_iszMTZ}");
+                    _recloser.Isz = _iszMTZ;
                 }
                 else
                 {
-                    if(_IszMTZ > _recloser.MTZ)
+                    if(_iszMTZ > _recloser.MTZ)
                     {
-                        AddParagraph(doc, $"Принимаем I_сз = {_IszMTZ}");
-                        _recloser.Isz = _IszMTZ;
+                        AddParagraph(doc, $"Принимаем I_сз = {_iszMTZ}");
+                        _recloser.Isz = _iszMTZ;
                     }
                     else
                     {
@@ -114,10 +115,10 @@ namespace ElectroMod.Reports
                         _recloser.Isz = _recloser.MTZ;
                     }
                 }
-                _KchuvMTZ = Math.Round(_farestLineMTZ.IkzMin * 0.865 / _recloser.Isz, 3);
+                _KchuvMTZ = Math.Round(_farestLineMTZ.IkzMin * 0.865 * 1000 / _recloser.Isz, 3);
                 AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
-                AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = " +
-                    $"({_farestLineMTZ.IkzMin} * 0.865)/{_recloser.Isz} = {_KchuvMTZ}");
+                AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865*1000)/I_сз = " +
+                    $"({_farestLineMTZ.IkzMin} * 0.865 * 1000)/{_recloser.Isz} = {_KchuvMTZ}");
                 AddParagraph(doc,
                     $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLineMTZ.K}, равен {_farestLineMTZ.IkzMin} А;\r\n" +
                     $"I_сз - принятый ток срабатывания МТЗ, равен {_recloser.Isz} А");

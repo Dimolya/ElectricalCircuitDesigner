@@ -32,10 +32,16 @@ namespace ElectroMod.Forms
             Reconnect = cbReconnect.Text;
             try
             {
-                PowerSuchKBT = double.Parse(tbPowerSuchKBT.Text.Replace('.', ','));
-                PowerSuchKBA = double.Parse(tbPowerSuchKBA.Text.Replace('.', ','));
-                PowerKBT = double.Parse(tbPowerKBT.Text.Replace('.', ','));
-                PowerKBA = double.Parse(tbPowerKBA.Text.Replace('.', ','));
+                if (Reconnect == "Расчет по мощности ТУ")
+                {
+                    PowerSuchKBT = double.Parse(tbPowerSuchKBT.Text.Replace('.', ','));
+                    PowerKBT = double.Parse(tbPowerKBT.Text.Replace('.', ','));
+                }
+                else
+                {
+                    PowerSuchKBA = double.Parse(tbPowerSuchKBA.Text.Replace('.', ','));
+                    PowerKBA = double.Parse(tbPowerKBA.Text.Replace('.', ','));
+                }
                 DialogResult = DialogResult.OK;
             }
             catch (FormatException ex)

@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using ElectroMod.Forms;
+using ElectroMod.Helper;
 using ElectroMod.Reports;
 using Microsoft.Office.Interop.Word;
 using System;
@@ -78,8 +79,8 @@ namespace ElectroMod
         public double Voltage { get; set; }
         public string TypeKTP { get; set; }
         public string ReconnectName { get; set; }
-        public int Ntt { get; set; }
-        public string TypeTT { get; set; }
+        public int NttBus { get; set; }
+        public string TypeTTBus { get; set; }
         public double TransformatorFullResistance { get; set; }
         //public int TransformatorS{ get; set; }
         public string NumberTY { get; set; }
@@ -98,10 +99,10 @@ namespace ElectroMod
         public double Zmin { get; set; }
 
         //расчеты МТО
-        public double Iust { get; set; }
-        public double[] IszMTO { get; set; }
-        public double IszMTOMax { get; set; }
-        public double IszMTOMaxCeiling { get; set; }
+        //public double Iust { get; set; }
+        //public double[] IszMTO { get; set; }
+        //public double IszMTOMax { get; set; }
+        //public double IszMTOMaxCeiling { get; set; }
 
         //расчеты МТЗ
         //public double IszMTZ { get; set; }
@@ -121,11 +122,7 @@ namespace ElectroMod
         {
             Bus = _elements.OfType<Bus>().FirstOrDefault();
             Reclosers = _elements.OfType<Recloser>().ToList();
-            Transformators = _elements.OfType<Transormator>().ToList();
-            TransormatorMaxS = Transformators.OrderByDescending(trans => trans.S).FirstOrDefault();
 
-            if (TransormatorMaxS != null)
-                TypeKTP = TransormatorMaxS.TypeKTP;
             ReconnectName = preCalculationForm.Reconnect;
             NumberTY = preCalculationForm.NumberTY;
             PowerSuchKBT = preCalculationForm.PowerSuchKBT;
@@ -133,55 +130,63 @@ namespace ElectroMod
             PowerSuchKBA = preCalculationForm.PowerSuchKBA;
             PowerKBA = preCalculationForm.PowerKBA;
 
-            TypeTT = Bus.TypeTT;
-            Ntt = Bus.Ntt;
+            TypeTTBus = Bus.TypeTT;
+            NttBus = Bus.Ntt;
 
-            //ToDo: это подходит только для bus для реклоузера надо как в мтз
-            Iust = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
-                ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT)
-                    / (Math.Sqrt(3) * Voltage * 0.95)
-                : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA)
-                    / (Math.Sqrt(3) * Voltage);
+            //ToDo: это подходит только для bus, для реклоузера надо как в мтз
+            var IustBus = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
+                ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95)
+                : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) / (Math.Sqrt(3) * Voltage);
+            IustBus = Math.Round(IustBus, 3);
 
-            Iust = Math.Round(Iust, 3);
-
-            IszMTO = new[]
-            {
-                1.2 * Iust,
-                3 * Iust,
-                4 * Iust,
-                Math.Round(1.2 * (TransormatorMaxS.IkzMax * 1000), 3) //ToDo: тут должен быть максимальный после определенного реклоузера если он есть 
-            };
-
-            IszMTOMax = IszMTO.Max();
-            IszMTOMaxCeiling = Math.Ceiling(IszMTOMax);
-
+            var transformatorMaxS = _elements.OfType<Transormator>().OrderByDescending(trans => trans.S).FirstOrDefault();
+            
             //IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
             //FarestLineMTZ = FindFarestLineFromBus(CalculationElementList);
             //KchuvMTZ = Math.Round(FarestLineMTZ.IkzMin * 0.865 / IszMTZ, 3); // тут точно самая дальняя линия от Шины???
 
             //первый отчет по мто для шины
-            Reports.Add(new ReportMTO(Bus, IszMTOMaxCeiling));
+            Reports.Add(new ReportMTO(Bus, IustBus, transformatorMaxS));
             double IszMTZ = 0;
             Line farestLine = null;
-            double KchuvMTZ = 0;
             if (Reclosers != null)
             {
-                foreach (var recloser in Reclosers)
+                var visitedRecloser = new List<Recloser>();
+                foreach (var elements in CalculationElementList)
                 {
-                    //отчет МТО когда есть реклоузеры
-                    if (recloser.IsCalculated)
+                    foreach (var recloser in Reclosers)
                     {
-                        TypeTT = recloser.TypeTT;
-                        Ntt = recloser.Ntt;
-                    }
-                    Reports.Add(new ReportMTO(recloser, IszMTOMaxCeiling));
-                }
+                        if (visitedRecloser.Contains(recloser) || !elements.Contains(recloser))
+                            continue;
+                        var index = elements.IndexOf(recloser);
+                        visitedRecloser.Add(recloser);
 
+                        //отчет МТО когда есть реклоузеры
+                        if (recloser.IsCalculated)
+                        {
+                            TypeTTBus = recloser.TypeTT;
+                            NttBus = recloser.Ntt;
+                        }
+
+                        var IustRecloser = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
+                            ? (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95)
+                            : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) //ToDo: вот тут наверное тоже надо Psuch?
+                                / (Math.Sqrt(3) * Voltage);
+                        IustRecloser = Math.Round(IustRecloser, 3);
+
+                        var transformatorsFromRecloser = ElementSearchEngine.FindTransformatorsFromRecloser(elements[index], elements[index + 1]);
+                        //после каждого выполнения этого метода и других подобных на сбрасывать IsVisited у элементов, т.к. это влияет на расчет других 
+                        //методов которые тоже завязаны на этом свойстве, ЭТО НЕПРАВИЛЬНО, НАДО ИЗБАВЛЯТЬСЯ ОТ IsVisited!!!
+                        ElementSearchEngine.ResetPropIsVisitedElements(_elements);
+                        transformatorMaxS = transformatorsFromRecloser.OrderByDescending(trans => trans.S).FirstOrDefault();
+
+                        Reports.Add(new ReportMTO(recloser, IustRecloser, transformatorMaxS));
+                    }
+                }
+                visitedRecloser.Clear();
                 //отчет МТЗ когда есть реклоузеры
                 //ищем путь с реклоузером и вычисляем от него самую длинную линию
-                var visitedRecloser = new List<Recloser>();
-                
+
                 foreach (var elements in CalculationElementList)
                 {
                     foreach (var recloser in Reclosers)
@@ -189,7 +194,10 @@ namespace ElectroMod
                         if (visitedRecloser.Contains(recloser) || !elements.Contains(recloser))
                             continue;
                         //Todo: надо добавить КВА и где то добавить умножение на тыщу
-                        var iustMTZ = (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95);
+                        var iustMTZ = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
+                            ? (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95)
+                            : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) //ToDo: вот тут наверное тоже надо Psuch?
+                                / (Math.Sqrt(3) * Voltage);
                         IszMTZ = Math.Round(recloser.Kn * recloser.Kcz / recloser.Kb * iustMTZ, 3);
                         iustMTZ = Math.Round(iustMTZ, 3);
 
@@ -197,185 +205,39 @@ namespace ElectroMod
                         visitedRecloser.Add(recloser);
                         //убрать из этого алгоритма isVisited потому что он его запоминается и не стирает при след 
                         //прогоне цикла, но пока что костыль 
-                        farestLine = CalculateFarestLineFromRecloser(elements[index], elements[index + 1]);
-                        
+                        farestLine = ElementSearchEngine.FindFarestLineFromRecloser(elements[index], elements[index + 1]);
+                        ElementSearchEngine.ResetPropIsVisitedElements(_elements);
                         //без этого флаг на всех элементах остается как будто они посещены НЕ УДАЛЯТЬ ПОКА НЕ ИЗМЕНИТСЯ АЛГОРИТМ
                         _elements.ForEach(elem => elem.IsVisited = false);
                         Reports.Add(new ReportMTZ(IszMTZ, iustMTZ, farestLine, preCalculationForm.PowerKBT, recloser, Bus, Voltage));
                     }
                 }
                 //отчет МТЗ для шины после всех реклоузеров
-                IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
-                farestLine = FindFarestLineFromBus(CalculationElementList);
-                Reports.Add(new ReportMTZ(IszMTZ, farestLine));
+                IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * IustBus, 3);
+                farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
+                Reports.Add(new ReportMTZ(IustBus, IszMTZ, farestLine));
 
                 //отчеты сравнения реклоузеров с шиной
                 foreach (var recloser in Reclosers)
                 {
                     // к этому времени recloser.Isz уже имеет значения с прошлых отчетов 
                     IszMTZ = 1.2 * recloser.Isz;
-                    farestLine = FindFarestLineFromBus(CalculationElementList);
+                    farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
                     Reports.Add(new ReportCompareProtectionsRecloserWithBus(IszMTZ, farestLine, Bus, recloser));
                 }
             }
             else
             {
                 //отчет МТЗ когда нет реклоузеров
-                IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
-                farestLine = FindFarestLineFromBus(CalculationElementList);
-
-                Reports.Add(new ReportMTZ(IszMTZ, farestLine));
+                IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * IustBus, 3);
+                farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
+                Reports.Add(new ReportMTZ(IustBus, IszMTZ, farestLine));
             }
-
-
-
-            //if (projectedRecloser != null)
-            //{
-            //    //Ntt = projectedRecloser.Ntt;
-
-            //    //TypeTT = projectedRecloser.TypeTT;
-            //    //KchuvMTO = projectedRecloser.IkzMin * 0.865 * 1000 / IkzMTOMaxCeiling;
-
-            //    //RecloserKn = projectedRecloser.Kn;
-            //    //RecloserKcz = projectedRecloser.Kcz;
-            //    //RecloserKb = projectedRecloser.Kb;
-
-            //    //дальше МТЗ
-            //    //IszMTZCeiling = Math.Ceiling(IszMTZ);
-            //    //KchuvMTZ = SecondLastElementList.IkzMin * 0.865 * 1000 / IszMTZCeiling; //ToDo: Надо спросить что тут имеется ввиду 
-            //    //KchuvMTZ = Math.Round(KchuvMTZ, 3);
-            //}
-            //KchuvMTO = Math.Round(KchuvMTO, 3);
-
-            //Ip = 1 * IszMTZCeiling / recloser.Ntt; //ToDo: либо с реклоузера если он еесть, либо с шины
-            //Ip2 = 0.5 * LastElementList.IcsMax * 1000 / recloser.Ntt;
-            //Kchuv2MTZ = Ip2 / Ip;
-
-            //if (transformator.Scheme == "Звезда-Звезда") //ToDo: тут пока неясно что
-            //{
-            //    Ikz1 = 220 / (1 / 3.0 * transformator.FullResistance);
-            //    Ikz1low = Ikz1 * (0.4 / Voltage);
-            //    Ip1 = Ikz1low / Math.Sqrt(3) * recloser.Ntt;
-            //    Kchuv3MTZ = Ip1 / Ip;
-            //}
-
-
-        }
-
-        public Line CalculateFarestLineFromRecloser(Element previuosElement, Element startElement)
-        {
-            // почему то по резлультату выполнения в список пробирается реклоузер, не критично, но противоречит
-            // логике метода, из-за этого надо писать костыль на проверку для GroupLinesForMTZ является ли элемент Line
-            var groupElementsForMTZ = new List<List<Element>>();
-            var groupLinesForMTZ = new List<List<Line>>();
-            CalcFarestLineFromRecloser(previuosElement, startElement, new List<Element>(), new HashSet<Element>(), groupElementsForMTZ);
-            //костыль
-            foreach (var lines in groupElementsForMTZ)
-            {
-                lines.RemoveAll(item => item is Recloser);
-                List<Line> list = lines.Select(elem => (Line)elem).ToList();
-                groupLinesForMTZ.Add(list);
-            }
-
-            //вычисляем самый длинный путь 
-            var sumLength = new List<double>();
-            foreach (var lines in groupLinesForMTZ)
-            {
-                sumLength.Add(lines.Sum(x => x.Length));
-            }
-
-            double maxSum = 0;
-            int indexLinesList = 0;
-            for (int i = 0; i < sumLength.Count; i++)
-            {
-                if (sumLength[i] > maxSum)
-                {
-                    maxSum = sumLength[i];
-                    indexLinesList = i;
-                }
-            }
-
-            return groupLinesForMTZ[indexLinesList].Last();
-        }
-
-        private void CalcFarestLineFromRecloser(Element previuosElement, Element currentElement, List<Element> currentPath, HashSet<Element> visitedElements, List<List<Element>> groupLinesForMTZ)
-        {
-            var liness = new List<List<Element>>();
-            foreach (var ware in currentElement.Wares)
-            {
-                if (ware.ConnectedWares.Any(x => x.ParentElement == previuosElement))
-                    continue;
-                foreach (var connectedWare in ware.ConnectedWares)
-                {
-                    if (ware.ConnectedWares.Count == 1 && connectedWare.ParentElement is Transormator)
-                    {
-                        currentPath.Add(currentElement);
-                        currentElement.IsVisited = true;
-                        groupLinesForMTZ.Add(new List<Element>(currentPath));
-                        currentPath.Clear();
-                        visitedElements.Remove(currentElement);
-                        break;
-                    }
-
-                    if (connectedWare.ParentElement is Transormator || connectedWare.ParentElement.IsVisited)
-                        continue;
-
-                    if (ware.ConnectedWares.Count > 1)
-                    {
-                        var lines = ware.ConnectedWares.Select(x => x.ParentElement).OfType<Line>();
-                        var haveRecloser = ware.ConnectedWares.Where(x => x.ParentElement is Recloser);
-
-                        if (lines.Count() > 1 || haveRecloser.Any())
-                        {
-                            ware.IsWareBranching = true;
-                            ware.ConnectedWares.ForEach(x => x.IsWareBranching = true);
-                        }
-                    }
-
-                    if (!currentPath.Contains(currentElement) && !(currentElement is Recloser))
-                        currentPath.Add(currentElement);
-
-                    visitedElements.Add(currentElement);
-                    currentElement.IsVisited = true;
-
-                    var nextElement = connectedWare.ParentElement;
-                    CalcFarestLineFromRecloser(currentElement, nextElement, currentPath, visitedElements, groupLinesForMTZ);
-
-                    if (ware.IsWareBranching)
-                    {
-                        if (ware.ConnectedWares.Where(x => x.ParentElement.IsVisited == false).Any())
-                            currentPath.AddRange(visitedElements);
-                        else
-                            visitedElements.Remove(ware.ParentElement);
-                    }
-                    else
-                        visitedElements.Remove(ware.ParentElement);
-                }
-            }
-        }
-
-        private Line FindFarestLineFromBus(List<List<Element>> calculationElementList)
-        {
-            Line farestLine = null;
-            double maxSumLength = 0;
-            var linesList = calculationElementList.Select(elementsList => elementsList.OfType<Line>().ToList()).ToList();
-
-            foreach (var lines in linesList)
-            {
-                var sumLength = lines.Sum(line => line.Length);
-                if (sumLength > maxSumLength)
-                {
-                    maxSumLength = sumLength;
-                    farestLine = lines.Last();
-                }
-            }
-
-            return farestLine;
         }
 
         private void GenerateListElementsForCalculation()
         {
-            var bus = _elements.OfType<Bus>().First();
+            var bus = _elements.OfType<Bus>().FirstOrDefault();
             var visited = new HashSet<Element>();
             var currentPath = new List<Element>();
             RecurceGenerateElementsList(bus, visited, currentPath);
@@ -485,7 +347,7 @@ namespace ElectroMod
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
                     CalculateIkz(sumResistance);
-                    if(recloser.IkzMax == 0 && recloser.IkzMax == 0) 
+                    if (recloser.IkzMax == 0 && recloser.IkzMax == 0)
                         Currents.Add((IkzMax, IkzMin));
                     recloser.IkzMax = IkzMax;
                     recloser.IkzMin = IkzMin;

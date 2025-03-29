@@ -31,7 +31,7 @@ namespace ElectroMod.Reports
             AddFormula(doc, $"I_(с.з.) ≥ k_нс*I_(с.з.)пред");
             AddParagraph(doc,
                 $"K_нс - коэффициент надежности согласования, принимается 1,2;\r\n" +
-                $"I_(с.з.)пред - ток срабатывания предыдущей защиты – {_recloser};");
+                $"I_(с.з.)пред - ток срабатывания предыдущей защиты – {_recloser.Name};");
             AddFormula(doc, $"I_(с.з.) ≥ 1.2*{_recloser.Isz} ≥ {_IszMTZ} А");
             AddParagraph(doc, $"I_с.з. - ток срабатывания для шины");
 
@@ -47,10 +47,10 @@ namespace ElectroMod.Reports
                 AddParagraph(doc, $"Принимаем I_с.з.сущ. = {_bus.MTZ}");
                 _bus.Isz = _bus.MTZ;
             }
-            _KchuvMTZ = Math.Round(_farestLine.IkzMin * 0.865 / _bus.Isz, 3);
+            _KchuvMTZ = Math.Round(_farestLine.IkzMin * 0.865 * 1000/ _bus.Isz, 3);
             AddParagraph(doc, "Проверка чувствительности к минимальному току КЗ (Кч > 1.5 по ПУЭ)");
-            AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865)/I_сз = " +
-                $"({_farestLine.IkzMin} * 0.865)/{_bus.Isz} = {_KchuvMTZ}");
+            AddFormula(doc, $"K_чувст = (I_(к.з.мин)*0.865*1000)/I_сз = " +
+                $"({_farestLine.IkzMin} * 0.865*1000)/{_bus.Isz} = {_KchuvMTZ}");
             AddParagraph(doc,
                 $"I_к.з.мин - минимальный ток двухфазного КЗ в наиболее удаленной точке фидера K{_farestLine.K}, равен {_farestLine.IkzMin} А;\r\n" +
                 $"I_сз - принятый ток срабатывания МТЗ, равен {_bus.Isz} А");

@@ -15,7 +15,7 @@ using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using System.Linq;
 
-namespace ElectroMod
+namespace ElectroMod.Reports
 {
     public class Docx
     {
@@ -105,7 +105,7 @@ namespace ElectroMod
                 AddParagraph(doc, "");
                 AddParagraph(doc, "Расчет уставок защит МТО, МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
                 AddParagraph(doc, "");
-                AddParagraph(doc, $"Коэффициент трансформации установленного трансформатора тока {calc.TypeTT} Ктт={calc.Ntt}\r\n");
+                AddParagraph(doc, $"Коэффициент трансформации установленного трансформатора тока {calc.TypeTTBus} Ктт={calc.NttBus}\r\n");
 
                 if (calc.ReconnectName == "Расчет по мощности ТУ")
                     AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность P_t.u.such {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования P_t.u. {calc.PowerKBT} кВт\r\n");
