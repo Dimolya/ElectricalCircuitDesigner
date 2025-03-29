@@ -223,7 +223,7 @@ namespace ElectroMod
                     // к этому времени recloser.Isz уже имеет значения с прошлых отчетов 
                     IszMTZ = 1.2 * recloser.Isz;
                     farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
-                    Reports.Add(new ReportCompareProtectionsRecloserWithBus(IszMTZ, farestLine, Bus, recloser));
+                    Reports.Add(new ReportCompareProtectionsRecloserWithBus(farestLine, Bus, recloser));
                 }
             }
             else

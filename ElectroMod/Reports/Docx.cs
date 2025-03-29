@@ -119,52 +119,6 @@ namespace ElectroMod.Reports
                 progress.Report(80);
 
                 AddTableResoultsMTOMTZ(doc, calc);
-                //Отсутпление на новый лист
-                //var range = doc.Content;
-                //range.Collapse(WdCollapseDirection.wdCollapseEnd); // Перемещаемся в конец документа
-                //range.InsertBreak(WdBreakType.wdPageBreak);
-                //AddParagraph(doc, "Максимальная токовая защита МТЗ", isBold: true, fontSize: 14, isCenterAligned: true);
-                //AddParagraph(doc, "");
-                //if (calc.ReconnectName == "Расчет по мощности ТУ")
-                //{
-                //    AddParagraph(doc, $"Согласно выданных ТУ \"{calc.NumberTY}\", ранее присоединённая мощность {calc.PowerSuchKBT} кВт, мощность вновь присоединяемого электрооборудования {calc.PowerKBT} кВт\r\n");
-                //    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {calc.Iust}");
-                //    AddParagraph(doc, "");
-                //}
-                //else
-                //{
-                //    AddParagraph(doc, $"Согласно исходных данных мощность на фидере {calc.PowerSuchKBA} кВа\r\n");
-                //    AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {calc.Iust}");// тут вопрос что подставлять S или PowerKBA (это одно и тоже???)
-                //    AddParagraph(doc, "");
-                //}
-                //AddParagraph(doc, "Условие отстройки от максимального рабочего тока\r\n");
-                //AddFormula(doc, $"I_сз>((k_н*k_сз)/k_в)*I_уст > (({calc.RecloserKn}*{calc.RecloserKcz})/{calc.RecloserKb})*{calc.Iust} > {calc.IszMTZ}"); //ToDo: тут надо потом calc.IszMTZ округлить до целого всегда в большую сторону и потом его учитывать в формулах 
-                //AddParagraph(doc, "");
-                //AddParagraph(doc, $"Принимаем уставку I_сз = {calc.IszMTZCeiling}\r\n\r\n" +
-                //    "Проверим чувствительность к минимальному току КЗ (Кч>1,5 по ПУЭ):\r\n");
-                //AddFormula(doc, $"k_чувст=(I_(к.з.min(KsecondLast))*0,865*1000)/(I_(c.з.)) = ({calc.SecondLastElementList?.IkzMin}*0,865*1000)/{calc.IszMTZCeiling} = {calc.KchuvMTZ}");
-                //progress.Report(90);
-
-
-
-
-                //AddParagraph(doc, "Проверка чувствительности МТЗ (для схемы D/Y)", isBold: true, fontSize: 14, isCenterAligned: true);
-                //AddParagraph(doc, "");
-                //AddFormula(doc, $"I_р=(K_сx·I_сз)/ntt = (1*{calc.IszMTZ})/{calc.RecloserNtt} = {calc.Ip}");
-                //AddParagraph(doc, "Где K_сx - коэффициент схемы принимаем 1, ntt коэффициент трансформации трансформатора тока.\r\n" +
-                //    "Определяем ток в реле при КЗ за трансформатором:");
-                //AddFormula(doc, $"I_р2=(0,5∙I_(к.з.max(к4))*1000)/ntt = (0,5∙{calc.LastElementList?.IcsMax}·1000)/{calc.RecloserNtt} = {calc.Ip2}");
-                //AddParagraph(doc, "Определяем коэффициент чувствительности при двухфазном КЗ за трансформатором по схеме неполная звезда:");
-                //AddFormula(doc, $"k_чувст=I_р2/I_р = {calc.Ip2}/{calc.Ip} = {calc.Kchuv2MTZ}");
-                //AddFormula(doc, "k_чувст > 1,5");
-                //AddParagraph(doc, "Рассчитываем ток однофазного К.З., за трансформатором:");
-                //AddFormula(doc, $"I_кз1 = U_ф/((1/3)*Z_тр) = 220/((1/3)*{calc.TransformatorFullResistance}) = {calc.Ikz1}");
-                //AddParagraph(doc, "Приведем ток однофазного КЗ на стороне 0,4 кВ к напряжению 10,5 кВ");
-                //AddFormula(doc, $"I_(кз1-10кВ)=I_кз1*(U_нн/Sub_voltage) = {calc.Ikz1}*(0.4/{calc.Voltage}) = {calc.Ikz1low}");
-                //AddParagraph(doc, "Определяем ток в реле при однофазном КЗ за трансформатором:");
-                //AddFormula(doc, $"I_р1=I_(кз1-10кВ)/(√(3) * ntt) = {calc.Ikz1low}/(√(3) * {calc.RecloserNtt}) = {calc.Ip1}");
-                //AddParagraph(doc, "Определяем коэффициент чувствительности при однофазном КЗ за трансформатором:");
-                //AddFormula(doc, $"k_чувст=I_р1/I_р = {calc.Ip1}/{calc.Ip} = {calc.Kchuv3MTZ}");
                 progress.Report(100);
                 owner.Invoke(new Action(() =>
                 {
@@ -202,7 +156,7 @@ namespace ElectroMod.Reports
         private void AddTableResoultsMTOMTZ(Document doc, CenterCalculation calc)
         {
             var countRows = calc.UnionElements.OfType<Recloser>().Count(); 
-            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, countRows + 1, 3); // + 1 потому что надо заголовок
+            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, countRows + 2, 3); // + 1 потому что надо заголовок
             table.Borders.Enable = 1; // Устанавливаем границы таблицы
             table.Cell(1, 1).Range.Text = "Наименование";
             table.Cell(1, 1).Range.Bold = 1;
@@ -215,11 +169,11 @@ namespace ElectroMod.Reports
             table.Cell(2, 2).Range.Text = $"{calc.Bus.TableMTO}";
             table.Cell(2, 3).Range.Text = $"{calc.Bus.TableMTZ}";
 
-            for (int i = 3; i < countRows; i++)
+            for (int i = 0; i < countRows; i++)
             {
-                table.Cell(i, 1).Range.Text = $"{calc.Reclosers[i].Name}";
-                table.Cell(i, 2).Range.Text = $"{calc.Reclosers[i].TableMTO}";
-                table.Cell(i, 3).Range.Text = $"{calc.Reclosers[i].TableMTZ}";
+                table.Cell(i + 3, 1).Range.Text = $"{calc.Reclosers[i].Name}";
+                table.Cell(i + 3, 2).Range.Text = $"{calc.Reclosers[i].TableMTO}";
+                table.Cell(i + 3, 3).Range.Text = $"{calc.Reclosers[i].TableMTZ}";
             }
 
             // Форматирование заголовков
@@ -256,12 +210,11 @@ namespace ElectroMod.Reports
 
         public void AddCalculationTableCurrentsKZ(Document doc, CenterCalculation calc)
         {
-            var currents = calc.Currents;
-
-            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, currents.Count * 3 + 1, 3);
+            var unionElements = calc.UnionElements.ToArray();
+            Table table = doc.Tables.Add(doc.Content.Paragraphs.Add().Range, unionElements.Count() * 3 + 1, 3);
             table.Borders.Enable = 1; // Устанавливаем границы таблицы
 
-            for (int i = 0; i < currents.Count; i++)
+            for (int i = 0; i < unionElements.Count(); i++)
             {
                 int rowOffset = i * 3 + 1;
 
@@ -273,7 +226,7 @@ namespace ElectroMod.Reports
 
                 // Добавляем данные для максимального режима
                 table.Cell(rowOffset + 1, 1).Range.Text = "Ток К.З. в максимальном режиме";
-                table.Cell(rowOffset + 1, 2).Range.Text = $"{Math.Round(currents[i].Item1, 3)}";
+                table.Cell(rowOffset + 1, 2).Range.Text = $"{Math.Round(unionElements[i].IkzMax, 3)}";
                 table.Cell(rowOffset + 1, 2).Range.Bold = 0;
                 table.Cell(rowOffset + 1, 2).Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
                 table.Cell(rowOffset + 1, 3).Range.Text = "кА";
@@ -281,7 +234,7 @@ namespace ElectroMod.Reports
 
                 // Добавляем данные для минимального режима
                 table.Cell(rowOffset + 2, 1).Range.Text = "Ток К.З. в минимальном режиме";
-                table.Cell(rowOffset + 2, 2).Range.Text = $"{Math.Round(currents[i].Item2, 3)}";
+                table.Cell(rowOffset + 2, 2).Range.Text = $"{Math.Round(unionElements[i].IkzMin, 3)}";
                 table.Cell(rowOffset + 2, 2).Range.Bold = 0;
                 table.Cell(rowOffset + 2, 2).Range.ParagraphFormat.Alignment = WdParagraphAlignment.wdAlignParagraphCenter;
                 table.Cell(rowOffset + 2, 3).Range.Text = "кА";

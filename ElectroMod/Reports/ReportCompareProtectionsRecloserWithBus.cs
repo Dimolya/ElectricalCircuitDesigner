@@ -9,15 +9,13 @@ namespace ElectroMod.Reports
 {
     public class ReportCompareProtectionsRecloserWithBus : Report
     {
-        private double _IszMTZ;
         private Line _farestLine;
         private double _KchuvMTZ;
         private Bus _bus;
         private Recloser _recloser;
 
-        public ReportCompareProtectionsRecloserWithBus(double iszMTZ, Line farestLine, Bus bus, Recloser recloser)
+        public ReportCompareProtectionsRecloserWithBus(Line farestLine, Bus bus, Recloser recloser)
         {
-            _IszMTZ = iszMTZ;
             _farestLine = farestLine;
             _bus = bus;
             _recloser = recloser;
@@ -32,18 +30,19 @@ namespace ElectroMod.Reports
             AddParagraph(doc,
                 $"K_нс - коэффициент надежности согласования, принимается 1,2;\r\n" +
                 $"I_(с.з.)пред - ток срабатывания предыдущей защиты – {_recloser.Name};");
-            AddFormula(doc, $"I_(с.з.) ≥ 1.2*{_recloser.Isz} ≥ {_IszMTZ} А");
+            var Isz = 1.2 * _recloser.Isz;
+            AddFormula(doc, $"I_(с.з.) ≥ 1.2*{_recloser.Isz} ≥ {Isz} А");
             AddParagraph(doc, $"I_с.з. - ток срабатывания для шины");
 
-            if(_IszMTZ > _bus.MTZ)
+            if(Isz > _bus.MTZ)
             {
-                AddParagraph(doc, $"I_с.з. {_IszMTZ} > I_с.з.сущ. {_bus.MTZ}");
-                AddParagraph(doc, $"Принимаем I_с.з. = {_IszMTZ} ");
-                _bus.Isz = _IszMTZ;
+                AddParagraph(doc, $"I_с.з. {Isz} > I_с.з.сущ. {_bus.MTZ}");
+                AddParagraph(doc, $"Принимаем I_с.з. = {Isz} ");
+                _bus.Isz = Isz;
             }
             else
             {
-                AddParagraph(doc, $"I_с.з. {_IszMTZ} < I_с.з.сущ. {_bus.MTZ}");
+                AddParagraph(doc, $"I_с.з. {Isz} < I_с.з.сущ. {_bus.MTZ}");
                 AddParagraph(doc, $"Принимаем I_с.з.сущ. = {_bus.MTZ}");
                 _bus.Isz = _bus.MTZ;
             }
