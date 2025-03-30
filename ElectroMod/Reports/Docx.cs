@@ -23,6 +23,7 @@ namespace ElectroMod.Reports
         private List<(string, string)> _elementsResistance = new List<(string, string)>();
         private int _lineCount = 1;
         private int _recloserCount = 1;
+        private int _transformatorCount = 1;
         private double _voltage;
 
         [STAThread]
@@ -57,12 +58,16 @@ namespace ElectroMod.Reports
                 Range tocRange = doc.Content.Paragraphs.Add().Range;
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
                 int countK = 2;
-                int indexCurrent = 0;
                 progress.Report(10);
                 foreach (var element in calc.UnionElements)
                 {
                     if (element is Bus)
                         continue;
+                    if(element is Recloser)
+                    {
+                        countK++;
+                        continue;
+                    }
 
                     AddParagraph(doc, $"Расчеты в точке K{countK}", isBold: true, fontSize: 14);
 
@@ -94,7 +99,6 @@ namespace ElectroMod.Reports
                                                    $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMin, 3)} кА");
                     }
                     countK++;
-                    indexCurrent++;
                 }
 
                 progress.Report(40);
@@ -266,8 +270,6 @@ namespace ElectroMod.Reports
                 AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistanceFromDto}*{line.Length}={line.ReactiveResistance} Ом");
                 elementCount = _lineCount++;
             }
-            if (element is Recloser)
-                elementCount = _recloserCount++;
 
             if (element is Transormator trans)
             {
@@ -275,6 +277,7 @@ namespace ElectroMod.Reports
                 AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*(({trans.Uk}*{_voltage}^2)/({trans.S})) = {trans.FullResistance} Ом");
                 AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2) = ({trans.Pk}*{_voltage}^2)/({trans.S}^2) = {trans.ActiveResistance} Ом");
                 AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2) = √({trans.FullResistance}^2 - {trans.ActiveResistance}^2) = {trans.ReactiveResistance} Ом");
+                elementCount = _transformatorCount++;
             }
 
             var elementTypeR = $"R_{element.GetType().Name}{elementCount}";
@@ -305,8 +308,6 @@ namespace ElectroMod.Reports
 
             if (element is Line line)
                 _elementsResistance.Add((line.ActiveResistance.ToString(), line.ReactiveResistance.ToString()));
-            if (element is Recloser)
-                _elementsResistance.Add(("0", "0"));
             if (element is Transormator transormator)
                 _elementsResistance.Add((transormator.ActiveResistance.ToString(), transormator.ReactiveResistance.ToString()));
             for (int i = 0; i < _elementsResistance.Count; i++)

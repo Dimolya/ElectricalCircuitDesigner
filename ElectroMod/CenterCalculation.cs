@@ -6,6 +6,7 @@ using ElectroMod.Reports;
 using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
@@ -30,8 +31,9 @@ namespace ElectroMod
         public CenterCalculation(Elements elements)
         {
             _elements = elements;
+            var bus = _elements.OfType<Bus>().FirstOrDefault();
             CleanPropElements();
-            GenerateListElementsForCalculation();
+            CalculationElementList = ElementSearchEngine.GenerateListElementsForCalculation(bus);
             CalculationFormuls();
 
             CommonElements = CalculationElementList
@@ -72,7 +74,6 @@ namespace ElectroMod
         public List<Transormator> Transformators { get; set; }
         public Transormator TransormatorMaxS { get; set; }
         public List<Report> Reports { get; set; } = new List<Report>();
-
 
         public int Order { get; set; }
         public bool IsCurrent { get; set; }
@@ -133,14 +134,14 @@ namespace ElectroMod
             TypeTTBus = Bus.TypeTT;
             NttBus = Bus.Ntt;
 
-            //ToDo: это подходит только для bus, для реклоузера надо как в мтз
+            //Этот Iust используется когда нет реклоузеров и в одном месте когда отчет для шины после реклоузеров
             var IustBus = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
                 ? (preCalculationForm.PowerSuchKBT + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95)
                 : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) / (Math.Sqrt(3) * Voltage);
             IustBus = Math.Round(IustBus, 3);
 
             var transformatorMaxS = _elements.OfType<Transormator>().OrderByDescending(trans => trans.S).FirstOrDefault();
-            
+
             //IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
             //FarestLineMTZ = FindFarestLineFromBus(CalculationElementList);
             //KchuvMTZ = Math.Round(FarestLineMTZ.IkzMin * 0.865 / IszMTZ, 3); // тут точно самая дальняя линия от Шины???
@@ -170,14 +171,12 @@ namespace ElectroMod
 
                         var IustRecloser = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
                             ? (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95)
-                            : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) //ToDo: вот тут наверное тоже надо Psuch?
-                                / (Math.Sqrt(3) * Voltage);
+                            : (recloser.Psuch + preCalculationForm.PowerKBA) / (Math.Sqrt(3) * Voltage);
                         IustRecloser = Math.Round(IustRecloser, 3);
-
-                        var transformatorsFromRecloser = ElementSearchEngine.FindTransformatorsFromRecloser(elements[index], elements[index + 1]);
+                        var transformatorsFromRecloser = ElementSearchEngine.FindTransformatorsFromRecloser(elements[index], elements[index - 1]);
                         //после каждого выполнения этого метода и других подобных на сбрасывать IsVisited у элементов, т.к. это влияет на расчет других 
                         //методов которые тоже завязаны на этом свойстве, ЭТО НЕПРАВИЛЬНО, НАДО ИЗБАВЛЯТЬСЯ ОТ IsVisited!!!
-                        ElementSearchEngine.ResetPropIsVisitedElements(_elements);
+                        //ElementSearchEngine.ResetPropIsVisitedElements(_elements);
                         transformatorMaxS = transformatorsFromRecloser.OrderByDescending(trans => trans.S).FirstOrDefault();
 
                         Reports.Add(new ReportMTO(recloser, IustRecloser, transformatorMaxS));
@@ -193,11 +192,10 @@ namespace ElectroMod
                     {
                         if (visitedRecloser.Contains(recloser) || !elements.Contains(recloser))
                             continue;
-                        //Todo: надо добавить КВА и где то добавить умножение на тыщу
+
                         var iustMTZ = (preCalculationForm.Reconnect == "Расчет по мощности ТУ")
                             ? (recloser.Psuch + preCalculationForm.PowerKBT) / (Math.Sqrt(3) * Voltage * 0.95)
-                            : (preCalculationForm.PowerSuchKBA + preCalculationForm.PowerKBA) //ToDo: вот тут наверное тоже надо Psuch?
-                                / (Math.Sqrt(3) * Voltage);
+                            : (recloser.Psuch + preCalculationForm.PowerKBA) / (Math.Sqrt(3) * Voltage);
                         IszMTZ = Math.Round(recloser.Kn * recloser.Kcz / recloser.Kb * iustMTZ, 3);
                         iustMTZ = Math.Round(iustMTZ, 3);
 
@@ -205,8 +203,8 @@ namespace ElectroMod
                         visitedRecloser.Add(recloser);
                         //убрать из этого алгоритма isVisited потому что он его запоминается и не стирает при след 
                         //прогоне цикла, но пока что костыль 
-                        farestLine = ElementSearchEngine.FindFarestLineFromRecloser(elements[index], elements[index + 1]);
-                        ElementSearchEngine.ResetPropIsVisitedElements(_elements);
+                        farestLine = ElementSearchEngine.FindFarestLineFromRecloser(elements[index], elements[index - 1]);
+                        //ElementSearchEngine.ResetPropIsVisitedElements(_elements);
                         //без этого флаг на всех элементах остается как будто они посещены НЕ УДАЛЯТЬ ПОКА НЕ ИЗМЕНИТСЯ АЛГОРИТМ
                         _elements.ForEach(elem => elem.IsVisited = false);
                         Reports.Add(new ReportMTZ(IszMTZ, iustMTZ, farestLine, preCalculationForm.PowerKBT, recloser, Bus, Voltage));
@@ -235,14 +233,6 @@ namespace ElectroMod
             }
         }
 
-        private void GenerateListElementsForCalculation()
-        {
-            var bus = _elements.OfType<Bus>().FirstOrDefault();
-            var visited = new HashSet<Element>();
-            var currentPath = new List<Element>();
-            RecurceGenerateElementsList(bus, visited, currentPath);
-        }
-
         private void CalculationFormuls()
         {
             int countK = 1;
@@ -251,44 +241,6 @@ namespace ElectroMod
                 CalculateCurrents(elementsList, ref countK);
                 _firstInitK = false;
             }
-        }
-
-        private void RecurceGenerateElementsList(Element current, HashSet<Element> visited, List<Element> currentPath)
-        {
-            if (visited.Contains(current))
-                return; // Избегаем зацикливания
-
-            visited.Add(current);
-            currentPath.Add(current);
-
-            // Если текущий элемент конечный, сохраняем путь
-            if (current is Transormator)
-            {
-                CalculationElementList.Add(new List<Element>(currentPath));
-            }
-            else
-            {
-                // Перебираем все соединённые элементы через Ware
-                foreach (var ware in current.Wares)
-                {
-                    foreach (var connectedWare in ware.ConnectedWares)
-                    {
-                        if (visited.Count > 1)
-                        {
-                            var lastElementWares = visited.ElementAt(visited.Count - 2).Wares
-                                              .SelectMany(x => x.ConnectedWares).ToList();
-                            if (lastElementWares.Contains(connectedWare))
-                                continue;
-                        }
-                        var nextElement = connectedWare.ParentElement;
-                        RecurceGenerateElementsList(nextElement, visited, currentPath);
-                    }
-                }
-            }
-
-            // Возвращаем состояние для продолжения поиска
-            visited.Remove(current);
-            currentPath.RemoveAt(currentPath.Count - 1);
         }
 
         private void CalculateCurrents(List<Element> elements, ref int countK)

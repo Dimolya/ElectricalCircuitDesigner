@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Presentation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,17 +14,11 @@ namespace ElectroMod.Helper
             elements.ForEach(elem => elem.IsVisited = false);
         }
 
-        public static Line FindFarestLineFromRecloser(Element previuosElement, Element startElement)
+        public static Line FindFarestLineFromRecloser(Element startElement, Element previuosElement)
         {
-            // почему то по резлультату выполнения в список пробирается реклоузер, не критично, но противоречит
-            // логике метода, из-за этого надо писать костыль на проверку для GroupLinesForMTZ является ли элемент Line
-
-            //ToDo: ОБНОВЛЕНО теперь этот метод будет для построения списка всех ветвей элементов после заданного
-            //но сейчас алгоритм игнорирует реклоузера и не правильно считает если от элемента с которого начинается поиск
-            //сразу исходят несколько элементов НАДО ПОПРАВИТЬ
-            var groupElementsForMTZ = new List<List<Element>>();
             var groupLinesForMTZ = new List<List<Line>>();
-            FindElementsGroupFromElement(previuosElement, startElement, new List<Element>(), new HashSet<Element>(), groupElementsForMTZ);
+            var groupElementsForMTZ = GenerateListElementsForCalculation(startElement, new HashSet<Element>() { previuosElement });
+            //FindElementsGroupFromElement(previuosElement, startElement, new List<Element>(), new HashSet<Element>(), groupElementsForMTZ);
             //костыль
             foreach (var lines in groupElementsForMTZ)
             {
@@ -69,6 +64,22 @@ namespace ElectroMod.Helper
             }
 
             return farestLine;
+        }
+
+        public static List<Transormator> FindTransformatorsFromRecloser(Element startElement, Element previuosElement)
+        {
+            var groupElementsForMTZ = GenerateListElementsForCalculation(startElement, new HashSet<Element>() { previuosElement });
+            //FindElementsGroupFromElement(previuosElement, startElement, new List<Element>(), new HashSet<Element>(), groupElementsForMTZ);
+            return groupElementsForMTZ.SelectMany(x => x).OfType<Transormator>().ToList();
+        }
+
+        public static List<List<Element>> GenerateListElementsForCalculation(Element currentElement, HashSet<Element> previouse = null)
+        {
+            if (previouse == null)
+                previouse = new HashSet<Element>();
+
+            var currentPath = new List<Element>();
+            return RecursiveGenerateElementsList(currentElement, previouse, currentPath);
         }
 
         private static void FindElementsGroupFromElement(Element previuosElement, Element currentElement, List<Element> currentPath, HashSet<Element> visitedElements, List<List<Element>> groupLinesForMTZ)
@@ -130,11 +141,43 @@ namespace ElectroMod.Helper
             }
         }
 
-        public static List<Transormator> FindTransformatorsFromRecloser(Element previuosElement, Element startElement)
+        private static List<List<Element>> RecursiveGenerateElementsList(Element current, HashSet<Element> visited, List<Element> currentPath)
         {
-            var groupElementsForMTZ = new List<List<Element>>();
-            FindElementsGroupFromElement(previuosElement, startElement, new List<Element>(), new HashSet<Element>(), groupElementsForMTZ);
-            return groupElementsForMTZ.SelectMany(x => x).OfType<Transormator>().ToList();
+            var result = new List<List<Element>>();
+
+            if (visited.Contains(current))
+                return result;
+
+            var newVisited = new HashSet<Element>(visited) { current };
+            var newCurrentPath = new List<Element>(currentPath) { current };
+
+            if (current is Transormator)
+            {
+                result.Add(newCurrentPath);
+                return result;
+            }
+
+            foreach (var ware in current.Wares)
+            {
+                foreach (var connectedWare in ware.ConnectedWares)
+                {
+                    if (newVisited.Count > 1 && newCurrentPath.Count > 1)
+                    {
+                        var lastElement = newCurrentPath[newCurrentPath.Count - 2];
+                        var lastElementWares = lastElement.Wares
+                            .SelectMany(w => w.ConnectedWares)
+                            .ToList();
+                        if (lastElementWares.Contains(connectedWare))
+                            continue;
+                    }
+
+                    var nextElement = connectedWare.ParentElement;
+                    var subPaths = RecursiveGenerateElementsList(nextElement, newVisited, newCurrentPath);
+                    result.AddRange(subPaths);
+                }
+            }
+
+            return result;
         }
     }
 }
