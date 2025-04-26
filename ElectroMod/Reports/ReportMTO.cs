@@ -59,10 +59,20 @@ namespace ElectroMod.Reports
             AddParagraph(doc, "");
             AddParagraph(doc, "Отстройка защиты от броска тока намагничивания\r\n");
 
-            if (calc.ReconnectName == "Расчет по мощности ТУ")
-                AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {_iust:F3} А");
-            else
-                AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {_iust} А");
+            if (_element is Bus)
+            {
+                if (calc.ReconnectName == "Расчет по мощности ТУ")
+                    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({calc.PowerSuchKBT} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {_iust:F3} А");
+                else
+                    AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({calc.PowerSuchKBA} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {_iust} А");
+            }
+            else if (_element is Recloser recloser)
+            {
+                if (calc.ReconnectName == "Расчет по мощности ТУ")
+                    AddFormula(doc, $"I_уст = (P_(t.u.such)+P_(t.u))/(√(3) * Sub_voltage * 0.95) = ({recloser.Psuch} + {calc.PowerKBT})/(√(3) * {calc.Voltage} * 0.95) = {_iust:F3} А");
+                else
+                    AddFormula(doc, $"I_уст = (P_such+S)/(√(3) * Sub_voltage) = ({recloser.Psuch} + {calc.PowerKBA})/(√(3) * {calc.Voltage}) = {_iust} А");
+            }
 
             AddParagraph(doc, "");
             AddFormula(doc, $"I_сз ≥ k_н*∑I_уст ≥ 1.2*{_iust} ≥ {_isz[0]} А");
@@ -97,7 +107,6 @@ namespace ElectroMod.Reports
         private void EndReportBus(Document doc, CenterCalculation calc)
         {
             AddFormula(doc, $"k_чувст=(I_(к.з.min(K1))*0,865*1000)/I_сз = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/{_iszMaxCeiling}={_kchuv}");
-            AddParagraph(doc, "");
 
             if (_kchuv > 1.2)
             {
@@ -111,20 +120,23 @@ namespace ElectroMod.Reports
                     {
                         AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
                         calc.Bus.TableMTO = calc.Bus.MTO;
+                        calc.Bus.IszMTO = calc.Bus.MTO;
                     }
                     else
                     {
                         AddParagraph(doc, "\r\nk_чувст < 1,2 - условие  не выполняется (для зон дальнего резервирования). Существующую уставку необходимо уменьшить ");
 
-                        AddFormula(doc, $"I_сз=(I_(к.з.min(K1))*0,865*1000)/1,2 = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/1,2={_newIsz} А"); // ToDo: я вообще не помню уже что это за формулы и почему в знаменателе 1.2 (актуально с 17.03.25)
+                        AddFormula(doc, $"I_сз=(I_(к.з.min(K1))*0,865*1000)/1,2 = ({Math.Round(_element.IkzMin, 3)}*0,865*1000)/1,2={_newIsz} А");
                         AddParagraph(doc, $"Уставка МТО принимается {_newIsz}");
                         calc.Bus.TableMTO = _newIsz;
+                        calc.Bus.IszMTO = _newIsz;
                     }
                 }
                 else
                 {
-                    AddParagraph(doc, $"Уставка МТО принимается {_kchuv}");
+                    AddParagraph(doc, $"Сущ. уставка = {calc.Bus.MTO}, расчетная уставка МТО принимается {_iszMaxCeiling}");
                     calc.Bus.TableMTO = _iszMaxCeiling;
+                    calc.Bus.IszMTO = _iszMaxCeiling;
                 }
             }
             else
@@ -153,6 +165,7 @@ namespace ElectroMod.Reports
                     {
                         AddParagraph(doc, "\r\nk_чувст > 1,2 - условие выполняется (для зон дальнего резервирования). Существующая уставка остается без изменений ");
                         recloser.TableMTO = recloser.MTO;
+                        recloser.IszMTO = recloser.MTO;
                     }
                     else
                     {
@@ -161,12 +174,14 @@ namespace ElectroMod.Reports
                         AddFormula(doc, $"I_сз=(I_(к.з.min(K{recloser.K}))*0,865*1000)/1,2 = ({Math.Round(recloser.IkzMin, 3)}*0,865*1000)/1,2={_newIsz} А"); // ToDo: тут аналогично как с шиной 
                         AddParagraph(doc, $"Уставка МТО принимается {_newIsz}");
                         recloser.TableMTO = _newIsz;
+                        recloser.IszMTO = _newIsz;
                     }
                 }
                 else
                 {
-                    AddParagraph(doc, $"Уставка МТО принимается {_kchuv}");
+                    AddParagraph(doc, $"Уставка МТО принимается {_iszMaxCeiling}");
                     recloser.TableMTO = _iszMaxCeiling;
+                    recloser.IszMTO = _iszMaxCeiling;
                 }
             }
             else
@@ -187,6 +202,7 @@ namespace ElectroMod.Reports
             {
                 AddParagraph(doc, "k_чувст > 1,2 - условие выполняется (для зон дальнего резервирования) \r\n");
                 recloser.TableMTO = _iszMaxCeiling;
+                recloser.IszMTO = _iszMaxCeiling;
             }
             else
             {

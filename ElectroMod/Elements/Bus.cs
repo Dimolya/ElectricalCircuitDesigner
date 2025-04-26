@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ElectroMod.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -7,7 +8,7 @@ using System.Windows.Forms;
 namespace ElectroMod
 {
     [Serializable]
-    public class Bus: Element
+    public class Bus: Element, IHasMTOMTZIsc
     {
         public Bus() {}
         public Bus(Elements elements) : base(elements)
@@ -39,7 +40,8 @@ namespace ElectroMod
         public double MTO { get; set; }
         public double MTZ { get; set; }
 
-        public double Isz { get; set; }
+        public double IszMTZ { get; set; }
+        public double IszMTO { get; set; }
 
         public double TableMTO { get; set; }
         public double TableMTZ { get; set; }

@@ -5,7 +5,11 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectroMod", "ElectroMod\ElectroMod.csproj", "{458F872F-C9AD-4477-98F5-374F4FF95588}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{501D07C2-CD9A-4DF2-82EA-A67FE2EF2D9E}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{EA8B3E49-8D5D-4B28-918B-7A1F24A6DD8B}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupWizard", "SetupWizard\SetupWizard.vdproj", "{E7532B23-C33E-4AF1-9D06-467C7A91BCD4}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupWizard2", "SetupWizard2\SetupWizard2.vdproj", "{5493E5FD-6895-4DF2-96BC-A79B6ECD2985}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,8 +21,12 @@ Global
 		{458F872F-C9AD-4477-98F5-374F4FF95588}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{458F872F-C9AD-4477-98F5-374F4FF95588}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{458F872F-C9AD-4477-98F5-374F4FF95588}.Release|Any CPU.Build.0 = Release|Any CPU
-		{501D07C2-CD9A-4DF2-82EA-A67FE2EF2D9E}.Debug|Any CPU.ActiveCfg = Debug
-		{501D07C2-CD9A-4DF2-82EA-A67FE2EF2D9E}.Release|Any CPU.ActiveCfg = Release
+		{EA8B3E49-8D5D-4B28-918B-7A1F24A6DD8B}.Debug|Any CPU.ActiveCfg = Debug
+		{EA8B3E49-8D5D-4B28-918B-7A1F24A6DD8B}.Release|Any CPU.ActiveCfg = Release
+		{E7532B23-C33E-4AF1-9D06-467C7A91BCD4}.Debug|Any CPU.ActiveCfg = Debug
+		{E7532B23-C33E-4AF1-9D06-467C7A91BCD4}.Release|Any CPU.ActiveCfg = Release
+		{5493E5FD-6895-4DF2-96BC-A79B6ECD2985}.Debug|Any CPU.ActiveCfg = Debug
+		{5493E5FD-6895-4DF2-96BC-A79B6ECD2985}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

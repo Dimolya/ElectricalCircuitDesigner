@@ -14,6 +14,7 @@ using Xceed.Words.NET;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using System.Linq;
+using System.Diagnostics;
 
 namespace ElectroMod.Reports
 {
@@ -21,9 +22,6 @@ namespace ElectroMod.Reports
     {
         private List<(string, string)> _elementsTypes = new List<(string, string)>();
         private List<(string, string)> _elementsResistance = new List<(string, string)>();
-        private int _lineCount = 1;
-        private int _recloserCount = 1;
-        private int _transformatorCount = 1;
         private double _voltage;
 
         [STAThread]
@@ -58,47 +56,65 @@ namespace ElectroMod.Reports
                 Range tocRange = doc.Content.Paragraphs.Add().Range;
                 doc.TablesOfContents.Add(tocRange, UseHeadingStyles: true);
                 int countK = 2;
+                var firstListOfElements = true;
                 progress.Report(10);
-                foreach (var element in calc.UnionElements)
+                foreach (var elementList in calc.CalculationElementList)
                 {
-                    if (element is Bus)
-                        continue;
-                    if(element is Recloser)
+                    foreach (var element in elementList)
                     {
-                        countK++;
-                        continue;
+                        var elementsNames = CreateFormulaElementName(doc, element);
+                        var elementsResistanceValues = CreateFormulaElementsResistanceValues(element);
+
+                        if ((calc.CommonElements.Contains(element) && !firstListOfElements) || 
+                            element is Bus || 
+                            element is Recloser)
+                            continue;
+
+                        AddParagraph(doc, $"Расчеты в точке K{element.K}", isBold: true, fontSize: 14);
+                        if (element is Line line)
+                        {
+                            AddParagraph(doc, $"Активное сопротивление линии {line.Name}:", isBold: false);
+                            AddFormula(doc, $"R_{line.NameForReportFormuls} = r*L = {line.ActiveResistanceFromDto}*{line.Length}={line.ActiveResistance} Ом");
+                            AddParagraph(doc, $"Реактивное сопротивление линии {line.Name}:", isBold: false);
+                            AddFormula(doc, $"X_{line.NameForReportFormuls} = x*L = {line.ReactiveResistanceFromDto}*{line.Length}={line.ReactiveResistance} Ом");
+                        }
+                        if (element is Transormator trans)
+                        {
+                            AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
+                            AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*(({trans.Uk}*{_voltage}^2)/({trans.S})) = {trans.FullResistance} Ом");
+                            AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2) = ({trans.Pk}*{_voltage}^2)/({trans.S}^2) = {trans.ActiveResistance} Ом");
+                            AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2) = √({trans.FullResistance}^2 - {trans.ActiveResistance}^2) = {trans.ReactiveResistance} Ом");
+                        }
+
+                        AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
+                        if (calc.IsCurrent)
+                        {
+                            AddFormula(doc, $"I_(к.з.max(k{element.K})) = " +
+                                $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max))) = " +
+                                $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
+                                $"{Math.Round(element.IkzMax, 3)} кА");
+
+                            AddFormula(doc, $"I_(к.з.min(k{element.K})) = " +
+                                $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
+                                $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
+                                $"{Math.Round(element.IkzMin, 3)} кА");
+                        }
+                        else
+                        {
+                            AddFormula(doc, $"I_(к.з.max(k{element.K})) = " +
+                                $"Sub_voltage/(√(3) * √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
+                                $"{calc.Voltage}/(√(3) * √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
+                                                       $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMax, 3)} кА");
+
+                            AddFormula(doc, $"I_(к.з.min(k{element.K})) = " +
+                                $"Sub_voltage/(√(3) * √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
+                                $"{calc.Voltage}/(√(3) * √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
+                                                       $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMin, 3)} кА");
+                        }
                     }
-
-                    AddParagraph(doc, $"Расчеты в точке K{countK}", isBold: true, fontSize: 14);
-
-                    var elementsNames = CreateFormulaElementName(doc, element);
-                    var elementsResistanceValues = CreateFormulaElementsResistanceValues(element);
-                    AddParagraph(doc, $"Ток К.З.в конце линии в макс.режиме:");
-                    if (calc.IsCurrent)
-                    {
-                        AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
-                            $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.max))) = " +
-                            $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmax})) = " +
-                            $"{Math.Round(element.IkzMax, 3)} кА");
-
-                        AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
-                            $"Sub_voltage/(√(3) * (√(({elementsNames.Item1})^2 + ({elementsNames.Item2})^2) + Z_(sub.min))) = " +
-                            $"{calc.Voltage}/(√(3) * (√(({elementsResistanceValues.Item1})^2 + ({elementsResistanceValues.Item2})^2) + {calc.Zmin})) = " +
-                            $"{Math.Round(element.IkzMin, 3)} кА");
-                    }
-                    else
-                    {
-                        AddFormula(doc, $"I_(к.з.max(k{countK})) = " +
-                            $"Sub_voltage/(√(3) * √((R_(sub.max) + {elementsNames.Item1})^2 + (X_(sub.max) + {elementsNames.Item2})^2)) = " +
-                            $"{calc.Voltage}/(√(3) * √(({calc.Rmax} + {elementsResistanceValues.Item1})^2" +
-                                                   $"+ ({calc.Xmax} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMax, 3)} кА");
-
-                        AddFormula(doc, $"I_(к.з.min(k{countK})) = " +
-                            $"Sub_voltage/(√(3) * √((R_(sub.min) + {elementsNames.Item1})^2 + (X_(sub.min) + {elementsNames.Item2})^2)) = " +
-                            $"{calc.Voltage}/(√(3) * √(({calc.Rmin} + {elementsResistanceValues.Item1})^2" +
-                                                   $"+ ({calc.Xmin} + {elementsResistanceValues.Item2})^2)) = {Math.Round(element.IkzMin, 3)} кА");
-                    }
-                    countK++;
+                    firstListOfElements = false;
+                    _elementsResistance.Clear();
+                    _elementsTypes.Clear();
                 }
 
                 progress.Report(40);
@@ -261,27 +277,10 @@ namespace ElectroMod.Reports
 
         private (string, string) CreateFormulaElementName(Document doc, Element element)
         {
-            int elementCount = 0;
-            if (element is Line line)
-            {
-                AddParagraph(doc, $"Активное сопротивление линии {line.Name}:", isBold: false);
-                AddFormula(doc, $"R_line{_lineCount} = r*L = {line.ActiveResistanceFromDto}*{line.Length}={line.ActiveResistance} Ом");
-                AddParagraph(doc, $"Реактивное сопротивление линии {line.Name}:", isBold: false);
-                AddFormula(doc, $"X_line{_lineCount} = x*L = {line.ReactiveResistanceFromDto}*{line.Length}={line.ReactiveResistance} Ом");
-                elementCount = _lineCount++;
-            }
-
-            if (element is Transormator trans)
-            {
-                AddParagraph(doc, $"Расчет сопротивления трансформатора:", isBold: false);
-                AddFormula(doc, $"Z_trans = 10*((U_k*Sub_voltage^2)/(S_ном)) = 10*(({trans.Uk}*{_voltage}^2)/({trans.S})) = {trans.FullResistance} Ом");
-                AddFormula(doc, $"R_trans = (P_k*Sub_voltage^2)/(S_ном^2) = ({trans.Pk}*{_voltage}^2)/({trans.S}^2) = {trans.ActiveResistance} Ом");
-                AddFormula(doc, $"X_trans = √(Z_trans^2 - R_trans^2) = √({trans.FullResistance}^2 - {trans.ActiveResistance}^2) = {trans.ReactiveResistance} Ом");
-                elementCount = _transformatorCount++;
-            }
-
-            var elementTypeR = $"R_{element.GetType().Name}{elementCount}";
-            var elementTypeX = $"X_{element.GetType().Name}{elementCount}";
+            if (element is Bus || element is Recloser)
+                return (null, null);
+            var elementTypeR = $"R_{element.NameForReportFormuls}";
+            var elementTypeX = $"X_{element.NameForReportFormuls}";
             var elementTypesR = default(string);
             var elementTypesX = default(string);
             _elementsTypes.Add((elementTypeR, elementTypeX));
@@ -303,6 +302,9 @@ namespace ElectroMod.Reports
 
         private (string, string) CreateFormulaElementsResistanceValues(Element element)
         {
+            if (element is Bus || element is Recloser)
+                return (null, null);
+
             var elementActiveRes = default(string);
             var elementReactiveRes = default(string);
 

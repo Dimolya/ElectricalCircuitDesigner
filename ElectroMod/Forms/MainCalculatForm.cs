@@ -1,21 +1,15 @@
-﻿using System;
-using System.Configuration;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Windows.Forms;
-using ElectroMod.Forms;
+﻿using ElectroMod.DataBase;
 using ElectroMod.DataBase.Dtos;
-using ElectroMod.DataBase;
 using ElectroMod.DataBase.Dtos.StaticDtos;
 using ElectroMod.Dtos.StaticDtos;
-using System.Collections.Generic;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
-using System.Globalization;
-using DocumentFormat.OpenXml.Office.Word;
-using Newtonsoft.Json;
-using System.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ElectroMod.Forms;
 using ElectroMod.Reports;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Windows.Forms;
 
 namespace ElectroMod
 {
@@ -126,8 +120,8 @@ namespace ElectroMod
 
         private async void btnCalculate_Click(object sender, EventArgs e)
         {
-            if (_elements.OfType<Bus>().Any() && 
-                _elements.OfType<Line>().Any() && 
+            if (_elements.OfType<Bus>().Any() &&
+                _elements.OfType<Line>().Any() &&
                 _elements.OfType<Transormator>().Any())
             {
                 var calculationCenter = new CenterCalculation(_elements);
@@ -182,8 +176,8 @@ namespace ElectroMod
         {
             if (selectedElement is Bus bus)
             {
-                var dataBusJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataBus.json");
-                var dataBusTypeJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataRecloser.json");
+                var dataBusJsonPath = Path.Combine(_baseDirectory, "DataBase", "DataForm", "DataBus.json");
+                var dataBusTypeJsonPath = Path.Combine(_baseDirectory, "DataBase", "DataForm", "DataRecloser.json");
 
                 if (File.Exists(dataBusJsonPath) && File.Exists(dataBusTypeJsonPath))
                 {
@@ -215,7 +209,7 @@ namespace ElectroMod
                     bus.IsResistanse = false;
                     tbBusCurrentMax.Text = bus.IkzMax.ToString();
                     tbBusCurrentMin.Text = bus.IkzMin.ToString();
-                }   
+                }
                 else if (rbBusResistance.Checked)
                 {
                     bus.IsResistanse = true;
@@ -228,7 +222,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Line line)
             {
-                var dataLineJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataLine.json");
+                var dataLineJsonPath = Path.Combine(_baseDirectory, "DataBase", "DataForm", "DataLine.json");
 
                 _slctElement = line;
                 panelPropertyLine.Visible = true;
@@ -250,7 +244,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Recloser recloser)
             {
-                var dataRecloserJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataRecloser.json");
+                var dataRecloserJsonPath = Path.Combine(_baseDirectory, "DataBase", "DataForm", "DataRecloser.json");
 
                 _slctElement = recloser;
                 panelPropertyRecloser.Visible = true;
@@ -278,7 +272,7 @@ namespace ElectroMod
             }
             else if (selectedElement is Transormator transormator)
             {
-                var dataTransformatorJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "DataForm", "DataTransformator.json");
+                var dataTransformatorJsonPath = Path.Combine(_baseDirectory, "DataBase", "DataForm", "DataTransformator.json");
 
                 _slctElement = transormator;
                 panelPropertyTransformator.Visible = true;
@@ -356,8 +350,8 @@ namespace ElectroMod
                 return;
             if (_slctElement is Bus bus)
             {
-                var typeTTJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TypeTT.json");
-                var recloserTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "RecloserTypes.json");
+                var typeTTJsonPath = Path.Combine(_baseDirectory, "DataBase", "TypeTT.json");
+                var recloserTypesJsonPath = Path.Combine(_baseDirectory, "DataBase", "RecloserTypes.json");
 
                 try
                 {
@@ -424,7 +418,7 @@ namespace ElectroMod
                     MessageBox.Show(ex.Message);
                 }
 
-                var lineTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "LineTypes.json");
+                var lineTypesJsonPath = Path.Combine(_baseDirectory, "DataBase", "LineTypes.json");
                 if (File.Exists(lineTypesJsonPath))
                 {
                     var dto = JsonProvider.LoadData<LineDataTypeDto>(lineTypesJsonPath);
@@ -446,8 +440,8 @@ namespace ElectroMod
             }
             else if (_slctElement is Recloser recloser)
             {
-                var recloserTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "RecloserTypes.json");
-                var typeTTJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TypeTT.json");
+                var recloserTypesJsonPath = Path.Combine(_baseDirectory, "DataBase", "RecloserTypes.json");
+                var typeTTJsonPath = Path.Combine(_baseDirectory, "DataBase", "TypeTT.json");
 
                 recloser.Name = tbRecloserName.Text;
                 recloser.TypeRecloser = cbRecloserType.Text;
@@ -513,7 +507,7 @@ namespace ElectroMod
             }
             else if (_slctElement is Transormator transormator)
             {
-                var transformatorTypesJsonPath = Path.Combine(_baseDirectory + "..//..//", "DataBase", "TransformatorTypes.json");
+                var transformatorTypesJsonPath = Path.Combine(_baseDirectory, "DataBase", "TransformatorTypes.json");
                 transormator.Name = tbTransformatorName.Text;
                 transormator.TypeKTP = cbTransformatorTypesKTP.Text;
                 transormator.Scheme = cbTransformatorSchemes.Text;

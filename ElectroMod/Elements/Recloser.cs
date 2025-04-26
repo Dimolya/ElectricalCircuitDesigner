@@ -1,4 +1,5 @@
 ﻿using ElectroMod.DataBase.Dtos;
+using ElectroMod.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,7 +8,7 @@ using System.Drawing.Drawing2D;
 namespace ElectroMod
 {
     [Serializable]
-    public class Recloser: Element
+    public class Recloser: Element, IHasMTOMTZIsc
     {
         public Recloser(Elements elements) : base(elements)
         {
@@ -42,7 +43,9 @@ namespace ElectroMod
         public double TableMTZ { get; set; }
 
         //Для формул МТЗ
-        public double Isz { get; set; }
+        public double IszMTZ { get; set; }
         public override Color BorderColor => Color.DarkBlue;
+
+        public double IszMTO { get; set; }
     }
 }

@@ -121,6 +121,7 @@
             this.btnCalculate = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.lbProgressProcess = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.drawPanel1 = new ElectroMod.DrawPanel();
             this.menu.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -132,6 +133,7 @@
             this.panelPropertyRecloser.SuspendLayout();
             this.panelRecloserMTOMTZ.SuspendLayout();
             this.panelPropertyTransformator.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // btBus
@@ -182,7 +184,7 @@
             this.файлToolStripMenuItem});
             this.menu.Location = new System.Drawing.Point(0, 0);
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(1406, 30);
+            this.menu.Size = new System.Drawing.Size(1406, 28);
             this.menu.TabIndex = 6;
             this.menu.Text = "menuStrip1";
             // 
@@ -193,7 +195,7 @@
             this.SaveFile,
             this.SavePNG});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
-            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 26);
+            this.файлToolStripMenuItem.Size = new System.Drawing.Size(59, 24);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
             // OpenFile
@@ -998,6 +1000,17 @@
             this.lbProgressProcess.Text = "Создание отчета...";
             this.lbProgressProcess.Visible = false;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.ErrorImage = global::ElectroMod.Properties.Resources._1;
+            this.pictureBox1.Image = global::ElectroMod.Properties.Resources._1;
+            this.pictureBox1.Location = new System.Drawing.Point(1032, 601);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(362, 120);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 59;
+            this.pictureBox1.TabStop = false;
+            // 
             // drawPanel1
             // 
             this.drawPanel1.BackColor = System.Drawing.SystemColors.Window;
@@ -1013,6 +1026,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1406, 803);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lbProgressProcess);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnCalculate);
@@ -1054,6 +1068,7 @@
             this.panelRecloserMTOMTZ.PerformLayout();
             this.panelPropertyTransformator.ResumeLayout(false);
             this.panelPropertyTransformator.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1154,6 +1169,7 @@
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.TextBox tbPsuch;
         private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

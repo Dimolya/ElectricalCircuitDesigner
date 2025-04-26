@@ -62,6 +62,9 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>2-_1_.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DocumentFormat.OpenXml, Version=3.2.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
       <HintPath>..\packages\DocumentFormat.OpenXml.3.2.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
@@ -100,6 +103,7 @@
     <Compile Include="Helper\Addition.cs" />
     <Compile Include="CenterCalculation.cs" />
     <Compile Include="ConnectingWare.cs" />
+    <Compile Include="Interfaces\IHasMTOMTZIsc.cs" />
     <Compile Include="Reports\Docx.cs" />
     <Compile Include="Dtos\LineDataTypeDto.cs" />
     <Compile Include="Dtos\RecloserDataTypeDto.cs" />
@@ -230,6 +234,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="2-_1_.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

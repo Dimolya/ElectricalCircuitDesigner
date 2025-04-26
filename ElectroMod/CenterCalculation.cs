@@ -1,24 +1,11 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using ElectroMod.Forms;
+﻿using ElectroMod.Forms;
 using ElectroMod.Helper;
+using ElectroMod.Interfaces;
 using ElectroMod.Reports;
-using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml.Linq;
-using Xceed.Words.NET;
 
 namespace ElectroMod
 {
@@ -26,7 +13,9 @@ namespace ElectroMod
     {
         private static Elements _elements;
         private List<(double, double)> _resistanceSchemes = new List<(double, double)>();
-        private bool _firstInitK = true;
+        private int _lineCount = 1;
+        private int _recloserCount = 1;
+        private int _transformatorCount = 1;
 
         public CenterCalculation(Elements elements)
         {
@@ -99,26 +88,6 @@ namespace ElectroMod
         public double Zmax { get; set; }
         public double Zmin { get; set; }
 
-        //расчеты МТО
-        //public double Iust { get; set; }
-        //public double[] IszMTO { get; set; }
-        //public double IszMTOMax { get; set; }
-        //public double IszMTOMaxCeiling { get; set; }
-
-        //расчеты МТЗ
-        //public double IszMTZ { get; set; }
-        //public Line FarestLineMTZ { get; set; }
-        //public double KchuvMTZ { get; set; }
-
-
-        //public double Kchuv2MTZ { get; set; }
-        //public double Kchuv3MTZ { get; set; }
-        //public double Ip { get; set; }
-        //public double Ip1 { get; set; }
-        //public double Ip2 { get; set; }
-        //public double Ikz1 { get; set; }
-        //public double Ikz1low { get; set; 
-
         public void CalculationMTOandMTZ(PreCalculationForm preCalculationForm)
         {
             Bus = _elements.OfType<Bus>().FirstOrDefault();
@@ -141,10 +110,6 @@ namespace ElectroMod
             IustBus = Math.Round(IustBus, 3);
 
             var transformatorMaxS = _elements.OfType<Transormator>().OrderByDescending(trans => trans.S).FirstOrDefault();
-
-            //IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * Iust, 3);
-            //FarestLineMTZ = FindFarestLineFromBus(CalculationElementList);
-            //KchuvMTZ = Math.Round(FarestLineMTZ.IkzMin * 0.865 / IszMTZ, 3); // тут точно самая дальняя линия от Шины???
 
             //первый отчет по мто для шины
             Reports.Add(new ReportMTO(Bus, IustBus, transformatorMaxS));
@@ -214,15 +179,6 @@ namespace ElectroMod
                 IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * IustBus, 3);
                 farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
                 Reports.Add(new ReportMTZ(IustBus, IszMTZ, farestLine));
-
-                //отчеты сравнения реклоузеров с шиной
-                foreach (var recloser in Reclosers)
-                {
-                    // к этому времени recloser.Isz уже имеет значения с прошлых отчетов 
-                    IszMTZ = 1.2 * recloser.Isz;
-                    farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
-                    Reports.Add(new ReportCompareProtectionsRecloserWithBus(farestLine, Bus, recloser));
-                }
             }
             else
             {
@@ -230,6 +186,40 @@ namespace ElectroMod
                 IszMTZ = Math.Round(Bus.Kn * Bus.Kcz / Bus.Kb * IustBus, 3);
                 farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
                 Reports.Add(new ReportMTZ(IustBus, IszMTZ, farestLine));
+            }
+            var alreadyCompare = new HashSet<IHasMTOMTZIsc>();
+
+            //отчеты сравнения реклоузеров с шиной РАБОТАЕТ ТОЛЬКО НЕ БОЛЕЕ ЧЕМ С ОДНОЙ ВЕТКОЙ РЕКЛОУЗЕРОВ
+            var indexFor = 1;
+            var alreadyVisited = new List<IHasMTOMTZIsc>();
+            foreach (var elements in CalculationElementList)
+            {
+                var reverceElements = elements.Reverse<Element>().ToList();
+                IHasMTOMTZIsc previouseElement = null;
+                for (int i = 0; i < reverceElements.Count; i++)
+                {
+                    if (reverceElements[i] is Recloser || reverceElements[i] is Bus)
+                    {
+                        if (!alreadyVisited.Contains((IHasMTOMTZIsc)reverceElements[i]))
+                        {
+                            if (previouseElement == null)
+                            {
+                                previouseElement = (IHasMTOMTZIsc)reverceElements[i];
+                                continue;
+                            }
+                            if (reverceElements[i] is Recloser)
+                                farestLine = ElementSearchEngine.FindFarestLineFromRecloser(reverceElements[i], reverceElements[i + 1]);
+                            if (reverceElements[i] is Bus)
+                                farestLine = ElementSearchEngine.FindFarestLineFromBus(CalculationElementList);
+                            Reports.Add(new ReportCompareProtectionsRecloserWithBus(farestLine, (IHasMTOMTZIsc)reverceElements[i], (Recloser)previouseElement));
+                            alreadyVisited.Add(previouseElement);
+                            previouseElement = (IHasMTOMTZIsc)reverceElements[i];
+                            if (CommonElements.Contains(reverceElements[i]) && indexFor != CalculationElementList.Count())
+                                break;
+                        }
+                    }
+                }
+                indexFor++;
             }
         }
 
@@ -239,7 +229,6 @@ namespace ElectroMod
             foreach (var elementsList in CalculationElementList)
             {
                 CalculateCurrents(elementsList, ref countK);
-                _firstInitK = false;
             }
         }
 
@@ -283,10 +272,15 @@ namespace ElectroMod
 
                         IkzMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + Xmax, 2)));
                         IkzMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + Xmin, 2)));
+                        bus.IkzMax = IkzMax;
+                        bus.IkzMin = IkzMin;
                     }
                 }
                 else if (element is Line line)
                 {
+                    if (line.NameForReportFormuls == null)
+                        line.NameForReportFormuls = line.GetType().Name + _lineCount++;
+
                     _resistanceSchemes.Add((line.ActiveResistance, line.ReactiveResistance));
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
@@ -296,6 +290,9 @@ namespace ElectroMod
                 }
                 else if (element is Recloser recloser)
                 {
+                    if (recloser.NameForReportFormuls == null)
+                        recloser.NameForReportFormuls = recloser.GetType().Name + _recloserCount++;
+
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
                     CalculateIkz(sumResistance);
@@ -305,9 +302,12 @@ namespace ElectroMod
                     recloser.IkzMin = IkzMin;
                     continue;
                 }
-                else if (element is Transormator transormator)
+                else if (element is Transormator transformator)
                 {
-                    _resistanceSchemes.Add((transormator.ActiveResistance, transormator.ReactiveResistance));
+                    if (transformator.NameForReportFormuls == null)
+                        transformator.NameForReportFormuls = transformator.GetType().Name + _transformatorCount++;
+
+                    _resistanceSchemes.Add((transformator.ActiveResistance, transformator.ReactiveResistance));
                     sumResistance = (_resistanceSchemes.Sum(x => x.Item1),
                                      _resistanceSchemes.Sum(x => x.Item2));
                     if (IsCurrent)
@@ -325,8 +325,8 @@ namespace ElectroMod
                         IkzMax = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmax + sumResistance.Item1, 2) + Math.Pow(Xmax + sumResistance.Item2, 2)));
                         IkzMin = Voltage / (Math.Sqrt(3) * Math.Sqrt(Math.Pow(Rmin + sumResistance.Item1, 2) + Math.Pow(Xmin + sumResistance.Item2, 2)));
                     }
-                    transormator.IkzMax = Math.Round(IkzMax, 3);
-                    transormator.IkzMin = Math.Round(IkzMin, 3);
+                    transformator.IkzMax = Math.Round(IkzMax, 3);
+                    transformator.IkzMin = Math.Round(IkzMin, 3);
                 }
 
                 if (Currents.Contains((IkzMax, IkzMin)))

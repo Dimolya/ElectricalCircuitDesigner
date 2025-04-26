@@ -32,6 +32,7 @@ namespace ElectroMod
         public virtual Color FillColor => Color.FromArgb(50, Color.White);
 
         public string Name { get; set; }
+        public string NameForReportFormuls { get; set; }
         public double Voltage { get; set; }
         public double IkzMax { get; set; }
         public double IkzMin { get; set; }

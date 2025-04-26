@@ -56,7 +56,7 @@
             this.btnFormCalculate.Location = new System.Drawing.Point(511, 262);
             this.btnFormCalculate.Name = "btnFormCalculate";
             this.btnFormCalculate.Size = new System.Drawing.Size(173, 43);
-            this.btnFormCalculate.TabIndex = 0;
+            this.btnFormCalculate.TabIndex = 5;
             this.btnFormCalculate.Text = "Сформировать расчет";
             this.btnFormCalculate.UseVisualStyleBackColor = true;
             this.btnFormCalculate.Click += new System.EventHandler(this.btnFormCalculate_Click);
@@ -79,7 +79,7 @@
             this.cbReconnect.Location = new System.Drawing.Point(328, 43);
             this.cbReconnect.Name = "cbReconnect";
             this.cbReconnect.Size = new System.Drawing.Size(291, 24);
-            this.cbReconnect.TabIndex = 3;
+            this.cbReconnect.TabIndex = 10;
             this.cbReconnect.Text = "Расчет по мощности ТУ";
             this.cbReconnect.SelectedIndexChanged += new System.EventHandler(this.cbReconnect_SelectedIndexChanged);
             // 
@@ -130,7 +130,7 @@
             this.tbPowerKBT.Location = new System.Drawing.Point(248, 82);
             this.tbPowerKBT.Name = "tbPowerKBT";
             this.tbPowerKBT.Size = new System.Drawing.Size(115, 22);
-            this.tbPowerKBT.TabIndex = 3;
+            this.tbPowerKBT.TabIndex = 2;
             // 
             // label9
             // 
@@ -146,14 +146,14 @@
             this.tbPowerSuchKBT.Location = new System.Drawing.Point(248, 50);
             this.tbPowerSuchKBT.Name = "tbPowerSuchKBT";
             this.tbPowerSuchKBT.Size = new System.Drawing.Size(115, 22);
-            this.tbPowerSuchKBT.TabIndex = 6;
+            this.tbPowerSuchKBT.TabIndex = 1;
             // 
             // tbNumberTY
             // 
             this.tbNumberTY.Location = new System.Drawing.Point(145, 14);
             this.tbNumberTY.Name = "tbNumberTY";
             this.tbNumberTY.Size = new System.Drawing.Size(437, 22);
-            this.tbNumberTY.TabIndex = 2;
+            this.tbNumberTY.TabIndex = 0;
             // 
             // label3
             // 
@@ -201,14 +201,14 @@
             this.tbPowerKBA.Location = new System.Drawing.Point(245, 47);
             this.tbPowerKBA.Name = "tbPowerKBA";
             this.tbPowerKBA.Size = new System.Drawing.Size(115, 22);
-            this.tbPowerKBA.TabIndex = 6;
+            this.tbPowerKBA.TabIndex = 1;
             // 
             // tbPowerSuchKBA
             // 
             this.tbPowerSuchKBA.Location = new System.Drawing.Point(245, 17);
             this.tbPowerSuchKBA.Name = "tbPowerSuchKBA";
             this.tbPowerSuchKBA.Size = new System.Drawing.Size(115, 22);
-            this.tbPowerSuchKBA.TabIndex = 6;
+            this.tbPowerSuchKBA.TabIndex = 0;
             // 
             // label7
             // 
